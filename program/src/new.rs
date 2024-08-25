@@ -6,7 +6,7 @@ use solana_program::{
 use crate::utils::AccountDeserialize;
 
 /// New ...
-pub fn process_new<'a, 'info>(accounts: &'a [AccountInfo<'info>], data: &[u8]) -> ProgramResult {
+pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     // Parse args.
 
     // Load accounts.

@@ -7,10 +7,7 @@ use solana_program::{
 use crate::utils::AccountDeserialize;
 
 /// Initialize ...
-pub fn process_initialize<'a, 'info>(
-    accounts: &'a [AccountInfo<'info>],
-    data: &[u8],
-) -> ProgramResult {
+pub fn process_initialize(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     // Parse args.
     let args = InitializeArgs::try_from_bytes(data)?;
 

@@ -18,7 +18,7 @@ bytemuck = "1.14.3"
 const-crypto = "0.1.0"
 num_enum = "0.7.2"
 ore-boost-api = { path = "api", version = "0.1.0" }
-ore-utils = { path = "../ore/utils", features = ["spl"], version = "2.1.4" }
+ore-utils = { path = "../ore/utils", features = ["spl"], version = "2.1.5" }
 solana-program = "^1.18"
 spl-token = { version = "^4", features = ["no-entrypoint"] }
 static_assertions = "1.1.0"
