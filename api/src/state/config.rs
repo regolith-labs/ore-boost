@@ -1,24 +1,17 @@
 use bytemuck::{Pod, Zeroable};
-
-use crate::utils::{impl_account_from_bytes, impl_to_bytes, Discriminator};
+use ore_utils::{account, Discriminator};
 
 use super::AccountDiscriminator;
 
-/// Config is a singleton account which manages program global variables.
+/// Config ...
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Config {
-    /// The base reward rate paid out for a hash of minimum difficulty.
-    pub base_reward_rate: u64,
+    /// The maximum amount of ORE that is allowed to be allocated across all boosts.
+    pub max_boost: u64,
 
-    /// The timestamp of the last reset.
-    pub last_reset_at: i64,
-
-    /// The minimum accepted difficulty.
-    pub min_difficulty: u64,
-
-    /// The largest known stake balance on the network from the last epoch.
-    pub top_balance: u64,
+    /// The total ORE currently allocated across all boosts.
+    pub total_boost: u64,
 }
 
 impl Discriminator for Config {
@@ -27,5 +20,4 @@ impl Discriminator for Config {
     }
 }
 
-impl_to_bytes!(Config);
-impl_account_from_bytes!(Config);
+account!(Config);

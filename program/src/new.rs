@@ -1,4 +1,3 @@
-use ore_boost_api::instruction::InitializeArgs;
 use ore_utils::spl::transfer_signed;
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
@@ -6,13 +5,9 @@ use solana_program::{
 
 use crate::utils::AccountDeserialize;
 
-/// Initialize ...
-pub fn process_initialize<'a, 'info>(
-    accounts: &'a [AccountInfo<'info>],
-    data: &[u8],
-) -> ProgramResult {
+/// New ...
+pub fn process_new<'a, 'info>(accounts: &'a [AccountInfo<'info>], data: &[u8]) -> ProgramResult {
     // Parse args.
-    let args = InitializeArgs::try_from_bytes(data)?;
 
     // Load accounts.
     // let [signer, beneficiary_info, proof_info, treasury_info, treasury_tokens_info, token_program] =

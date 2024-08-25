@@ -1,27 +1,22 @@
-use ore_api::{loaders::*, state::Proof};
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+    system_program,
 };
 
 use crate::utils::AccountDeserialize;
 
-/// Update changes the miner authority on a proof account.
+/// Update ...
 pub fn process_update<'a, 'info>(
     accounts: &'a [AccountInfo<'info>],
     _data: &[u8],
 ) -> ProgramResult {
-    // Load accounts.
-    let [signer, miner_info, proof_info] = accounts else {
-        return Err(ProgramError::NotEnoughAccountKeys);
-    };
-    load_signer(signer)?;
-    load_any(miner_info, false)?;
-    load_proof(proof_info, signer.key, true)?;
-
-    // Update the proof's miner authority.
-    let mut proof_data = proof_info.data.borrow_mut();
-    let proof = Proof::try_from_bytes_mut(&mut proof_data)?;
-    proof.miner = *miner_info.key;
+    // // Load accounts.
+    // let [signer, proof_info, system_program] = accounts else {
+    //     return Err(ProgramError::NotEnoughAccountKeys);
+    // };
+    // load_signer(signer)?;
+    // load_proof(proof_info, signer.key, true)?;
+    // load_program(system_program, system_program::id())?;
 
     Ok(())
 }

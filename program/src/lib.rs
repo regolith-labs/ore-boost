@@ -1,24 +1,12 @@
-mod claim;
-mod close;
 mod initialize;
-mod mine;
-mod open;
-mod reset;
-mod stake;
+mod new;
 mod update;
-mod upgrade;
 
-use claim::*;
-use close::*;
 use initialize::*;
-use mine::*;
-use open::*;
-use reset::*;
-use stake::*;
+use new::*;
 use update::*;
-use upgrade::*;
 
-use ore_api::instruction::*;
+use ore_boost_api::instruction::*;
 use solana_program::{
     self, account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
     pubkey::Pubkey,
@@ -26,7 +14,6 @@ use solana_program::{
 
 pub(crate) use ore_utils as utils;
 
-#[cfg(not(feature = "no-entrypoint"))]
 solana_program::entrypoint!(process_instruction);
 
 pub fn process_instruction(
@@ -34,7 +21,7 @@ pub fn process_instruction(
     accounts: &[AccountInfo],
     data: &[u8],
 ) -> ProgramResult {
-    if program_id.ne(&ore_api::id()) {
+    if program_id.ne(&ore_boost_api::id()) {
         return Err(ProgramError::IncorrectProgramId);
     }
 
@@ -42,16 +29,16 @@ pub fn process_instruction(
         .split_first()
         .ok_or(ProgramError::InvalidInstructionData)?;
 
-    match OreInstruction::try_from(*tag).or(Err(ProgramError::InvalidInstructionData))? {
-        OreInstruction::Claim => process_claim(accounts, data)?,
-        OreInstruction::Close => process_close(accounts, data)?,
-        OreInstruction::Mine => process_mine(accounts, data)?,
-        OreInstruction::Open => process_open(accounts, data)?,
-        OreInstruction::Reset => process_reset(accounts, data)?,
-        OreInstruction::Stake => process_stake(accounts, data)?,
-        OreInstruction::Update => process_update(accounts, data)?,
-        OreInstruction::Upgrade => process_upgrade(accounts, data)?,
-        OreInstruction::Initialize => process_initialize(accounts, data)?,
+    match BoostInstruction::try_from(*tag).or(Err(ProgramError::InvalidInstructionData))? {
+        // User
+        BoostInstruction::Open => todo!(),
+        BoostInstruction::Stake => todo!(),
+        BoostInstruction::Unstake => todo!(),
+
+        // Admin
+        BoostInstruction::Initialize => process_initialize(accounts, data)?,
+        BoostInstruction::New => process_new(accounts, data)?,
+        BoostInstruction::Update => process_update(accounts, data)?,
     }
 
     Ok(())
