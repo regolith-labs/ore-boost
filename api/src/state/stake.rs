@@ -1,14 +1,15 @@
 use bytemuck::{Pod, Zeroable};
-use ore_utils::{account, Discriminator};
+use ore_utils::*;
+use solana_program::pubkey::Pubkey;
 
-use super::AccountDiscriminator;
+use super::BoostAccount;
 
 /// Stake ...
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Stake {
     /// The authority of this stake account.
-    pub authority: u64,
+    pub authority: Pubkey,
 
     /// The balance of this stake account.
     pub balance: u64,
@@ -17,10 +18,4 @@ pub struct Stake {
     pub last_stake_at: i64,
 }
 
-impl Discriminator for Stake {
-    fn discriminator() -> u8 {
-        AccountDiscriminator::Stake.into()
-    }
-}
-
-account!(Stake);
+account!(BoostAccount, Stake);

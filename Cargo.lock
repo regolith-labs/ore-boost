@@ -1182,12 +1182,13 @@ dependencies = [
  "ore-utils",
  "rand 0.8.5",
  "solana-program",
+ "spl-associated-token-account",
  "spl-token",
 ]
 
 [[package]]
 name = "ore-utils"
-version = "2.1.5"
+version = "2.1.8"
 dependencies = [
  "bytemuck",
  "solana-program",

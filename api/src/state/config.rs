@@ -1,23 +1,15 @@
 use bytemuck::{Pod, Zeroable};
-use ore_utils::{account, Discriminator};
+use ore_utils::*;
+use solana_program::pubkey::Pubkey;
 
-use super::AccountDiscriminator;
+use super::BoostAccount;
 
 /// Config ...
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Config {
-    /// The maximum amount of ORE that is allowed to be allocated across all boosts.
-    pub max_boost: u64,
-
-    /// The total ORE currently allocated across all boosts.
-    pub total_boost: u64,
+    /// The program authority with permission to set token multiplers.
+    pub authority: Pubkey,
 }
 
-impl Discriminator for Config {
-    fn discriminator() -> u8 {
-        AccountDiscriminator::Config.into()
-    }
-}
-
-account!(Config);
+account!(BoostAccount, Config);

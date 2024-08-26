@@ -1,14 +1,18 @@
 use bytemuck::{Pod, Zeroable};
-use ore_utils::{account, Discriminator};
+use ore_utils::*;
+use solana_program::pubkey::Pubkey;
 
-use super::AccountDiscriminator;
+use super::BoostAccount;
 
 /// Boost ...
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Boost {
+    /// The bump used for signing.
+    pub bump: u64,
+
     /// The mint address
-    pub mint: u64,
+    pub mint: Pubkey,
 
     /// The multiplier allocated to this token.
     pub multiplier: u64,
@@ -17,10 +21,4 @@ pub struct Boost {
     pub total_stake: u64,
 }
 
-impl Discriminator for Boost {
-    fn discriminator() -> u8 {
-        AccountDiscriminator::Boost.into()
-    }
-}
-
-account!(Boost);
+account!(BoostAccount, Boost);

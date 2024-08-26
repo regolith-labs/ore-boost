@@ -10,7 +10,7 @@ use num_enum::{IntoPrimitive, TryFromPrimitive};
 
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
-pub enum AccountDiscriminator {
+pub enum BoostAccount {
     Boost = 100,
     Config = 101,
     Stake = 102,
