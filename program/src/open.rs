@@ -3,6 +3,7 @@ use std::mem::size_of;
 use ore_boost_api::{
     consts::STAKE,
     instruction::Open,
+    loaders::load_boost,
     state::{Boost, Stake},
 };
 use ore_utils::*;
@@ -21,8 +22,9 @@ pub fn process_open(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult 
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     load_signer(signer)?;
+    load_boost(boost_info, mint_info.key, false)?;
     load_uninitialized_pda(
-        boost_info,
+        stake_info,
         &[STAKE, boost_info.key.as_ref(), signer.key.as_ref()],
         args.stake_bump,
         &ore_boost_api::id(),
@@ -47,6 +49,7 @@ pub fn process_open(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult 
     let stake = Stake::try_from_bytes_mut(&mut stake_data)?;
     stake.authority = *signer.key;
     stake.balance = 0;
+    stake.boost = *boost_info.key;
     stake.last_stake_at = clock.unix_timestamp;
 
     Ok(())

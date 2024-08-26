@@ -14,6 +14,9 @@ pub struct Stake {
     /// The balance of this stake account.
     pub balance: u64,
 
+    /// The boost this stake account is associated with.
+    pub boost: Pubkey,
+
     /// The timestamp of the last time stake was added to this account.
     pub last_stake_at: i64,
 }

@@ -99,6 +99,7 @@ pub fn load_config(info: &AccountInfo<'_>, is_writable: bool) -> Result<(), Prog
 pub fn load_stake(
     info: &AccountInfo<'_>,
     authority: &Pubkey,
+    boost: &Pubkey,
     is_writable: bool,
 ) -> Result<(), ProgramError> {
     if info.owner.ne(&crate::id()) {
@@ -113,6 +114,10 @@ pub fn load_stake(
     let stake = Stake::try_from_bytes(&stake_data)?;
 
     if stake.authority.ne(&authority) {
+        return Err(ProgramError::InvalidAccountData);
+    }
+
+    if stake.boost.ne(&boost) {
         return Err(ProgramError::InvalidAccountData);
     }
 

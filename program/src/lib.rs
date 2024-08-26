@@ -1,14 +1,14 @@
+mod deposit;
 mod initialize;
 mod new;
 mod open;
-mod stake;
 mod update;
 mod withdraw;
 
+use deposit::*;
 use initialize::*;
 use new::*;
 use open::*;
-use stake::*;
 use update::*;
 use withdraw::*;
 

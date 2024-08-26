@@ -27,7 +27,7 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     load_boost(boost_info, mint_info.key, true)?;
     load_associated_token_account(boost_tokens_info, boost_info.key, mint_info.key, true)?;
     load_any_mint(mint_info, false)?;
-    load_stake(stake_info, signer.key, true)?;
+    load_stake(stake_info, signer.key, boost_info.key, true)?;
     load_program(system_program, system_program::id())?;
     load_program(token_program, spl_token::id())?;
 
