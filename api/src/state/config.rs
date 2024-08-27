@@ -2,6 +2,8 @@ use bytemuck::{Pod, Zeroable};
 use ore_utils::*;
 use solana_program::pubkey::Pubkey;
 
+use crate::consts::CONFIG;
+
 use super::BoostAccount;
 
 /// Config ...
@@ -10,6 +12,11 @@ use super::BoostAccount;
 pub struct Config {
     /// The program authority with permission to set token multiplers.
     pub authority: Pubkey,
+}
+
+/// Fetch the PDA of the config account.
+pub fn config_pda() -> (Pubkey, u8) {
+    Pubkey::find_program_address(&[CONFIG], &crate::id())
 }
 
 account!(BoostAccount, Config);
