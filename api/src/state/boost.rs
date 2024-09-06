@@ -13,6 +13,9 @@ pub struct Boost {
     /// The bump used for signing.
     pub bump: u64,
 
+    /// The unix timestamp this boost expires.
+    pub expires_at: i64,
+
     /// The mint address
     pub mint: Pubkey,
 

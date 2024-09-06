@@ -12,7 +12,7 @@ use solana_program::{
     program_error::ProgramError, system_program, sysvar::Sysvar,
 };
 
-/// Open ...
+/// Open creates a new stake account.
 pub fn process_open(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     // Parse args.
     let args = Open::try_from_bytes(data)?;
@@ -35,7 +35,7 @@ pub fn process_open(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult 
     // Get clock
     let clock = Clock::get().unwrap();
 
-    // Initialize the boost account.
+    // Initialize the stake account.
     create_pda(
         stake_info,
         &ore_boost_api::id(),

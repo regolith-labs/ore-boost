@@ -10,7 +10,7 @@ use super::BoostAccount;
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Config {
-    /// The program authority with permission to set token multiplers.
+    /// The admin authority with permission to set token multiplers.
     pub authority: Pubkey,
 }
 

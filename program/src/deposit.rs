@@ -9,7 +9,7 @@ use solana_program::{
     program_error::ProgramError, system_program, sysvar::Sysvar,
 };
 
-/// Deposit ...
+/// Deposit adds tokens to a stake account to earn a multiplier.
 pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     // Parse args.
     let args = Deposit::try_from_bytes(data)?;

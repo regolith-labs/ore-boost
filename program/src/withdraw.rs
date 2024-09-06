@@ -10,7 +10,7 @@ use solana_program::{
     system_program,
 };
 
-/// Withdraw ...
+/// Withdraw unstakes tokens from a stake account.
 pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     // Parse args.
     let args = Withdraw::try_from_bytes(data)?;

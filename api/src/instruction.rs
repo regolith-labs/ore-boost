@@ -14,14 +14,16 @@ use crate::state::{boost_pda, config_pda, stake_pda};
 #[rustfmt::skip]
 pub enum BoostInstruction {
     // User
-    Open = 0,
+    Close = 0,
     Deposit = 1,
-    Withdraw = 2,
+    Open = 2,
+    Withdraw = 3,
     
     // Admin
     Initialize = 100,
     New = 101,
-    Update = 102,
+    UpdateAdmin = 102,
+    UpdateBoost = 103,
 }
 
 impl BoostInstruction {
@@ -29,6 +31,10 @@ impl BoostInstruction {
         vec![*self as u8]
     }
 }
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct Close {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -46,6 +52,8 @@ pub struct Initialize {
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct New {
     pub bump: u8,
+    pub expires_at: [u8; 8],
+    pub multiplier: [u8; 8],
 }
 
 #[repr(C)]
@@ -56,7 +64,14 @@ pub struct Open {
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Update {
+pub struct UpdateAdmin {
+    pub new_admin: Pubkey,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct UpdateBoost {
+    pub expires_at: [u8; 8],
     pub multiplier: [u8; 8],
 }
 
@@ -66,11 +81,13 @@ pub struct Withdraw {
     pub amount: [u8; 8],
 }
 
+instruction!(BoostInstruction, Close);
 instruction!(BoostInstruction, Deposit);
 instruction!(BoostInstruction, Initialize);
 instruction!(BoostInstruction, New);
 instruction!(BoostInstruction, Open);
-instruction!(BoostInstruction, Update);
+instruction!(BoostInstruction, UpdateAdmin);
+instruction!(BoostInstruction, UpdateBoost);
 instruction!(BoostInstruction, Withdraw);
 
 // Build deposit instruction.
@@ -117,7 +134,7 @@ pub fn initialize(signer: Pubkey) -> Instruction {
 }
 
 // Build new instruction.
-pub fn new(signer: Pubkey, mint: Pubkey) -> Instruction {
+pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> Instruction {
     let boost_pda = boost_pda(mint);
     let boost_tokens_address =
         spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
@@ -133,7 +150,12 @@ pub fn new(signer: Pubkey, mint: Pubkey) -> Instruction {
             AccountMeta::new_readonly(spl_token::id(), false),
             AccountMeta::new_readonly(spl_associated_token_account::id(), false),
         ],
-        data: New { bump: boost_pda.1 }.to_bytes(),
+        data: New {
+            bump: boost_pda.1,
+            expires_at: expires_at.to_le_bytes(),
+            multiplier: multiplier.to_le_bytes(),
+        }
+        .to_bytes(),
     }
 }
 
@@ -157,8 +179,13 @@ pub fn open(signer: Pubkey, mint: Pubkey) -> Instruction {
     }
 }
 
-// Build update instruction.
-pub fn update(signer: Pubkey, boost: Pubkey, multiplier: u64) -> Instruction {
+// Build update_boost instruction.
+pub fn update_boost(
+    signer: Pubkey,
+    boost: Pubkey,
+    expires_at: i64,
+    multiplier: u64,
+) -> Instruction {
     Instruction {
         program_id: crate::id(),
         accounts: vec![
@@ -166,7 +193,8 @@ pub fn update(signer: Pubkey, boost: Pubkey, multiplier: u64) -> Instruction {
             AccountMeta::new(boost, false),
             AccountMeta::new_readonly(config_pda().0, false),
         ],
-        data: Update {
+        data: UpdateBoost {
+            expires_at: expires_at.to_le_bytes(),
             multiplier: multiplier.to_le_bytes(),
         }
         .to_bytes(),

@@ -12,10 +12,12 @@ use solana_program::{
     system_program,
 };
 
-/// New ...
+/// New creates a new boost.
 pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     // Parse args.
     let args = New::try_from_bytes(data)?;
+    let multiplier = u64::from_le_bytes(args.multiplier);
+    let expires_at = i64::from_le_bytes(args.expires_at);
 
     // Load accounts.
     let [signer, boost_info, boost_tokens_info, config_info, mint_info, system_program, token_program, associated_token_program] =
@@ -58,7 +60,8 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     let boost = Boost::try_from_bytes_mut(&mut boost_data)?;
     boost.bump = args.bump as u64;
     boost.mint = *mint_info.key;
-    boost.multiplier = 0;
+    boost.expires_at = expires_at;
+    boost.multiplier = multiplier;
     boost.total_stake = 0;
 
     // Create boost token account.

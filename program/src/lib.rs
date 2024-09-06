@@ -1,15 +1,19 @@
+mod close;
 mod deposit;
 mod initialize;
 mod new;
 mod open;
-mod update;
+mod update_admin;
+mod update_boost;
 mod withdraw;
 
+use close::*;
 use deposit::*;
 use initialize::*;
 use new::*;
 use open::*;
-use update::*;
+use update_admin::*;
+use update_boost::*;
 use withdraw::*;
 
 use ore_boost_api::instruction::*;
@@ -35,6 +39,7 @@ pub fn process_instruction(
 
     match BoostInstruction::try_from(*tag).or(Err(ProgramError::InvalidInstructionData))? {
         // User
+        BoostInstruction::Close => process_close(accounts, data)?,
         BoostInstruction::Open => process_open(accounts, data)?,
         BoostInstruction::Deposit => process_deposit(accounts, data)?,
         BoostInstruction::Withdraw => process_withdraw(accounts, data)?,
@@ -42,7 +47,8 @@ pub fn process_instruction(
         // Admin
         BoostInstruction::Initialize => process_initialize(accounts, data)?,
         BoostInstruction::New => process_new(accounts, data)?,
-        BoostInstruction::Update => process_update(accounts, data)?,
+        BoostInstruction::UpdateAdmin => process_update_admin(accounts, data)?,
+        BoostInstruction::UpdateBoost => process_update_boost(accounts, data)?,
     }
 
     Ok(())

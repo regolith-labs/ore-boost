@@ -1,13 +1,17 @@
 use std::mem::size_of;
 
-use ore_boost_api::{consts::CONFIG, instruction::Initialize, state::Config};
+use ore_boost_api::{
+    consts::{CONFIG, INITIALIZER_ADDRESS},
+    instruction::Initialize,
+    state::Config,
+};
 use ore_utils::*;
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
     system_program,
 };
 
-/// Initialize ...
+/// Initialize sets up the boost program.
 pub fn process_initialize(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     // Parse args.
     let args = Initialize::try_from_bytes(data)?;
@@ -24,6 +28,11 @@ pub fn process_initialize(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramR
         &ore_boost_api::id(),
     )?;
     load_program(system_program, system_program::id())?;
+
+    // Reject if initializer is not valid.
+    if signer.key.ne(&INITIALIZER_ADDRESS) {
+        return Err(ProgramError::MissingRequiredSignature);
+    }
 
     // Initialize config account.
     create_pda(
