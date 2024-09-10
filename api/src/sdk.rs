@@ -42,7 +42,7 @@ pub fn initialize(signer: Pubkey) -> Instruction {
         program_id: crate::id(),
         accounts: vec![
             AccountMeta::new(signer, true),
-            AccountMeta::new_readonly(config_pda.0, false),
+            AccountMeta::new(config_pda.0, false),
             AccountMeta::new_readonly(system_program::id(), false),
         ],
         data: Initialize {

@@ -42,7 +42,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     // Reject signer if not admin.
     let mut config_data = config_info.data.borrow_mut();
     let config = Config::try_from_bytes_mut(&mut config_data)?;
-    if config.authority.ne(&signer.key) {
+    if signer.key.ne(&config.authority) {
         return Err(ProgramError::MissingRequiredSignature);
     }
 
@@ -51,7 +51,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
         boost_info,
         &ore_boost_api::id(),
         8 + size_of::<Boost>(),
-        &[BOOST, mint_info.key.as_ref()],
+        &[BOOST, mint_info.key.as_ref(), &[args.bump]],
         system_program,
         signer,
     )?;
@@ -65,6 +65,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     boost.total_stake = 0;
 
     // Create boost token account.
+    drop(boost_data);
     create_ata(
         signer,
         boost_info,

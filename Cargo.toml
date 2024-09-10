@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["api", "program"]
+members = ["api", "cli", "program"]
 
 [workspace.package]
 version = "0.1.0"
@@ -14,14 +14,24 @@ keywords = ["solana", "crypto", "mining"]
 
 [workspace.dependencies]
 array-const-fn-init = "0.1.1"
+bincode = "1.3.3"
+bs58 = "0.5.1"
 bytemuck = "1.14.3"
+clap = { version = "4.4.12", features = ["derive"] }
 const-crypto = "0.1.0"
+log = "0.4"
+futures = "0.3"
 num_enum = "0.7.2"
 ore-boost-api = { path = "api", version = "0.1.0" }
 ore-utils = { path = "../ore/utils", features = ["spl"], version = "2.1.8" }
+solana-cli-config = "^1.18"
+solana-client = "^1.18"
 solana-program = "^1.18"
+solana-rpc-client = "^1.18"
+solana-sdk = "^1.18"
+solana-transaction-status = "^1.18"
 spl-token = { version = "^4", features = ["no-entrypoint"] }
 spl-associated-token-account = { version = "^2.3", features = [ "no-entrypoint" ] } 
 static_assertions = "1.1.0"
 thiserror = "1.0.57"
-
+tokio = "1.35"
