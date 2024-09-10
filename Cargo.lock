@@ -1189,7 +1189,7 @@ dependencies = [
 
 [[package]]
 name = "ore-utils"
-version = "2.1.9"
+version = "2.1.8"
 dependencies = [
  "bytemuck",
  "solana-program",
