@@ -8,4 +8,4 @@ pub mod state;
 pub use ore_utils;
 use solana_program::declare_id;
 
-declare_id!("5P1kyfBQ2f91Ro3aqMB58JaPMSKNvvbtoyo8wkWYrumz");
+declare_id!("4UT1BjrL7EPZuzEAiyGbSrs2xJrfNfCuZ4yWgW5R8Z1a");
