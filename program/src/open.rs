@@ -1,11 +1,6 @@
 use std::mem::size_of;
 
-use ore_boost_api::{
-    consts::STAKE,
-    instruction::Open,
-    loaders::load_boost,
-    state::{Boost, Stake},
-};
+use ore_boost_api::{consts::STAKE, instruction::Open, loaders::load_boost, state::Stake};
 use ore_utils::*;
 use solana_program::{
     account_info::AccountInfo, clock::Clock, entrypoint::ProgramResult,
@@ -25,7 +20,7 @@ pub fn process_open(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult 
     load_boost(boost_info, mint_info.key, false)?;
     load_uninitialized_pda(
         stake_info,
-        &[STAKE, boost_info.key.as_ref(), signer.key.as_ref()],
+        &[STAKE, signer.key.as_ref(), boost_info.key.as_ref()],
         args.stake_bump,
         &ore_boost_api::id(),
     )?;
@@ -39,8 +34,13 @@ pub fn process_open(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult 
     create_pda(
         stake_info,
         &ore_boost_api::id(),
-        8 + size_of::<Boost>(),
-        &[STAKE, boost_info.key.as_ref(), signer.key.as_ref()],
+        8 + size_of::<Stake>(),
+        &[
+            STAKE,
+            signer.key.as_ref(),
+            boost_info.key.as_ref(),
+            &[args.stake_bump],
+        ],
         system_program,
         signer,
     )?;
