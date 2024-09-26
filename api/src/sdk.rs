@@ -79,13 +79,14 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> In
 }
 
 // Build open instruction.
-pub fn open(signer: Pubkey, mint: Pubkey) -> Instruction {
+pub fn open(signer: Pubkey, payer: Pubkey, mint: Pubkey) -> Instruction {
     let boost_pda = boost_pda(mint);
     let stake_pda = stake_pda(signer, boost_pda.0);
     Instruction {
         program_id: crate::id(),
         accounts: vec![
             AccountMeta::new(signer, true),
+            AccountMeta::new(payer, true),
             AccountMeta::new_readonly(boost_pda.0, false),
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new(stake_pda.0, false),

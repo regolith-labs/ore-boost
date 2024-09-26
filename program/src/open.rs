@@ -13,10 +13,11 @@ pub fn process_open(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult 
     let args = Open::try_from_bytes(data)?;
 
     // Load accounts.
-    let [signer, boost_info, mint_info, stake_info, system_program] = accounts else {
+    let [signer, payer, boost_info, mint_info, stake_info, system_program] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     load_signer(signer)?;
+    load_signer(payer)?;
     load_boost(boost_info, mint_info.key, false)?;
     load_uninitialized_pda(
         stake_info,
@@ -42,7 +43,7 @@ pub fn process_open(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult 
             &[args.stake_bump],
         ],
         system_program,
-        signer,
+        payer,
     )?;
     let mut stake_data = stake_info.data.borrow_mut();
     stake_data[0] = Stake::discriminator();
