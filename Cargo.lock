@@ -572,7 +572,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4114279215a005bc675e386011e594e1d9b800918cea18fcadadcce864a2046b"
 dependencies = [
  "borsh-derive 0.10.3",
- "hashbrown 0.13.2",
+ "hashbrown 0.12.3",
 ]
 
 [[package]]
@@ -1619,6 +1619,9 @@ name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
+dependencies = [
+ "ahash 0.7.8",
+]
 
 [[package]]
 name = "hashbrown"
@@ -2372,11 +2375,11 @@ dependencies = [
  "bytemuck",
  "const-crypto",
  "num_enum 0.7.3",
- "ore-utils",
  "solana-program",
  "spl-associated-token-account",
  "spl-token",
  "static_assertions",
+ "steel",
  "thiserror",
 ]
 
@@ -2385,11 +2388,11 @@ name = "ore-boost-program"
 version = "0.1.0"
 dependencies = [
  "ore-boost-api",
- "ore-utils",
  "rand 0.8.5",
  "solana-program",
  "spl-associated-token-account",
  "spl-token",
+ "steel",
 ]
 
 [[package]]
@@ -2400,7 +2403,6 @@ dependencies = [
  "futures",
  "log",
  "ore-boost-api",
- "ore-utils",
  "solana-cli-config",
  "solana-client",
  "solana-program",
@@ -2409,19 +2411,8 @@ dependencies = [
  "solana-transaction-status",
  "spl-associated-token-account",
  "spl-token",
+ "steel",
  "tokio",
-]
-
-[[package]]
-name = "ore-utils"
-version = "2.1.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a2d6933b14c84fb91ad7ab2e8fccff589884a81507c1a198dea4f03f3180ef4"
-dependencies = [
- "bytemuck",
- "solana-program",
- "spl-associated-token-account",
- "spl-token",
 ]
 
 [[package]]
@@ -4328,6 +4319,18 @@ name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
+
+[[package]]
+name = "steel"
+version = "1.2.0"
+dependencies = [
+ "bytemuck",
+ "num_enum 0.7.3",
+ "solana-program",
+ "spl-associated-token-account",
+ "spl-token",
+ "thiserror",
+]
 
 [[package]]
 name = "strsim"

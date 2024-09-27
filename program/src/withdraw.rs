@@ -1,13 +1,9 @@
 use ore_boost_api::{
     consts::BOOST,
     instruction::Withdraw,
-    loaders::{load_boost, load_stake},
     state::{Boost, Stake},
 };
-use ore_utils::*;
-use solana_program::{
-    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
-};
+use steel::*;
 
 /// Withdraw unstakes tokens from a stake account.
 pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
@@ -16,39 +12,44 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     let amount = u64::from_le_bytes(args.amount);
 
     // Load accounts.
-    let [signer, beneficiary_info, boost_info, boost_tokens_info, mint_info, stake_info, token_program] =
+    let [signer_info, beneficiary_info, boost_info, boost_tokens_info, mint_info, stake_info, token_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-    load_signer(signer)?;
-    load_token_account(beneficiary_info, Some(signer.key), mint_info.key, true)?;
-    load_boost(boost_info, mint_info.key, true)?;
-    load_associated_token_account(boost_tokens_info, boost_info.key, mint_info.key, true)?;
-    load_any_mint(mint_info, false)?;
-    load_stake(stake_info, signer.key, boost_info.key, true)?;
-    load_program(token_program, spl_token::id())?;
+    signer_info.is_signer()?;
+    beneficiary_info
+        .is_writable()?
+        .to_token_account()?
+        .check(|t| t.owner == *signer_info.key)?
+        .check(|t| t.mint == *mint_info.key)?;
+    let boost = boost_info
+        .to_account_mut::<Boost>(&ore_boost_api::ID)?
+        .check_mut(|b| b.mint == *mint_info.key)?;
+    boost_tokens_info
+        .is_writable()?
+        .to_associated_token_account(boost_info.key, mint_info.key)?;
+    mint_info.to_mint()?;
+    let stake = stake_info
+        .to_account_mut::<Stake>(&ore_boost_api::ID)?
+        .check_mut(|s| s.authority == *signer_info.key)?
+        .check_mut(|s| s.boost == *boost_info.key)?;
+    token_program.is_program(&spl_token::ID)?;
 
     // Update the stake balance.
-    let mut stake_data = stake_info.data.borrow_mut();
-    let stake = Stake::try_from_bytes_mut(&mut stake_data)?;
     stake.balance = stake.balance.checked_sub(amount).unwrap();
 
     // Update the boost balance.
-    let mut boost_data = boost_info.data.borrow_mut();
-    let boost = Boost::try_from_bytes_mut(&mut boost_data)?;
     boost.total_stake = boost.total_stake.checked_sub(amount).unwrap();
 
     // Transfer tokens from signer to treasury
-    let boost_bump = boost.bump as u8;
-    drop(boost_data);
     transfer_signed(
         boost_info,
         boost_tokens_info,
         beneficiary_info,
         token_program,
         amount,
-        &[&[BOOST, mint_info.key.as_ref(), &[boost_bump]]],
+        &[&[BOOST, mint_info.key.as_ref(), &[boost.bump as u8]]],
     )?;
 
     Ok(())

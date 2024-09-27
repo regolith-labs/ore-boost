@@ -1,9 +1,8 @@
 use std::str::FromStr;
 
 use ore_boost_api::state::{boost_pda, Boost};
-use ore_utils::AccountDeserialize;
 use solana_client::client_error::Result as ClientResult;
-use solana_sdk::pubkey::Pubkey;
+use steel::*;
 
 use crate::{args::GetBoostArgs, Cli};
 
