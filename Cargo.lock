@@ -2414,7 +2414,9 @@ dependencies = [
 
 [[package]]
 name = "ore-utils"
-version = "2.1.8"
+version = "2.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a2d6933b14c84fb91ad7ab2e8fccff589884a81507c1a198dea4f03f3180ef4"
 dependencies = [
  "bytemuck",
  "solana-program",
