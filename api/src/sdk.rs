@@ -25,7 +25,6 @@ pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new(sender_address, false),
             AccountMeta::new(stake_pda.0, false),
-            AccountMeta::new_readonly(system_program::id(), false),
             AccountMeta::new_readonly(spl_token::id(), false),
         ],
         data: Deposit {
@@ -137,7 +136,6 @@ pub fn withdraw(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
             AccountMeta::new(boost_tokens_address, false),
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new(stake_pda.0, false),
-            AccountMeta::new_readonly(system_program::id(), false),
             AccountMeta::new_readonly(spl_token::id(), false),
         ],
         data: Withdraw {

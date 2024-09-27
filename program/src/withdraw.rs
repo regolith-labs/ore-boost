@@ -7,7 +7,6 @@ use ore_boost_api::{
 use ore_utils::*;
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
-    system_program,
 };
 
 /// Withdraw unstakes tokens from a stake account.
@@ -17,7 +16,7 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     let amount = u64::from_le_bytes(args.amount);
 
     // Load accounts.
-    let [signer, beneficiary_info, boost_info, boost_tokens_info, mint_info, stake_info, system_program, token_program] =
+    let [signer, beneficiary_info, boost_info, boost_tokens_info, mint_info, stake_info, token_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -28,7 +27,6 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     load_associated_token_account(boost_tokens_info, boost_info.key, mint_info.key, true)?;
     load_any_mint(mint_info, false)?;
     load_stake(stake_info, signer.key, boost_info.key, true)?;
-    load_program(system_program, system_program::id())?;
     load_program(token_program, spl_token::id())?;
 
     // Update the stake balance.
