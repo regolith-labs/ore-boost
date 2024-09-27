@@ -2,10 +2,6 @@ use ore_boost_api::{
     instruction::Deposit,
     state::{Boost, Stake},
 };
-use solana_program::{
-    account_info::AccountInfo, clock::Clock, entrypoint::ProgramResult,
-    program_error::ProgramError, sysvar::Sysvar,
-};
 use steel::*;
 
 /// Deposit adds tokens to a stake account to earn a multiplier.
@@ -22,7 +18,6 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
     };
     signer_info.is_signer()?;
     let boost = boost_info
-        .is_writable()?
         .to_account_mut::<Boost>(&ore_boost_api::ID)?
         .check_mut(|b| b.mint == *mint_info.key)?;
     boost_tokens_info

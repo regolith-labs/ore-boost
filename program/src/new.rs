@@ -20,14 +20,11 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
-    boost_info
-        .has_seeds(
-            &[BOOST, mint_info.key.as_ref()],
-            args.bump,
-            &ore_boost_api::id(),
-        )?
-        .is_writable()?
-        .is_empty()?;
+    boost_info.is_writable()?.is_empty()?.has_seeds(
+        &[BOOST, mint_info.key.as_ref()],
+        args.bump,
+        &ore_boost_api::id(),
+    )?;
     boost_tokens_info.is_writable()?.is_empty()?;
     config_info
         .to_account::<Config>(&ore_boost_api::ID)?

@@ -3,9 +3,6 @@ use ore_boost_api::{
     instruction::Withdraw,
     state::{Boost, Stake},
 };
-use solana_program::{
-    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
-};
 use steel::*;
 
 /// Withdraw unstakes tokens from a stake account.
@@ -22,6 +19,7 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     };
     signer_info.is_signer()?;
     beneficiary_info
+        .is_writable()?
         .to_token_account()?
         .check(|t| t.owner == *signer_info.key)?
         .check(|t| t.mint == *mint_info.key)?;

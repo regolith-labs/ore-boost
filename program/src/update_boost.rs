@@ -2,9 +2,6 @@ use ore_boost_api::{
     instruction::UpdateBoost,
     state::{Boost, Config},
 };
-use solana_program::{
-    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
-};
 use steel::*;
 
 /// UpdateBoost updates the multiplier or expiry date on a boost.
