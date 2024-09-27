@@ -1,15 +1,10 @@
-use std::mem::size_of;
-
 use ore_boost_api::{
     consts::{CONFIG, INITIALIZER_ADDRESS},
     instruction::Initialize,
     state::Config,
 };
-use ore_utils::*;
-use solana_program::{
-    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
-    system_program,
-};
+use solana_program::system_program;
+use steel::*;
 
 /// Initialize sets up the boost program.
 pub fn process_initialize(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
@@ -17,36 +12,27 @@ pub fn process_initialize(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramR
     let args = Initialize::try_from_bytes(data)?;
 
     // Load accounts.
-    let [signer, config_info, system_program] = accounts else {
+    let [signer_info, config_info, system_program] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-    load_signer(signer)?;
-    load_uninitialized_pda(
-        config_info,
+    signer_info.is_signer()?.has_address(&INITIALIZER_ADDRESS)?;
+    config_info.is_writable()?.is_empty()?.has_seeds(
         &[CONFIG],
         args.config_bump,
         &ore_boost_api::id(),
     )?;
-    load_program(system_program, system_program::id())?;
-
-    // Reject if initializer is not valid.
-    if signer.key.ne(&INITIALIZER_ADDRESS) {
-        return Err(ProgramError::MissingRequiredSignature);
-    }
+    system_program.is_program(&system_program::ID)?;
 
     // Initialize config account.
-    create_pda(
+    create_account::<Config>(
         config_info,
         &ore_boost_api::id(),
-        8 + size_of::<Config>(),
         &[CONFIG, &[args.config_bump]],
         system_program,
-        signer,
+        signer_info,
     )?;
-    let mut config_data = config_info.data.borrow_mut();
-    config_data[0] = Config::discriminator();
-    let config = Config::try_from_bytes_mut(&mut config_data)?;
-    config.authority = *signer.key;
+    let config = config_info.to_account_mut::<Config>(&ore_boost_api::ID)?;
+    config.authority = *signer_info.key;
 
     Ok(())
 }

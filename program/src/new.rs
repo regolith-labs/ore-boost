@@ -1,16 +1,10 @@
-use std::mem::size_of;
-
 use ore_boost_api::{
     consts::BOOST,
     instruction::New,
-    loaders::load_config,
     state::{Boost, Config},
 };
-use ore_utils::*;
-use solana_program::{
-    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
-    system_program,
-};
+use solana_program::system_program;
+use steel::*;
 
 /// New creates a new boost.
 pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
@@ -20,44 +14,38 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     let expires_at = i64::from_le_bytes(args.expires_at);
 
     // Load accounts.
-    let [signer, boost_info, boost_tokens_info, config_info, mint_info, system_program, token_program, associated_token_program] =
+    let [signer_info, boost_info, boost_tokens_info, config_info, mint_info, system_program, token_program, associated_token_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-    load_signer(signer)?;
-    load_uninitialized_pda(
-        boost_info,
-        &[BOOST, mint_info.key.as_ref()],
-        args.bump,
-        &ore_boost_api::id(),
-    )?;
-    load_system_account(boost_tokens_info, true)?;
-    load_config(config_info, false)?;
-    load_any_mint(mint_info, false)?;
-    load_program(system_program, system_program::id())?;
-    load_program(token_program, spl_token::id())?;
-    load_program(associated_token_program, spl_associated_token_account::id())?;
-
-    // Reject signer if not admin.
-    let mut config_data = config_info.data.borrow_mut();
-    let config = Config::try_from_bytes_mut(&mut config_data)?;
-    if signer.key.ne(&config.authority) {
-        return Err(ProgramError::MissingRequiredSignature);
-    }
+    signer_info.is_signer()?;
+    boost_info
+        .has_seeds(
+            &[BOOST, mint_info.key.as_ref()],
+            args.bump,
+            &ore_boost_api::id(),
+        )?
+        .is_writable()?
+        .is_empty()?;
+    boost_tokens_info.is_writable()?.is_empty()?;
+    config_info
+        .to_account::<Config>(&ore_boost_api::ID)?
+        .check(|c| c.authority == *signer_info.key)?;
+    mint_info.to_mint()?;
+    system_program.is_program(&system_program::ID)?;
+    token_program.is_program(&spl_token::ID)?;
+    associated_token_program.is_program(&spl_associated_token_account::ID)?;
 
     // Initialize the boost account.
-    create_pda(
+    create_account::<Boost>(
         boost_info,
         &ore_boost_api::id(),
-        8 + size_of::<Boost>(),
         &[BOOST, mint_info.key.as_ref(), &[args.bump]],
         system_program,
-        signer,
+        signer_info,
     )?;
-    let mut boost_data = boost_info.data.borrow_mut();
-    boost_data[0] = Boost::discriminator();
-    let boost = Boost::try_from_bytes_mut(&mut boost_data)?;
+    let boost = boost_info.to_account_mut::<Boost>(&ore_boost_api::ID)?;
     boost.bump = args.bump as u64;
     boost.mint = *mint_info.key;
     boost.expires_at = expires_at;
@@ -65,9 +53,8 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     boost.total_stake = 0;
 
     // Create boost token account.
-    drop(boost_data);
-    create_ata(
-        signer,
+    create_associated_token_account(
+        signer_info,
         boost_info,
         boost_tokens_info,
         mint_info,

@@ -1,8 +1,5 @@
-use ore_boost_api::{instruction::UpdateAdmin, loaders::load_config, state::Config};
-use ore_utils::*;
-use solana_program::{
-    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
-};
+use ore_boost_api::{instruction::UpdateAdmin, state::Config};
+use steel::*;
 
 /// UpdateAdmin updates the program admin authority.
 pub fn process_update_admin(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
@@ -10,18 +7,13 @@ pub fn process_update_admin(accounts: &[AccountInfo<'_>], data: &[u8]) -> Progra
     let args = UpdateAdmin::try_from_bytes(data)?;
 
     // Load accounts.
-    let [signer, config_info] = accounts else {
+    let [signer_info, config_info] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-    load_signer(signer)?;
-    load_config(config_info, false)?;
-
-    // Reject signer if not admin.
-    let mut config_data = config_info.data.borrow_mut();
-    let config = Config::try_from_bytes_mut(&mut config_data)?;
-    if config.authority.ne(&signer.key) {
-        return Err(ProgramError::MissingRequiredSignature);
-    }
+    signer_info.is_signer()?;
+    let config = config_info
+        .to_account_mut::<Config>(&ore_boost_api::ID)?
+        .check_mut(|c| c.authority == *signer_info.key)?;
 
     // Update the admin.
     config.authority = args.new_admin;

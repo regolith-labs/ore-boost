@@ -23,7 +23,6 @@ log = "0.4"
 futures = "0.3"
 num_enum = "0.7.2"
 ore-boost-api = { path = "api", version = "0.1.0" }
-ore-utils = { features = ["spl"], version = "2.1.9" }
 solana-cli-config = "^1.18"
 solana-client = "^1.18"
 solana-program = "^1.18"
@@ -35,5 +34,10 @@ spl-associated-token-account = { version = "^2.3", features = [
   "no-entrypoint",
 ] }
 static_assertions = "1.1.0"
+steel = { features = ["spl"], version = "1.2" }
 thiserror = "1.0.57"
 tokio = "1.35"
+
+[patch.crates-io]
+steel = { path = "../steel/lib" }
+
