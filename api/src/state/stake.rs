@@ -2,8 +2,6 @@ use bytemuck::{Pod, Zeroable};
 use ore_utils::*;
 use solana_program::pubkey::Pubkey;
 
-use crate::consts::STAKE;
-
 use super::BoostAccount;
 
 /// Stake ...
@@ -21,11 +19,6 @@ pub struct Stake {
 
     /// The timestamp of the last time stake was added to this account.
     pub last_stake_at: i64,
-}
-
-/// Fetch the PDA of the stake account.
-pub fn stake_pda(authority: Pubkey, boost: Pubkey) -> (Pubkey, u8) {
-    Pubkey::find_program_address(&[STAKE, authority.as_ref(), boost.as_ref()], &crate::id())
 }
 
 account!(BoostAccount, Stake);
