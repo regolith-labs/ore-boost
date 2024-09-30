@@ -1,8 +1,4 @@
-use solana_program::{
-    instruction::{AccountMeta, Instruction},
-    pubkey::Pubkey,
-    system_program,
-};
+use steel::*;
 
 use crate::{
     instruction::*,
