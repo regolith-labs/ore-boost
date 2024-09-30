@@ -6,8 +6,7 @@ pub use boost::*;
 pub use config::*;
 pub use stake::*;
 
-use num_enum::{IntoPrimitive, TryFromPrimitive};
-use solana_program::pubkey::Pubkey;
+use steel::*;
 
 use crate::consts::{BOOST, CONFIG, STAKE};
 
