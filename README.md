@@ -1,6 +1,6 @@
 # ORE Boost
 
-**ORE Boost is a staking program to earn ORE mining multipliers.** 
+**ORE Boost is a staking program for earning ORE mining multipliers.** 
 
 
 ## API
