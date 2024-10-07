@@ -1,6 +1,6 @@
 # ORE Boost
 
-**ORE Boost is a proof-of-stake multiplier system for ORE mining.** This program allows users to stake community-aligned tokens to earn a multiplier on their ORE mining rewards.
+**ORE Boost is a staking program to earn ORE mining multipliers.** 
 
 
 ## API
