@@ -1,19 +1,17 @@
-use ore_boost_api::state::{Boost, Stake};
-use solana_program::system_program;
+use ore_boost_api::prelude::*;
 use steel::*;
 
 /// Closes a stake account.
 pub fn process_close(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
     // Load accounts.
-    let [signer_info, boost_info, stake_info, system_program] = accounts else {
+    let [signer_info, stake_info, system_program] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
-    boost_info.to_account::<Boost>(&ore_boost_api::ID)?;
     stake_info
-        .is_writable()?
-        .to_account::<Stake>(&ore_boost_api::ID)?
-        .check(|s| s.balance == 0)?;
+        .to_account_mut::<Stake>(&ore_boost_api::ID)?
+        .check_mut(|s| s.authority == *signer_info.key)?
+        .check_mut(|s| s.balance == 0)?;
     system_program.is_program(&system_program::ID)?;
 
     // Realloc data to zero.

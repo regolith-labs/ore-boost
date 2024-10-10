@@ -38,6 +38,3 @@ steel = { features = ["spl"], version = "1.2" }
 thiserror = "1.0.57"
 tokio = "1.35"
 
-[patch.crates-io]
-steel = { path = "../steel/lib" }
-

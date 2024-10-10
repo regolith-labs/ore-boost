@@ -29,9 +29,6 @@ pub fn process_open(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult 
     mint_info.to_mint()?;
     system_program.is_program(&system_program::ID)?;
 
-    // Get clock
-    let clock = Clock::get().unwrap();
-
     // Initialize the stake account.
     create_account::<Stake>(
         stake_info,
@@ -45,6 +42,7 @@ pub fn process_open(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult 
         system_program,
         payer_info,
     )?;
+    let clock = Clock::get()?;
     let stake = stake_info.to_account_mut::<Stake>(&ore_boost_api::ID)?;
     stake.authority = *signer_info.key;
     stake.balance = 0;

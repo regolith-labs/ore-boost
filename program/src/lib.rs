@@ -17,27 +17,16 @@ use update_boost::*;
 use withdraw::*;
 
 use ore_boost_api::instruction::*;
-use solana_program::{
-    self, account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
-    pubkey::Pubkey,
-};
-
-solana_program::entrypoint!(process_instruction);
+use steel::*;
 
 pub fn process_instruction(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
     data: &[u8],
 ) -> ProgramResult {
-    if program_id.ne(&ore_boost_api::id()) {
-        return Err(ProgramError::IncorrectProgramId);
-    }
+    let (ix, data) = parse_instruction(&ore_boost_api::ID, program_id, data)?;
 
-    let (tag, data) = data
-        .split_first()
-        .ok_or(ProgramError::InvalidInstructionData)?;
-
-    match BoostInstruction::try_from(*tag).or(Err(ProgramError::InvalidInstructionData))? {
+    match ix {
         // User
         BoostInstruction::Close => process_close(accounts, data)?,
         BoostInstruction::Open => process_open(accounts, data)?,
@@ -53,3 +42,5 @@ pub fn process_instruction(
 
     Ok(())
 }
+
+entrypoint!(process_instruction);

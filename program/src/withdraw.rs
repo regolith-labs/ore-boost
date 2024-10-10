@@ -21,7 +21,6 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     beneficiary_info
         .is_writable()?
         .to_token_account()?
-        .check(|t| t.owner == *signer_info.key)?
         .check(|t| t.mint == *mint_info.key)?;
     let boost = boost_info
         .to_account_mut::<Boost>(&ore_boost_api::ID)?

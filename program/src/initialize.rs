@@ -1,9 +1,4 @@
-use ore_boost_api::{
-    consts::{CONFIG, INITIALIZER_ADDRESS},
-    instruction::Initialize,
-    state::Config,
-};
-use solana_program::system_program;
+use ore_boost_api::prelude::*;
 use steel::*;
 
 /// Initialize sets up the boost program.
@@ -19,7 +14,7 @@ pub fn process_initialize(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramR
     config_info.is_writable()?.is_empty()?.has_seeds(
         &[CONFIG],
         args.config_bump,
-        &ore_boost_api::id(),
+        &ore_boost_api::ID,
     )?;
     system_program.is_program(&system_program::ID)?;
 

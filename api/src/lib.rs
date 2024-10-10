@@ -4,6 +4,14 @@ pub mod instruction;
 pub mod sdk;
 pub mod state;
 
+pub mod prelude {
+    pub use crate::consts::*;
+    pub use crate::error::*;
+    pub use crate::instruction::*;
+    pub use crate::sdk::*;
+    pub use crate::state::*;
+}
+
 use steel::*;
 
-declare_id!("5P1kyfBQ2f91Ro3aqMB58JaPMSKNvvbtoyo8wkWYrumz");
+declare_id!("boostmPwypNUQu8qZ8RoWt5DXyYSVYxnBXqbbrGjecc");

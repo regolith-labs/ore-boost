@@ -1,7 +1,4 @@
-use ore_boost_api::{
-    instruction::Deposit,
-    state::{Boost, Stake},
-};
+use ore_boost_api::prelude::*;
 use steel::*;
 
 /// Deposit adds tokens to a stake account to earn a multiplier.
@@ -31,21 +28,19 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
         .check(|t| t.mint == *mint_info.key)?;
     let stake = stake_info
         .to_account_mut::<Stake>(&ore_boost_api::ID)?
-        .check_mut(|s| s.boost == *boost_info.key)?
-        .check_mut(|s| s.authority == *signer_info.key)?;
+        .check_mut(|s| s.authority == *signer_info.key)?
+        .check_mut(|s| s.boost == *boost_info.key)?;
     token_program.is_program(&spl_token::ID)?;
 
-    // Update the stake balance.
+    // Update balances.
     stake.balance = stake.balance.checked_add(amount).unwrap();
-
-    // Update the boost balance.
     boost.total_stake = boost.total_stake.checked_add(amount).unwrap();
 
-    // Update deposit timestamp.
-    let clock = Clock::get().unwrap();
+    // Update timestamps.
+    let clock = Clock::get()?;
     stake.last_stake_at = clock.unix_timestamp;
 
-    // Transfer tokens from signer to treasury
+    // Transfer tokens.
     transfer(
         signer_info,
         sender_info,
