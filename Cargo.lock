@@ -2366,7 +2366,7 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
 name = "ore-boost-api"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "array-const-fn-init",
  "bytemuck",
@@ -2382,7 +2382,7 @@ dependencies = [
 
 [[package]]
 name = "ore-boost-program"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "ore-boost-api",
  "rand 0.8.5",
@@ -2394,7 +2394,7 @@ dependencies = [
 
 [[package]]
 name = "ore-boosts-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clap 4.5.17",
  "futures",
