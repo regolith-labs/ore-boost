@@ -21,18 +21,18 @@ pub fn process_open(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult 
     boost_info
         .to_account::<Boost>(&ore_boost_api::ID)?
         .check(|b| b.mint == *mint_info.key)?;
+    mint_info.to_mint()?;
     stake_info.is_empty()?.is_writable()?.has_seeds(
         &[STAKE, signer_info.key.as_ref(), boost_info.key.as_ref()],
         args.stake_bump,
-        &ore_boost_api::id(),
+        &ore_boost_api::ID,
     )?;
-    mint_info.to_mint()?;
     system_program.is_program(&system_program::ID)?;
 
     // Initialize the stake account.
     create_account::<Stake>(
         stake_info,
-        &ore_boost_api::id(),
+        &ore_boost_api::ID,
         &[
             STAKE,
             signer_info.key.as_ref(),
