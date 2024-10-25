@@ -2366,7 +2366,7 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
 name = "ore-boost-api"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "array-const-fn-init",
  "bytemuck",
@@ -2382,7 +2382,7 @@ dependencies = [
 
 [[package]]
 name = "ore-boost-program"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "ore-boost-api",
  "rand 0.8.5",
@@ -2394,7 +2394,7 @@ dependencies = [
 
 [[package]]
 name = "ore-boosts-cli"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "clap 4.5.17",
  "futures",
@@ -4319,9 +4319,9 @@ checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "steel"
-version = "1.3.0"
+version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d88c610ca9fd5e4e51bdb6e9964114133a42f006713fe38aff37266fac91e1be"
+checksum = "7a2ca3cc310b7b71ce7944af64fb4fdaa5d0c2848ac79616d75e401913b6f781"
 dependencies = [
  "bytemuck",
  "num_enum 0.7.3",

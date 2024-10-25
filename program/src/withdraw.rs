@@ -20,19 +20,19 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     signer_info.is_signer()?;
     beneficiary_info
         .is_writable()?
-        .to_token_account()?
-        .check(|t| t.mint == *mint_info.key)?;
+        .as_token_account()?
+        .assert(|t| t.mint == *mint_info.key)?;
     let boost = boost_info
-        .to_account_mut::<Boost>(&ore_boost_api::ID)?
-        .check_mut(|b| b.mint == *mint_info.key)?;
+        .as_account_mut::<Boost>(&ore_boost_api::ID)?
+        .assert_mut(|b| b.mint == *mint_info.key)?;
     boost_tokens_info
         .is_writable()?
-        .to_associated_token_account(boost_info.key, mint_info.key)?;
-    mint_info.to_mint()?;
+        .as_associated_token_account(boost_info.key, mint_info.key)?;
+    mint_info.as_mint()?;
     let stake = stake_info
-        .to_account_mut::<Stake>(&ore_boost_api::ID)?
-        .check_mut(|s| s.authority == *signer_info.key)?
-        .check_mut(|s| s.boost == *boost_info.key)?;
+        .as_account_mut::<Stake>(&ore_boost_api::ID)?
+        .assert_mut(|s| s.authority == *signer_info.key)?
+        .assert_mut(|s| s.boost == *boost_info.key)?;
     token_program.is_program(&spl_token::ID)?;
 
     // Update the stake balance.
@@ -48,7 +48,7 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
         beneficiary_info,
         token_program,
         amount,
-        &[&[BOOST, mint_info.key.as_ref(), &[boost.bump as u8]]],
+        &[BOOST, mint_info.key.as_ref()],
     )?;
 
     Ok(())
