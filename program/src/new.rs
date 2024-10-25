@@ -20,16 +20,15 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
-    boost_info.is_writable()?.is_empty()?.has_seeds(
-        &[BOOST, mint_info.key.as_ref()],
-        args.bump,
-        &ore_boost_api::id(),
-    )?;
+    boost_info
+        .is_writable()?
+        .is_empty()?
+        .has_seeds(&[BOOST, mint_info.key.as_ref()], &ore_boost_api::id())?;
     boost_tokens_info.is_writable()?.is_empty()?;
     config_info
-        .to_account::<Config>(&ore_boost_api::ID)?
-        .check(|c| c.authority == *signer_info.key)?;
-    mint_info.to_mint()?;
+        .as_account::<Config>(&ore_boost_api::ID)?
+        .assert(|c| c.authority == *signer_info.key)?;
+    mint_info.as_mint()?;
     system_program.is_program(&system_program::ID)?;
     token_program.is_program(&spl_token::ID)?;
     associated_token_program.is_program(&spl_associated_token_account::ID)?;
@@ -37,13 +36,12 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     // Initialize the boost account.
     create_account::<Boost>(
         boost_info,
-        &ore_boost_api::id(),
-        &[BOOST, mint_info.key.as_ref(), &[args.bump]],
         system_program,
         signer_info,
+        &ore_boost_api::id(),
+        &[BOOST, mint_info.key.as_ref()],
     )?;
-    let boost = boost_info.to_account_mut::<Boost>(&ore_boost_api::ID)?;
-    boost.bump = args.bump as u64;
+    let boost = boost_info.as_account_mut::<Boost>(&ore_boost_api::ID)?;
     boost.mint = *mint_info.key;
     boost.expires_at = expires_at;
     boost.multiplier = multiplier;

@@ -36,12 +36,14 @@ pub struct Deposit {
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct Initialize {
+    #[deprecated(since = "0.3.0", note = "Bump no longer used")]
     pub config_bump: u8,
 }
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct New {
+    #[deprecated(since = "0.3.0", note = "Bump no longer used")]
     pub bump: u8,
     pub expires_at: [u8; 8],
     pub multiplier: [u8; 8],
@@ -50,6 +52,7 @@ pub struct New {
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct Open {
+    #[deprecated(since = "0.3.0", note = "Bump no longer used")]
     pub stake_bump: u8,
 }
 

@@ -31,6 +31,7 @@ pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
 }
 
 // Build initialize instruction.
+#[allow(deprecated)]
 pub fn initialize(signer: Pubkey) -> Instruction {
     let config_pda = config_pda();
     Instruction {
@@ -48,6 +49,7 @@ pub fn initialize(signer: Pubkey) -> Instruction {
 }
 
 // Build new instruction.
+#[allow(deprecated)]
 pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> Instruction {
     let boost_pda = boost_pda(mint);
     let boost_tokens_address =
@@ -74,6 +76,7 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> In
 }
 
 // Build open instruction.
+#[allow(deprecated)]
 pub fn open(signer: Pubkey, payer: Pubkey, mint: Pubkey) -> Instruction {
     let boost_pda = boost_pda(mint);
     let stake_pda = stake_pda(signer, boost_pda.0);

@@ -16,10 +16,10 @@ pub fn process_update_boost(accounts: &[AccountInfo<'_>], data: &[u8]) -> Progra
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
-    let boost = boost_info.to_account_mut::<Boost>(&ore_boost_api::ID)?;
+    let boost = boost_info.as_account_mut::<Boost>(&ore_boost_api::ID)?;
     config_info
-        .to_account::<Config>(&ore_boost_api::ID)?
-        .check(|c| c.authority == *signer_info.key)?;
+        .as_account::<Config>(&ore_boost_api::ID)?
+        .assert(|c| c.authority == *signer_info.key)?;
 
     // Update the boost multiplier.
     boost.multiplier = multiplier;
