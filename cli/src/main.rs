@@ -2,6 +2,7 @@ mod args;
 mod boost;
 mod initialize;
 mod new;
+mod update_boost;
 
 use std::sync::Arc;
 
@@ -55,8 +56,16 @@ struct Args {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
+    #[command(about = "Fetch a boost account")]
     Boost(GetBoostArgs),
+
+    #[command(about = "Update a boost")]
+    UpdateBoost(UpdateBoostArgs),
+
+    #[command(about = "Create a new boost")]
     New(NewArgs),
+
+    #[command(about = "Initialize the boost program")]
     Initialize(InitializeArgs),
 }
 
@@ -92,6 +101,9 @@ async fn main() {
         }
         Commands::New(args) => {
             cli.new_boost(args).await.unwrap();
+        }
+        Commands::UpdateBoost(args) => {
+            cli.update_boost(args).await.unwrap();
         }
     };
 }

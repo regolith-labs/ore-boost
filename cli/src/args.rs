@@ -11,6 +11,17 @@ pub struct NewArgs {
 }
 
 #[derive(Parser, Debug)]
+pub struct UpdateBoostArgs {
+    pub mint: String,
+
+    #[arg(long, short, value_name = "UNIX_TIME")]
+    pub expires_at: Option<i64>,
+
+    #[arg(long, short, value_name = "MULTIPLIER")]
+    pub multiplier: Option<u64>,
+}
+
+#[derive(Parser, Debug)]
 pub struct GetBoostArgs {
     pub mint: String,
 }
