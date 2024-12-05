@@ -35,6 +35,8 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
         .assert_mut(|s| s.boost == *boost_info.key)?;
     token_program.is_program(&spl_token::ID)?;
 
+    // TODO Withdraw pending stake first, then committed stake.
+    
     // Update the stake balance.
     stake.balance = stake.balance.checked_sub(amount).unwrap();
 

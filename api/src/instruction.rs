@@ -9,6 +9,11 @@ pub enum BoostInstruction {
     Deposit = 1,
     Open = 2,
     Withdraw = 3,
+    Rank = 4,
+    Reserve = 5,
+    Rebase = 6,
+    Claim = 7,
+    Payout = 8,
     
     // Admin
     Initialize = 100,
@@ -22,6 +27,13 @@ impl BoostInstruction {
         vec![*self as u8]
     }
 }
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct Claim {
+    pub amount: [u8; 8],
+}
+
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -58,6 +70,24 @@ pub struct Open {
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct Rank {}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct Reserve {}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct Rebase {}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct Payout {
+    pub amount: [u8; 8],
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct UpdateAdmin {
     pub new_admin: Pubkey,
 }
@@ -75,11 +105,15 @@ pub struct Withdraw {
     pub amount: [u8; 8],
 }
 
+instruction!(BoostInstruction, Claim);
 instruction!(BoostInstruction, Close);
 instruction!(BoostInstruction, Deposit);
 instruction!(BoostInstruction, Initialize);
 instruction!(BoostInstruction, New);
 instruction!(BoostInstruction, Open);
+instruction!(BoostInstruction, Rank);
+instruction!(BoostInstruction, Reserve);
 instruction!(BoostInstruction, UpdateAdmin);
 instruction!(BoostInstruction, UpdateBoost);
 instruction!(BoostInstruction, Withdraw);
+instruction!(BoostInstruction, Payout);

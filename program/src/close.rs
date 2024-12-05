@@ -14,12 +14,8 @@ pub fn process_close(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResul
         .assert_mut(|s| s.balance == 0)?;
     system_program.is_program(&system_program::ID)?;
 
-    // Realloc data to zero.
-    stake_info.realloc(0, true)?;
-
-    // Send remaining lamports to signer.
-    **signer_info.lamports.borrow_mut() += stake_info.lamports();
-    **stake_info.lamports.borrow_mut() = 0;
+    // Close the stake account.
+    stake_info.close(signer_info)?;
 
     Ok(())
 }

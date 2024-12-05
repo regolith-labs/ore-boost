@@ -1,20 +1,31 @@
+mod claim;
 mod close;
 mod deposit;
 mod initialize;
 mod new;
 mod open;
+mod rank;
+mod reserve;
+mod rebase;
 mod update_admin;
 mod update_boost;
+mod payout;
 mod withdraw;
 
+use claim::*;
 use close::*;
 use deposit::*;
 use initialize::*;
 use new::*;
 use open::*;
+use rank::*;
+use reserve::*;
+use rebase::*;
 use update_admin::*;
 use update_boost::*;
+use payout::*;
 use withdraw::*;
+
 
 use ore_boost_api::instruction::*;
 use steel::*;
@@ -32,6 +43,11 @@ pub fn process_instruction(
         BoostInstruction::Open => process_open(accounts, data)?,
         BoostInstruction::Deposit => process_deposit(accounts, data)?,
         BoostInstruction::Withdraw => process_withdraw(accounts, data)?,
+        BoostInstruction::Rank => process_rank(accounts, data)?,
+        BoostInstruction::Reserve => process_reserve(accounts, data)?,
+        BoostInstruction::Rebase => process_rebase(accounts, data)?,
+        BoostInstruction::Claim => process_claim(accounts, data)?,
+        BoostInstruction::Payout => process_payout(accounts, data)?,
 
         // Admin
         BoostInstruction::Initialize => process_initialize(accounts, data)?,

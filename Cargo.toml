@@ -22,6 +22,7 @@ const-crypto = "0.1.0"
 log = "0.4"
 futures = "0.3"
 num_enum = "0.7.2"
+ore-api = "2.7"
 ore-boost-api = { path = "api", version = "0.3" }
 solana-cli-config = "^1.18"
 solana-client = "^1.18"

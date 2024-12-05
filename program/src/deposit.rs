@@ -14,9 +14,9 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
-    let boost = boost_info
-        .as_account_mut::<Boost>(&ore_boost_api::ID)?
-        .assert_mut(|b| b.mint == *mint_info.key)?;
+    boost_info
+        .as_account::<Boost>(&ore_boost_api::ID)?
+        .assert(|b| b.mint == *mint_info.key)?;
     boost_tokens_info
         .is_writable()?
         .as_associated_token_account(boost_info.key, mint_info.key)?;
@@ -33,12 +33,12 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
     token_program.is_program(&spl_token::ID)?;
 
     // Update balances.
-    stake.balance = stake.balance.checked_add(amount).unwrap();
-    boost.total_stake = boost.total_stake.checked_add(amount).unwrap();
+    stake.pending_balance = stake.pending_balance.checked_add(amount).unwrap();
+    // boost.total_stake = boost.total_stake.checked_add(amount).unwrap();
 
     // Update timestamps.
     let clock = Clock::get()?;
-    stake.last_stake_at = clock.unix_timestamp;
+    stake.last_deposit_at = clock.unix_timestamp;
 
     // Transfer tokens.
     transfer(
