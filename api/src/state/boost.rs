@@ -15,7 +15,7 @@ pub struct Boost {
     /// Flag indicating if this boost is locked for checkpointing.
     pub locked: u64,
 
-    /// The mint address
+    /// The mint address of the token associated with this boost.
     pub mint: Pubkey,
 
     /// The multiplier allocated to this token.
@@ -26,9 +26,6 @@ pub struct Boost {
 
     /// The timestamp of when this boost was last reserved.
     pub reserved_at: i64,
-
-    /// The amount of rewards to distribute in the next checkpoint.
-    pub rewards: u64,
     
     // The total amount of stake in this boost.
     pub total_stake: u64,

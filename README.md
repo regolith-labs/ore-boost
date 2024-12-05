@@ -24,7 +24,6 @@
 - [`Payout`](program/src/payout.rs) – Called by ORE program to trigger a boost to claim its rewards.
 - [`Claim`](program/src/claim.rs) – Allows a staker to claim their rewards.
 
-
 ## State
  - [`Boost`](api/src/state/boost.rs) - An account (1 per mint) which records how much of a multiplier should be paid out for staked tokens of a given mint.
  - [`Config`](api/src/state/config.rs) – A singleton account which manages program-wide variables.

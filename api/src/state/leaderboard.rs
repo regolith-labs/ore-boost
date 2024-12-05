@@ -1,7 +1,7 @@
 use steel::*;
 use super::BoostAccount;
 
-/// Leaderboard tracks the top 32 miners by proof balance.
+/// Leaderboard tracks the top 32 miners by proof balance (unclaimed ORE).
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Leaderboard {    

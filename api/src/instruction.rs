@@ -5,15 +5,14 @@ use steel::*;
 #[rustfmt::skip]
 pub enum BoostInstruction {
     // User
-    Close = 0,
-    Deposit = 1,
-    Open = 2,
-    Withdraw = 3,
-    Rank = 4,
-    Reserve = 5,
+    Claim = 0,
+    Close = 1,
+    Deposit = 2,
+    Open = 3,
+    Rank = 5,
     Rebase = 6,
-    Claim = 7,
-    Payout = 8,
+    Reserve = 7,
+    Withdraw = 8,
     
     // Admin
     Initialize = 100,
@@ -47,26 +46,18 @@ pub struct Deposit {
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Initialize {
-    #[deprecated(since = "0.3.0", note = "Bump no longer used")]
-    pub config_bump: u8,
-}
+pub struct Initialize {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct New {
-    #[deprecated(since = "0.3.0", note = "Bump no longer used")]
-    pub bump: u8,
     pub expires_at: [u8; 8],
     pub multiplier: [u8; 8],
 }
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Open {
-    #[deprecated(since = "0.3.0", note = "Bump no longer used")]
-    pub stake_bump: u8,
-}
+pub struct Open {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -79,12 +70,6 @@ pub struct Reserve {}
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct Rebase {}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Payout {
-    pub amount: [u8; 8],
-}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -116,4 +101,3 @@ instruction!(BoostInstruction, Reserve);
 instruction!(BoostInstruction, UpdateAdmin);
 instruction!(BoostInstruction, UpdateBoost);
 instruction!(BoostInstruction, Withdraw);
-instruction!(BoostInstruction, Payout);

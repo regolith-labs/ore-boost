@@ -28,7 +28,7 @@ pub fn process_reserve(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
     let random_number = u64::from_le_bytes(random_bytes.try_into().unwrap());
     let selected_balance = random_number % total_balance;
 
-    // Find the proof that weighted by their balance.
+    // Select a proof weighted by their unclaimed ORE balance.
     let mut cumulative_sum: u64 = 0;
     let mut selected_proof = None;
     for entry in leaderboard.entries.iter() {

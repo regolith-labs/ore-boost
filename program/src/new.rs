@@ -1,7 +1,7 @@
 use ore_boost_api::{
-    consts::BOOST,
+    consts::{BOOST, CHECKPOINT},
     instruction::New,
-    state::{Boost, Config},
+    state::{Boost, Checkpoint, Config},
 };
 use solana_program::system_program;
 use steel::*;
@@ -14,7 +14,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     let expires_at = i64::from_le_bytes(args.expires_at);
 
     // Load accounts.
-    let [signer_info, boost_info, boost_tokens_info, boost_rewards_info, config_info, mint_info, ore_mint_info, system_program, token_program, associated_token_program] =
+    let [signer_info, boost_info, boost_tokens_info, boost_rewards_info, checkpoint_info, config_info, mint_info, ore_mint_info, system_program, token_program, associated_token_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -26,6 +26,10 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
         .has_seeds(&[BOOST, mint_info.key.as_ref()], &ore_boost_api::id())?;
     boost_tokens_info.is_writable()?.is_empty()?;
     boost_rewards_info.is_writable()?.is_empty()?;
+    checkpoint_info
+        .is_writable()?
+        .is_empty()?
+        .has_seeds(&[CHECKPOINT, boost_info.key.as_ref()], &ore_boost_api::id())?;
     config_info
         .as_account::<Config>(&ore_boost_api::ID)?
         .assert(|c| c.authority == *signer_info.key)?;
@@ -51,7 +55,23 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     boost.reserved_at = 0;
     boost.total_stake = 0;
 
-    // Open a proof account owned by this boost.
+    // Initialize checkpoint account.
+    create_account::<Checkpoint>(
+        checkpoint_info,
+        system_program,
+        signer_info,
+        &ore_boost_api::id(),
+        &[CHECKPOINT, boost_info.key.as_ref()],
+    )?;
+    let checkpoint = checkpoint_info.as_account_mut::<Checkpoint>(&ore_boost_api::ID)?;
+    checkpoint.boost = *boost_info.key;
+    checkpoint.current_id = 0;
+    checkpoint.total_pending_stake = 0;
+    checkpoint.total_rewards = 0;
+    checkpoint.total_stakers = 0;
+    checkpoint.ts = 0;
+
+    // Open a proof account for this boost.
     invoke_signed(
         &ore_api::sdk::open(
             *boost_info.key, 
@@ -76,7 +96,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
         associated_token_program,
     )?;
 
-    // Create token account hold yield.
+    // Create token account to accumulate staking rewards.
     create_associated_token_account(
         signer_info,
         boost_info,

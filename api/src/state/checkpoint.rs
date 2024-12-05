@@ -18,6 +18,9 @@ pub struct Checkpoint {
     /// The number of total stakers in this checkpoint.
     pub total_stakers: u64,
 
+    /// The total amount of rewards to distribute.
+    pub total_rewards: u64,
+
     /// The timestamp of when the last checkpoint finished.
     pub ts: i64,
 }

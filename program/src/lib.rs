@@ -9,7 +9,6 @@ mod reserve;
 mod rebase;
 mod update_admin;
 mod update_boost;
-mod payout;
 mod withdraw;
 
 use claim::*;
@@ -23,7 +22,6 @@ use reserve::*;
 use rebase::*;
 use update_admin::*;
 use update_boost::*;
-use payout::*;
 use withdraw::*;
 
 
@@ -47,7 +45,6 @@ pub fn process_instruction(
         BoostInstruction::Reserve => process_reserve(accounts, data)?,
         BoostInstruction::Rebase => process_rebase(accounts, data)?,
         BoostInstruction::Claim => process_claim(accounts, data)?,
-        BoostInstruction::Payout => process_payout(accounts, data)?,
 
         // Admin
         BoostInstruction::Initialize => process_initialize(accounts, data)?,
