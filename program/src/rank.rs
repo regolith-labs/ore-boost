@@ -15,7 +15,7 @@ pub fn process_rank(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult
     // TODO Handle case where is already on the leaderboard. 
 
     // Add miner to leaderboard.
-    leaderboard.insert(*proof_info.key, proof.balance);
+    leaderboard.insert(*proof_info.key, (proof.balance as f64).log2() as u64);
 
     // Update leaderboard total balance.
     leaderboard.total_balance = leaderboard.entries.iter().map(|e| e.balance).sum();

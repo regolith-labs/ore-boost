@@ -4,6 +4,9 @@ use solana_program::{pubkey, pubkey::Pubkey};
 /// The authority allowed to initialize the program.
 pub const INITIALIZER_ADDRESS: Pubkey = pubkey!("HBUh9g46wk2X89CvaNN15UmsznP59rh6od1h8JwYAopk");
 
+/// The denominator of boost multipliers for percentage calculations.
+pub const BOOST_DENOMINATOR: u64 = 1000;
+
 /// The seed of the boost PDA.
 pub const BOOST: &[u8] = b"boost";
 

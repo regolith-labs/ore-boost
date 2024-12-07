@@ -22,8 +22,8 @@ pub struct Entry {
     /// The proof address.
     pub address: Pubkey,
 
-    /// The proof balance.
-    pub balance: u64,
+    /// The log2 of the proof balance.
+    pub score: u64,
 }
 
 
