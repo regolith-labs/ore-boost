@@ -41,9 +41,7 @@ pub fn initialize(signer: Pubkey) -> Instruction {
             AccountMeta::new(config_pda.0, false),
             AccountMeta::new_readonly(system_program::ID, false),
         ],
-        data: Initialize {
-            config_bump: config_pda.1,
-        }
+        data: Initialize {}
         .to_bytes(),
     }
 }
@@ -67,7 +65,6 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> In
             AccountMeta::new_readonly(spl_associated_token_account::ID, false),
         ],
         data: New {
-            bump: boost_pda.1,
             expires_at: expires_at.to_le_bytes(),
             multiplier: multiplier.to_le_bytes(),
         }
@@ -90,9 +87,7 @@ pub fn open(signer: Pubkey, payer: Pubkey, mint: Pubkey) -> Instruction {
             AccountMeta::new(stake_pda.0, false),
             AccountMeta::new_readonly(system_program::ID, false),
         ],
-        data: Open {
-            stake_bump: stake_pda.1,
-        }
+        data: Open {}
         .to_bytes(),
     }
 }

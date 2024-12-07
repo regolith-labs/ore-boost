@@ -25,5 +25,6 @@ pub fn process_initialize(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Program
     let config = config_info.as_account_mut::<Config>(&ore_boost_api::ID)?;
     config.authority = *signer_info.key;
 
+
     Ok(())
 }
