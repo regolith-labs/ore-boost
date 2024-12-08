@@ -20,20 +20,20 @@ pub fn process_reserve(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
 
     // Use most recent slot hash to sample a number between 0 and the total balance on the leaderboard.
     let last_hash = &slot_hashes_sysvar.data.borrow()[0..size_of::<SlotHash>()];
-    let total_balance = leaderboard.total_balance;
+    let total_balance = leaderboard.total_score;
     if total_balance == 0 {
         return Err(ProgramError::InvalidAccountData);
     }
     let random_bytes = &last_hash[..8];
     let random_number = u64::from_le_bytes(random_bytes.try_into().unwrap());
-    let selected_balance = random_number % total_balance;
+    let k = random_number % total_balance;
 
     // Select a proof weighted by their unclaimed ORE balance.
-    let mut cumulative_sum: u64 = 0;
+    let mut cumulative_score: u64 = 0;
     let mut selected_proof = None;
     for entry in leaderboard.entries.iter() {
-        cumulative_sum = cumulative_sum.checked_add(entry.balance).unwrap();
-        if cumulative_sum > selected_balance {
+        cumulative_score = cumulative_score.checked_add(entry.score).unwrap();
+        if cumulative_score > k {
             selected_proof = Some(entry.address);
             break;
         }
