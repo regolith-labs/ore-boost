@@ -11,7 +11,8 @@ pub fn process_close(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResul
     stake_info
         .as_account_mut::<Stake>(&ore_boost_api::ID)?
         .assert_mut(|s| s.authority == *signer_info.key)?
-        .assert_mut(|s| s.balance == 0)?;
+        .assert_mut(|s| s.balance == 0)?
+        .assert_mut(|s| s.pending_balance == 0)?;
     system_program.is_program(&system_program::ID)?;
 
     // Close the stake account.

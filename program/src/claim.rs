@@ -23,7 +23,8 @@ pub fn process_claim(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult
         .is_writable()?
         .as_token_account()?
         .assert(|t| t.mint == ore_api::consts::MINT_ADDRESS)?
-        .assert(|t| t.owner == *boost_info.key)?;
+        .assert(|t| t.owner == *boost_info.key)?
+        .assert(|t| t.amount >= amount)?;
     let stake = stake_info
         .as_account_mut::<Stake>(&ore_boost_api::ID)?
         .assert_mut(|s| s.authority == *signer_info.key)?

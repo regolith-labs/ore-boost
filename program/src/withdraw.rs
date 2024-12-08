@@ -24,7 +24,8 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
         .assert(|t| t.mint == *mint_info.key)?;
     let boost = boost_info
         .as_account_mut::<Boost>(&ore_boost_api::ID)?
-        .assert_mut(|b| b.mint == *mint_info.key)?;
+        .assert_mut(|b| b.mint == *mint_info.key)?
+        .assert_mut(|b| b.locked == 0)?;
     boost_tokens_info
         .is_writable()?
         .as_associated_token_account(boost_info.key, mint_info.key)?;
@@ -32,18 +33,24 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     let stake = stake_info
         .as_account_mut::<Stake>(&ore_boost_api::ID)?
         .assert_mut(|s| s.authority == *signer_info.key)?
-        .assert_mut(|s| s.boost == *boost_info.key)?;
+        .assert_mut(|s| s.boost == *boost_info.key)?
+        .assert_mut(|s| s.pending_balance.checked_add(s.balance).unwrap() >= amount)?;
     token_program.is_program(&spl_token::ID)?;
 
-    // TODO Withdraw pending stake first, then committed stake.
-    
-    // Update the stake balance.
-    stake.balance = stake.balance.checked_sub(amount).unwrap();
+    // Calculate how much to withdraw from pending vs committed stake
+    let pending_withdraw = amount.min(stake.pending_balance);
+    let committed_withdraw = amount.checked_sub(pending_withdraw).unwrap();
 
-    // Update the boost balance.
-    boost.total_stake = boost.total_stake.checked_sub(amount).unwrap();
+    // Update the pending stake balance
+    stake.pending_balance = stake.pending_balance.checked_sub(pending_withdraw).unwrap();
 
-    // Transfer tokens from signer to treasury
+    // Update the committed stake balance
+    stake.balance = stake.balance.checked_sub(committed_withdraw).unwrap();
+
+    // Update the boost balance
+    boost.total_stake = boost.total_stake.checked_sub(committed_withdraw).unwrap();
+
+    // Transfer tokens from boost to beneficiary
     transfer_signed(
         boost_info,
         boost_tokens_info,

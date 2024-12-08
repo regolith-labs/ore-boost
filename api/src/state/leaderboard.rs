@@ -1,18 +1,18 @@
 use steel::*;
 use super::BoostAccount;
 
-/// Leaderboard tracks the top 32 miners by proof balance (unclaimed ORE).
+/// Leaderboard tracks the top 32 miners by proof score (log2 of unclaimed ORE).
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Leaderboard {    
-    /// The sorted entries (sorted by balance descending)
+    /// The sorted entries (sorted by score descending)
     pub entries: [Entry; 32],
 
     /// The number of entries currently stored
     pub len: usize,
 
-    /// The total sum of all balances.
-    pub total_balance: u64,
+    /// The total sum of all scores.
+    pub total_score: u64,
 }
 
 /// Entry represents a single position in the leaderboard
@@ -22,24 +22,27 @@ pub struct Entry {
     /// The proof address.
     pub address: Pubkey,
 
-    /// The log2 of the proof balance.
+    /// The log2 of the proof score.
     pub score: u64,
 }
 
 
 impl Leaderboard {
     /// Insert a new entry into the leaderboard, maintaining sort order
-    pub fn insert(&mut self, address: Pubkey, balance: u64) {
+    pub fn insert(&mut self, address: Pubkey, score: u64) {
+        // First remove existing entry if present
+        self.remove(address);
+        
         // Find insertion point
         let mut insert_at = self.len as usize;
         for i in 0..self.len as usize {
-            if balance > self.entries[i].balance {
+            if score > self.entries[i].score {  // Note: using score instead of score
                 insert_at = i;
                 break;
             }
         }
 
-        // Don't insert if balance is too small and board is full
+        // Don't insert if score is too small and board is full
         if insert_at >= 32 && self.len >= 32 {
             return;
         }
@@ -56,7 +59,7 @@ impl Leaderboard {
 
         // Insert new entry
         if insert_at < 32 {
-            self.entries[insert_at] = Entry { address, balance };
+            self.entries[insert_at] = Entry { address, score };
             self.len = (self.len + 1).min(32);
         }
     }

@@ -34,7 +34,6 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
 
     // Update balances.
     stake.pending_balance = stake.pending_balance.checked_add(amount).unwrap();
-    // boost.total_stake = boost.total_stake.checked_add(amount).unwrap();
 
     // Update timestamps.
     let clock = Clock::get()?;

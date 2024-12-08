@@ -10,12 +10,16 @@ pub fn process_rank(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult
     };
     signer_info.is_signer()?;
     let leaderboard = leaderboard_info.as_account_mut::<Leaderboard>(&ore_boost_api::ID)?;
-    let proof = proof_info.as_account::<Proof>(&ore_api::ID)?;
-    
-    // TODO Handle case where is already on the leaderboard. 
 
-    // Add miner to leaderboard.
-    leaderboard.insert(*proof_info.key, (proof.balance as f64).log2() as u64);
+    // Rank the miner on the leaderboard.
+    if proof_info.data_is_empty() {
+        // Remove miner from leaderboard if proof account is empty.
+        leaderboard.remove(*signer_info.key);
+    } else {
+        // Add miner to leaderboard.
+        let proof = proof_info.as_account::<Proof>(&ore_api::ID)?;
+        leaderboard.insert(*proof_info.key, (proof.balance as f64).log2() as u64);
+    }
 
     // Update leaderboard total balance.
     leaderboard.total_balance = leaderboard.entries.iter().map(|e| e.balance).sum();
