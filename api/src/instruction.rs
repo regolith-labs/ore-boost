@@ -65,11 +65,11 @@ pub struct Rank {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Reserve {}
+pub struct Rebase {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Rebase {}
+pub struct Reserve {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -97,6 +97,7 @@ instruction!(BoostInstruction, Initialize);
 instruction!(BoostInstruction, New);
 instruction!(BoostInstruction, Open);
 instruction!(BoostInstruction, Rank);
+instruction!(BoostInstruction, Rebase);
 instruction!(BoostInstruction, Reserve);
 instruction!(BoostInstruction, UpdateAdmin);
 instruction!(BoostInstruction, UpdateBoost);

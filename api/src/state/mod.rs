@@ -40,8 +40,8 @@ pub fn config_pda() -> (Pubkey, u8) {
 }
 
 /// Fetch the PDA of the leaderboard account.
-pub fn leaderboard_pda(boost: Pubkey) -> (Pubkey, u8) {
-    Pubkey::find_program_address(&[LEADERBOARD, boost.as_ref()], &crate::id())
+pub fn leaderboard_pda() -> (Pubkey, u8) {
+    Pubkey::find_program_address(&[LEADERBOARD], &crate::id())
 }
 
 /// Fetch the PDA of the stake account.
