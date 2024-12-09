@@ -92,14 +92,21 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> In
     let boost_pda = boost_pda(mint);
     let boost_tokens_address =
         spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
+    let boost_rewards_address =
+        spl_associated_token_account::get_associated_token_address(&boost_pda.0, &ore_api::consts::MINT_ADDRESS);
+    let checkpoint_pda = checkpoint_pda(boost_pda.0);
+    let config_pda = config_pda();
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(boost_pda.0, false),
             AccountMeta::new(boost_tokens_address, false),
-            AccountMeta::new_readonly(config_pda().0, false),
+            AccountMeta::new(boost_rewards_address, false),
+            AccountMeta::new(checkpoint_pda.0, false),
+            AccountMeta::new_readonly(config_pda.0, false),
             AccountMeta::new_readonly(mint, false),
+            AccountMeta::new_readonly(ore_api::consts::MINT_ADDRESS, false),
             AccountMeta::new_readonly(system_program::ID, false),
             AccountMeta::new_readonly(spl_token::ID, false),
             AccountMeta::new_readonly(spl_associated_token_account::ID, false),

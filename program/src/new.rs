@@ -10,8 +10,8 @@ use steel::*;
 pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     // Parse args.
     let args = New::try_from_bytes(data)?;
-    let multiplier = u64::from_le_bytes(args.multiplier);
     let expires_at = i64::from_le_bytes(args.expires_at);
+    let multiplier = u64::from_le_bytes(args.multiplier);
 
     // Load accounts.
     let [signer_info, boost_info, boost_tokens_info, boost_rewards_info, checkpoint_info, config_info, mint_info, ore_mint_info, system_program, token_program, associated_token_program] =
@@ -23,13 +23,13 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     boost_info
         .is_writable()?
         .is_empty()?
-        .has_seeds(&[BOOST, mint_info.key.as_ref()], &ore_boost_api::id())?;
+        .has_seeds(&[BOOST, mint_info.key.as_ref()], &ore_boost_api::ID)?;
     boost_tokens_info.is_writable()?.is_empty()?;
     boost_rewards_info.is_writable()?.is_empty()?;
     checkpoint_info
         .is_writable()?
         .is_empty()?
-        .has_seeds(&[CHECKPOINT, boost_info.key.as_ref()], &ore_boost_api::id())?;
+        .has_seeds(&[CHECKPOINT, boost_info.key.as_ref()], &ore_boost_api::ID)?;
     config_info
         .as_account::<Config>(&ore_boost_api::ID)?
         .assert(|c| c.authority == *signer_info.key)?;
@@ -44,7 +44,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
         boost_info,
         system_program,
         signer_info,
-        &ore_boost_api::id(),
+        &ore_boost_api::ID,
         &[BOOST, mint_info.key.as_ref()],
     )?;
     let boost = boost_info.as_account_mut::<Boost>(&ore_boost_api::ID)?;
@@ -60,7 +60,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
         checkpoint_info,
         system_program,
         signer_info,
-        &ore_boost_api::id(),
+        &ore_boost_api::ID,
         &[CHECKPOINT, boost_info.key.as_ref()],
     )?;
     let checkpoint = checkpoint_info.as_account_mut::<Checkpoint>(&ore_boost_api::ID)?;
