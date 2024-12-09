@@ -14,7 +14,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     let multiplier = u64::from_le_bytes(args.multiplier);
 
     // Load accounts.
-    let [signer_info, boost_info, boost_tokens_info, boost_rewards_info, checkpoint_info, config_info, mint_info, ore_mint_info, proof_info, system_program, token_program, associated_token_program, slot_hashes] =
+    let [signer_info, boost_info, boost_tokens_info, boost_rewards_info, checkpoint_info, config_info, mint_info, ore_mint_info, proof_info, ore_program, system_program, token_program, associated_token_program, slot_hashes] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -36,6 +36,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     mint_info.as_mint()?;
     ore_mint_info.has_address(&ore_api::consts::MINT_ADDRESS)?.as_mint()?;
     proof_info.is_writable()?.is_empty()?;
+    ore_program.is_program(&ore_api::ID)?;
     system_program.is_program(&system_program::ID)?;
     token_program.is_program(&spl_token::ID)?;
     associated_token_program.is_program(&spl_associated_token_account::ID)?;
@@ -86,6 +87,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
             proof_info.clone(),
             system_program.clone(),
             slot_hashes.clone(),
+            ore_program.clone(),
         ], 
         &ore_boost_api::ID, 
         &[BOOST, mint_info.key.as_ref()]

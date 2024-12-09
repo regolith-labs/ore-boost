@@ -109,6 +109,7 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> In
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new_readonly(ore_api::consts::MINT_ADDRESS, false),
             AccountMeta::new(proof_pda.0, false),
+            AccountMeta::new_readonly(ore_api::ID, false),
             AccountMeta::new_readonly(system_program::ID, false),
             AccountMeta::new_readonly(spl_token::ID, false),
             AccountMeta::new_readonly(spl_associated_token_account::ID, false),
