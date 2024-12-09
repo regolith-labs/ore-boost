@@ -26,6 +26,11 @@ pub struct Entry {
     pub score: u64,
 }
 
+impl Default for Entry {
+    fn default() -> Self {
+        Self { address: Pubkey::default(), score: 0 }
+    }
+}
 
 impl Leaderboard {
     /// Insert a new entry into the leaderboard, maintaining sort order

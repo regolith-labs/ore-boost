@@ -74,11 +74,13 @@ pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
 #[allow(deprecated)]
 pub fn initialize(signer: Pubkey) -> Instruction {
     let config_pda = config_pda();
+    let leaderboard_pda = leaderboard_pda();
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(config_pda.0, false),
+            AccountMeta::new(leaderboard_pda.0, false),
             AccountMeta::new_readonly(system_program::ID, false),
         ],
         data: Initialize {}
