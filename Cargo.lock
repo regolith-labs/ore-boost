@@ -2494,6 +2494,7 @@ dependencies = [
  "bytemuck",
  "const-crypto",
  "num_enum 0.7.3",
+ "ore-api",
  "solana-program",
  "spl-associated-token-account",
  "spl-token",

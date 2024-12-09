@@ -1,3 +1,4 @@
+use ore_api::consts::{TREASURY_ADDRESS, TREASURY_TOKENS_ADDRESS};
 use steel::*;
 
 use crate::{
@@ -6,16 +7,15 @@ use crate::{
 };
 
 // Build claim instruction.
-pub fn claim(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
+pub fn claim(signer: Pubkey, beneficiary: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     let boost_pda = boost_pda(mint);
     let boost_rewards_address = spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
-    let beneficiary_address = spl_associated_token_account::get_associated_token_address(&signer, &mint);
     let stake_pda = stake_pda(signer, boost_pda.0);
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
-            AccountMeta::new(beneficiary_address, false),
+            AccountMeta::new(beneficiary, false),
             AccountMeta::new_readonly(boost_pda.0, false),
             AccountMeta::new(boost_rewards_address, false),
             AccountMeta::new(stake_pda.0, false),
@@ -147,16 +147,23 @@ pub fn rank(signer: Pubkey, proof: Pubkey) -> Instruction {
 }
 
 // Build rebase instruction.
-pub fn rebase(signer: Pubkey, mint: Pubkey) -> Instruction {
+pub fn rebase(signer: Pubkey, mint: Pubkey, stake: Pubkey) -> Instruction {
     let boost_pda = boost_pda(mint);
+    let boost_rewards = spl_associated_token_account::get_associated_token_address(&boost_pda.0, &ore_api::consts::MINT_ADDRESS);
     let checkpoint_pda = checkpoint_pda(boost_pda.0);
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(boost_pda.0, false),
+            AccountMeta::new(ore_api::state::proof_pda(boost_pda.0).0, false),
+            AccountMeta::new(boost_rewards, false),
             AccountMeta::new(checkpoint_pda.0, false),
-            AccountMeta::new_readonly(config_pda().0, false),
+            AccountMeta::new(stake, false),
+            AccountMeta::new_readonly(TREASURY_ADDRESS, false),
+            AccountMeta::new(TREASURY_TOKENS_ADDRESS, false),
+            AccountMeta::new_readonly(ore_api::ID, false),
+            AccountMeta::new_readonly(spl_token::ID, false),
         ],
         data: Rebase {}.to_bytes(),
     }
