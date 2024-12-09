@@ -133,7 +133,7 @@ pub fn open(signer: Pubkey, payer: Pubkey, mint: Pubkey) -> Instruction {
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(payer, true),
-            AccountMeta::new_readonly(boost_pda.0, false),
+            AccountMeta::new(boost_pda.0, false),
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new(stake_pda.0, false),
             AccountMeta::new_readonly(system_program::ID, false),
