@@ -1,4 +1,4 @@
-use ore_api::consts::{TREASURY_ADDRESS, TREASURY_TOKENS_ADDRESS};
+use ore_api::{consts::{TREASURY_ADDRESS, TREASURY_TOKENS_ADDRESS}, state::proof_pda};
 use steel::*;
 
 use crate::{
@@ -96,6 +96,7 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> In
         spl_associated_token_account::get_associated_token_address(&boost_pda.0, &ore_api::consts::MINT_ADDRESS);
     let checkpoint_pda = checkpoint_pda(boost_pda.0);
     let config_pda = config_pda();
+    let proof_pda = proof_pda(boost_pda.0);
     Instruction {
         program_id: crate::ID,
         accounts: vec![
@@ -107,9 +108,11 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> In
             AccountMeta::new_readonly(config_pda.0, false),
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new_readonly(ore_api::consts::MINT_ADDRESS, false),
+            AccountMeta::new(proof_pda.0, false),
             AccountMeta::new_readonly(system_program::ID, false),
             AccountMeta::new_readonly(spl_token::ID, false),
             AccountMeta::new_readonly(spl_associated_token_account::ID, false),
+            AccountMeta::new_readonly(sysvar::slot_hashes::ID, false),
         ],
         data: New {
             expires_at: expires_at.to_le_bytes(),

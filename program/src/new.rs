@@ -14,7 +14,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     let multiplier = u64::from_le_bytes(args.multiplier);
 
     // Load accounts.
-    let [signer_info, boost_info, boost_tokens_info, boost_rewards_info, checkpoint_info, config_info, mint_info, ore_mint_info, system_program, token_program, associated_token_program] =
+    let [signer_info, boost_info, boost_tokens_info, boost_rewards_info, checkpoint_info, config_info, mint_info, ore_mint_info, proof_info, system_program, token_program, associated_token_program, slot_hashes] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -35,9 +35,11 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
         .assert(|c| c.authority == *signer_info.key)?;
     mint_info.as_mint()?;
     ore_mint_info.has_address(&ore_api::consts::MINT_ADDRESS)?.as_mint()?;
+    proof_info.is_writable()?.is_empty()?;
     system_program.is_program(&system_program::ID)?;
     token_program.is_program(&spl_token::ID)?;
     associated_token_program.is_program(&spl_associated_token_account::ID)?;
+    slot_hashes.is_sysvar(&sysvar::slot_hashes::ID)?;
 
     // Initialize the boost account.
     create_account::<Boost>(
@@ -79,7 +81,11 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
             *signer_info.key), 
         &[
             boost_info.clone(),
+            boost_info.clone(),
             signer_info.clone(),
+            proof_info.clone(),
+            system_program.clone(),
+            slot_hashes.clone(),
         ], 
         &ore_api::ID, 
         &[BOOST, mint_info.key.as_ref()]
