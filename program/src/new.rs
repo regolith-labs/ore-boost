@@ -87,7 +87,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
             system_program.clone(),
             slot_hashes.clone(),
         ], 
-        &ore_api::ID, 
+        &ore_boost_api::ID, 
         &[BOOST, mint_info.key.as_ref()]
     )?;
 
