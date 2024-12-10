@@ -47,7 +47,8 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
                 boost_proof_info.clone(),
                 treasury_info.clone(),
                 treasury_tokens_info.clone(),
-                token_program.clone()
+                token_program.clone(),
+                ore_program.clone(),
             ], 
             &ore_boost_api::ID, 
             &[BOOST, boost.mint.as_ref()]
