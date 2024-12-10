@@ -21,8 +21,8 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
         .as_associated_token_account(boost_info.key, &ore_api::consts::MINT_ADDRESS)?;
     let checkpoint = checkpoint_info
         .as_account_mut::<Checkpoint>(&ore_boost_api::ID)?
-        .assert_mut(|c| c.boost == *boost_info.key)?
-        .assert_mut(|c| clock.unix_timestamp > c.ts + 3600)?; // checkpoint every hour
+        .assert_mut(|c| c.boost == *boost_info.key)?;
+        // .assert_mut(|c| clock.unix_timestamp > c.ts + 3600)?; // TODO checkpoint every hour
     ore_program.is_program(&ore_api::ID)?;
     token_program.is_program(&spl_token::ID)?;
 

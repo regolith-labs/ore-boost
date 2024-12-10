@@ -13,8 +13,8 @@ pub fn process_reserve(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
     };
     signer_info.is_signer()?;
     let boost = boost_info
-        .as_account_mut::<Boost>(&ore_boost_api::ID)?
-        .assert_mut(|b| clock.unix_timestamp > b.reserved_at + 600)?; // reserve every 10 minutes
+        .as_account_mut::<Boost>(&ore_boost_api::ID)?;
+        // .assert_mut(|b| clock.unix_timestamp > b.reserved_at + 60)?; // TODO 
     let leaderboard = leaderboard_info.as_account::<Leaderboard>(&ore_boost_api::ID)?;
     slot_hashes_sysvar.is_sysvar(&sysvar::slot_hashes::ID)?;
 
