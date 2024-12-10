@@ -10,7 +10,7 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
-    let boost: &mut Boost = boost_info
+    let boost = boost_info
         .as_account_mut::<Boost>(&ore_boost_api::ID)?;
     let boost_proof = boost_proof_info
         .is_writable()?
@@ -50,7 +50,7 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
                 token_program.clone()
             ], 
             &ore_boost_api::ID, 
-            &[BOOST, boost_info.key.as_ref()]
+            &[BOOST, boost.mint.as_ref()]
         )?;
     }
 
