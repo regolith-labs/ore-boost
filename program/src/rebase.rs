@@ -49,7 +49,7 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
                 treasury_tokens_info.clone(),
                 token_program.clone()
             ], 
-            &ore_api::ID, 
+            &ore_boost_api::ID, 
             &[BOOST, boost_info.key.as_ref()]
         )?;
     }
