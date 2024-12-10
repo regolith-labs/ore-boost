@@ -6,13 +6,12 @@ use steel::*;
 pub enum BoostInstruction {
     // User
     Claim = 0,
-    Close = 1,
-    Deposit = 2,
-    Open = 3,
-    Rank = 5,
-    Rebase = 6,
-    Reserve = 7,
-    Withdraw = 8,
+    Deposit = 1,
+    Open = 2,
+    Rank = 3,
+    Rebase = 4,
+    Reserve = 5,
+    Withdraw = 6,
     
     // Admin
     Initialize = 100,
@@ -32,11 +31,6 @@ impl BoostInstruction {
 pub struct Claim {
     pub amount: [u8; 8],
 }
-
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Close {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -91,7 +85,6 @@ pub struct Withdraw {
 }
 
 instruction!(BoostInstruction, Claim);
-instruction!(BoostInstruction, Close);
 instruction!(BoostInstruction, Deposit);
 instruction!(BoostInstruction, Initialize);
 instruction!(BoostInstruction, New);

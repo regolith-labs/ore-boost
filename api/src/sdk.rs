@@ -28,23 +28,6 @@ pub fn claim(signer: Pubkey, beneficiary: Pubkey, mint: Pubkey, amount: u64) -> 
     }
 }
 
-
-// Build close instruction.
-pub fn close(signer: Pubkey, mint: Pubkey) -> Instruction {
-    let boost_pda = boost_pda(mint);
-    let stake_pda = stake_pda(signer, boost_pda.0);
-    Instruction {
-        program_id: crate::ID,
-        accounts: vec![
-            AccountMeta::new(signer, true),
-            AccountMeta::new(stake_pda.0, false),
-            AccountMeta::new_readonly(system_program::ID, false),
-        ],
-        data: Close {}.to_bytes(),
-    }
-}
-
-
 // Build deposit instruction.
 pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     let boost_pda = boost_pda(mint);

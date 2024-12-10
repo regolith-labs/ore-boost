@@ -1,5 +1,4 @@
 mod claim;
-mod close;
 mod deposit;
 mod initialize;
 mod new;
@@ -12,7 +11,6 @@ mod update_boost;
 mod withdraw;
 
 use claim::*;
-use close::*;
 use deposit::*;
 use initialize::*;
 use new::*;
@@ -37,14 +35,13 @@ pub fn process_instruction(
 
     match ix {
         // User
-        BoostInstruction::Close => process_close(accounts, data)?,
-        BoostInstruction::Open => process_open(accounts, data)?,
-        BoostInstruction::Deposit => process_deposit(accounts, data)?,
-        BoostInstruction::Withdraw => process_withdraw(accounts, data)?,
-        BoostInstruction::Rank => process_rank(accounts, data)?,
-        BoostInstruction::Reserve => process_reserve(accounts, data)?,
-        BoostInstruction::Rebase => process_rebase(accounts, data)?,
         BoostInstruction::Claim => process_claim(accounts, data)?,
+        BoostInstruction::Deposit => process_deposit(accounts, data)?,
+        BoostInstruction::Open => process_open(accounts, data)?,
+        BoostInstruction::Rank => process_rank(accounts, data)?,
+        BoostInstruction::Rebase => process_rebase(accounts, data)?,
+        BoostInstruction::Reserve => process_reserve(accounts, data)?,
+        BoostInstruction::Withdraw => process_withdraw(accounts, data)?,
 
         // Admin
         BoostInstruction::Initialize => process_initialize(accounts, data)?,
