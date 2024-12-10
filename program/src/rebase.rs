@@ -65,7 +65,9 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
 
         // Update staker rewards according to commited stake weight.
         if boost.total_stake > 0 {
-            let rewards = checkpoint.total_rewards.checked_mul(stake.balance).unwrap().checked_div(boost.total_stake).unwrap();
+            let rewards = (checkpoint.total_rewards as u128)
+                .checked_mul(stake.balance as u128).unwrap()
+                .checked_div(boost.total_stake as u128).unwrap() as u64;
             stake.rewards = stake.rewards.checked_add(rewards).unwrap();
         }
 
