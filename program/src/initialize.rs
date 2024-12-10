@@ -8,10 +8,10 @@ pub fn process_initialize(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Program
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?.has_address(&INITIALIZER_ADDRESS)?;
-    // config_info
-    //     .is_writable()?
-    //     .is_empty()?
-    //     .has_seeds(&[CONFIG], &ore_boost_api::ID)?;
+    config_info
+        .is_writable()?
+        .is_empty()?
+        .has_seeds(&[CONFIG], &ore_boost_api::ID)?;
     leaderboard_info
         .is_writable()?
         .is_empty()?
@@ -19,15 +19,15 @@ pub fn process_initialize(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Program
     system_program.is_program(&system_program::ID)?;
 
     // Initialize config account.
-    // create_account::<Config>(
-    //     config_info,
-    //     system_program,
-    //     signer_info,
-    //     &ore_boost_api::ID,
-    //     &[CONFIG],
-    // )?;
-    // let config = config_info.as_account_mut::<Config>(&ore_boost_api::ID)?;
-    // config.authority = *signer_info.key;
+    create_account::<Config>(
+        config_info,
+        system_program,
+        signer_info,
+        &ore_boost_api::ID,
+        &[CONFIG],
+    )?;
+    let config = config_info.as_account_mut::<Config>(&ore_boost_api::ID)?;
+    config.authority = *signer_info.key;
 
     // Initialize leaderboard account.
     create_account::<Leaderboard>(

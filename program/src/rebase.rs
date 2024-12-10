@@ -22,7 +22,6 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
     let checkpoint = checkpoint_info
         .as_account_mut::<Checkpoint>(&ore_boost_api::ID)?
         .assert_mut(|c| c.boost == *boost_info.key)?
-        .assert_mut(|c| c.current_id < c.total_stakers)?
         .assert_mut(|c| clock.unix_timestamp > c.ts + 3600)?; // checkpoint every hour
     ore_program.is_program(&ore_api::ID)?;
     token_program.is_program(&spl_token::ID)?;
@@ -56,7 +55,7 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
     }
 
     // Process stake account if it exists.
-    if !stake_info.data_is_empty() {
+    if checkpoint.total_stakers > 0 && !stake_info.data_is_empty() {
         // Load stake account.
         let stake = stake_info
             .as_account_mut::<Stake>(&ore_boost_api::ID)?
@@ -79,7 +78,7 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
     checkpoint.current_id = checkpoint.current_id.checked_add(1).unwrap();  
 
     // Finalize the checkpoint.
-    if checkpoint.current_id == checkpoint.total_stakers {
+    if checkpoint.current_id >= checkpoint.total_stakers {
         boost.locked = 0;
         boost.total_stake = boost.total_stake.checked_add(checkpoint.total_pending_stake).unwrap();
         checkpoint.current_id = 0;
