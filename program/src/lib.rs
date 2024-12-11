@@ -1,20 +1,27 @@
-mod close;
+mod claim;
 mod deposit;
 mod initialize;
 mod new;
 mod open;
+mod rank;
+mod reserve;
+mod rebase;
 mod update_admin;
 mod update_boost;
 mod withdraw;
 
-use close::*;
+use claim::*;
 use deposit::*;
 use initialize::*;
 use new::*;
 use open::*;
+use rank::*;
+use reserve::*;
+use rebase::*;
 use update_admin::*;
 use update_boost::*;
 use withdraw::*;
+
 
 use ore_boost_api::instruction::*;
 use steel::*;
@@ -28,9 +35,12 @@ pub fn process_instruction(
 
     match ix {
         // User
-        BoostInstruction::Close => process_close(accounts, data)?,
-        BoostInstruction::Open => process_open(accounts, data)?,
+        BoostInstruction::Claim => process_claim(accounts, data)?,
         BoostInstruction::Deposit => process_deposit(accounts, data)?,
+        BoostInstruction::Open => process_open(accounts, data)?,
+        BoostInstruction::Rank => process_rank(accounts, data)?,
+        BoostInstruction::Rebase => process_rebase(accounts, data)?,
+        BoostInstruction::Reserve => process_reserve(accounts, data)?,
         BoostInstruction::Withdraw => process_withdraw(accounts, data)?,
 
         // Admin

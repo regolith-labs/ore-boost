@@ -19,6 +19,7 @@ no-entrypoint = []
 default = []
 
 [dependencies]
+ore-api.workspace = true
 ore-boost-api.workspace = true
 solana-program.workspace = true
 spl-token.workspace = true
