@@ -166,8 +166,8 @@ pub fn rebase(signer: Pubkey, mint: Pubkey, stake: Pubkey) -> Instruction {
 }
 
 
-// Build reserve instruction.
-pub fn reserve(signer: Pubkey, mint: Pubkey) -> Instruction {
+// Build rotate instruction.
+pub fn rotate(signer: Pubkey, mint: Pubkey) -> Instruction {
     let boost_pda = boost_pda(mint);
     let leaderboard = leaderboard_pda().0;
     Instruction {
@@ -178,7 +178,7 @@ pub fn reserve(signer: Pubkey, mint: Pubkey) -> Instruction {
             AccountMeta::new_readonly(leaderboard, false),
             AccountMeta::new_readonly(sysvar::slot_hashes::ID, false),
         ],
-        data: Reserve {}.to_bytes(),
+        data: Rotate {}.to_bytes(),
     }
 }
 

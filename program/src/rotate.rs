@@ -1,11 +1,11 @@
 use std::mem::size_of;
 
-use ore_boost_api::state::{Boost, Leaderboard};
+use ore_boost_api::{consts::RESERVATION_INTERVAL, state::{Boost, Leaderboard}};
 use solana_program::slot_hashes::SlotHash;
 use steel::*;
 
-/// Reserves a boost for a randomly selected miner on the leaderboard, weighted by their balance.
-pub fn process_reserve(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
+/// Rotates a boost reservation for a randomly selected miner on the leaderboard, weighted by their balance.
+pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
     // Load accounts
     let clock = Clock::get()?;
     let [signer_info, boost_info, leaderboard_info, slot_hashes_sysvar] = accounts else {
@@ -13,8 +13,8 @@ pub fn process_reserve(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
     };
     signer_info.is_signer()?;
     let boost = boost_info
-        .as_account_mut::<Boost>(&ore_boost_api::ID)?;
-        // .assert_mut(|b| clock.unix_timestamp > b.reserved_at + 60)?; // TODO 
+        .as_account_mut::<Boost>(&ore_boost_api::ID)?
+        .assert_mut(|b| clock.unix_timestamp > b.reserved_at + RESERVATION_INTERVAL)?; 
     let leaderboard = leaderboard_info.as_account::<Leaderboard>(&ore_boost_api::ID)?;
     slot_hashes_sysvar.is_sysvar(&sysvar::slot_hashes::ID)?;
 
@@ -41,7 +41,7 @@ pub fn process_reserve(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
     let proof = selected_proof.ok_or(ProgramError::InvalidAccountData)?;
 
     // Reserve the boost for the selected proof.
-    boost.proof = proof;
+    boost.reserved_for = proof;
     boost.reserved_at = clock.unix_timestamp;
 
     Ok(())

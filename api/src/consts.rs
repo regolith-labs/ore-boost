@@ -22,6 +22,12 @@ pub const LEADERBOARD: &[u8] = b"leaderboard";
 /// The seed of the checkpoint PDA.
 pub const CHECKPOINT: &[u8] = b"checkpoint";
 
+/// The time interval between checkpoints (in seconds)
+pub const CHECKPOINT_INTERVAL: i64 = 3600; // 1 hour
+
+/// The time interval between reservations (in seconds)
+pub const RESERVATION_INTERVAL: i64 = 600; // 10 minutes
+
 /// Program ID for const pda derivations
 const PROGRAM_ID: [u8; 32] = unsafe { *(&crate::id() as *const Pubkey as *const [u8; 32]) };
 

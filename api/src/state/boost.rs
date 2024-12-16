@@ -22,7 +22,7 @@ pub struct Boost {
     pub multiplier: u64,
 
     /// The miner this boost is reserved for.
-    pub proof: Pubkey,
+    pub reserved_for: Pubkey,
 
     /// The timestamp of when this boost was last reserved.
     pub reserved_at: i64,

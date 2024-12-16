@@ -26,4 +26,4 @@ pub fn process_rank(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult
     leaderboard.total_score = leaderboard.entries.iter().map(|e| e.score).sum();
 
     Ok(())
-} 
+}

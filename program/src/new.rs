@@ -54,7 +54,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     boost.expires_at = expires_at;
     boost.mint = *mint_info.key;
     boost.multiplier = multiplier;
-    boost.proof = Pubkey::default();
+    boost.reserved_for = Pubkey::default();
     boost.reserved_at = 0;
     boost.total_stake = 0;
 

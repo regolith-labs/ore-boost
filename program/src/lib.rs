@@ -4,7 +4,7 @@ mod initialize;
 mod new;
 mod open;
 mod rank;
-mod reserve;
+mod rotate;
 mod rebase;
 mod update_admin;
 mod update_boost;
@@ -16,12 +16,11 @@ use initialize::*;
 use new::*;
 use open::*;
 use rank::*;
-use reserve::*;
+use rotate::*;
 use rebase::*;
 use update_admin::*;
 use update_boost::*;
 use withdraw::*;
-
 
 use ore_boost_api::instruction::*;
 use steel::*;
@@ -40,7 +39,7 @@ pub fn process_instruction(
         BoostInstruction::Open => process_open(accounts, data)?,
         BoostInstruction::Rank => process_rank(accounts, data)?,
         BoostInstruction::Rebase => process_rebase(accounts, data)?,
-        BoostInstruction::Reserve => process_reserve(accounts, data)?,
+        BoostInstruction::Rotate => process_rotate(accounts, data)?,
         BoostInstruction::Withdraw => process_withdraw(accounts, data)?,
 
         // Admin
