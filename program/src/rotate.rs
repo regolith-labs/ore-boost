@@ -24,7 +24,7 @@ pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
     if total_balance == 0 {
         return Err(ProgramError::InvalidAccountData);
     }
-    let random_bytes = &last_hash[..8];
+    let random_bytes = &last_hash[last_hash.len() - 8..];
     sol_log(&format!("random_bytes: {:x?}", random_bytes));
     let random_number = u64::from_le_bytes(random_bytes.try_into().unwrap());
     sol_log(&format!("random_number: {}", random_number));
