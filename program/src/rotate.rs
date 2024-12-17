@@ -1,7 +1,7 @@
 use std::mem::size_of;
 
 use ore_boost_api::{consts::RESERVATION_INTERVAL, state::{Boost, Leaderboard}};
-use solana_program::slot_hashes::SlotHash;
+use solana_program::{log::sol_log, slot_hashes::SlotHash};
 use steel::*;
 
 /// Rotates a boost reservation for a randomly selected miner on the leaderboard, weighted by their balance.
@@ -25,24 +25,30 @@ pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
         return Err(ProgramError::InvalidAccountData);
     }
     let random_bytes = &last_hash[..8];
+    sol_log(&format!("random_bytes: {:x?}", random_bytes));
     let random_number = u64::from_le_bytes(random_bytes.try_into().unwrap());
+    sol_log(&format!("random_number: {}", random_number));
+    sol_log(&format!("total_balance: {}", total_balance));
     let k = random_number % total_balance;
+    sol_log(&format!("k: {}", k));
 
     // Select a proof weighted by their unclaimed ORE balance.
     let mut cumulative_score: u64 = 0;
-    let mut selected_proof = None;
     for entry in leaderboard.entries.iter() {
         cumulative_score = cumulative_score.checked_add(entry.score).unwrap();
+        sol_log(&format!("score: {}", cumulative_score));
+        
+        // Reserve the boost for the selected proof.
         if cumulative_score > k {
-            selected_proof = Some(entry.address);
+            sol_log(&format!("reservation: {}", entry.address));
+            boost.reserved_for = entry.address;
+            boost.reserved_at = clock.unix_timestamp;
             break;
         }
     }
-    let proof = selected_proof.ok_or(ProgramError::InvalidAccountData)?;
 
-    // Reserve the boost for the selected proof.
-    boost.reserved_for = proof;
-    boost.reserved_at = clock.unix_timestamp;
+    
+    
 
     Ok(())
 }
