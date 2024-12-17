@@ -63,8 +63,8 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
             .assert_mut(|s| s.boost == *boost_info.key)?
             .assert_mut(|s| s.id == checkpoint.current_id)?;
 
-        // Update staker rewards according to commited stake weight.
-        if boost.total_stake > 0 {
+        // Update staker rewards weighted by stake.
+        if boost.total_stake > 0 && checkpoint.current_id < checkpoint.total_stakers {
             let rewards = (checkpoint.total_rewards as u128)
                 .checked_mul(stake.balance as u128).unwrap()
                 .checked_div(boost.total_stake as u128).unwrap() as u64;
@@ -81,7 +81,7 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
     checkpoint.current_id = checkpoint.current_id.checked_add(1).unwrap();  
 
     // Finalize the checkpoint.
-    if checkpoint.current_id >= checkpoint.total_stakers {
+    if checkpoint.current_id >= boost.total_stakers {
         boost.locked = 0;
         boost.total_stake = boost.total_stake.checked_add(checkpoint.total_pending_stake).unwrap();
         checkpoint.current_id = 0;
