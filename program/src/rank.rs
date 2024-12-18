@@ -18,7 +18,7 @@ pub fn process_rank(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult
     } else {
         // Add miner to leaderboard.
         let proof = proof_info.as_account::<Proof>(&ore_api::ID)?;
-        let score = (proof.balance as f64).log2() as u64;
+        let score = proof.balance.ilog2() as u64;
         leaderboard.insert(*proof_info.key, score);
     }
 
