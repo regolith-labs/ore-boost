@@ -4,6 +4,9 @@ use solana_program::{pubkey, pubkey::Pubkey};
 /// The authority allowed to initialize the program.
 pub const INITIALIZER_ADDRESS: Pubkey = pubkey!("HBUh9g46wk2X89CvaNN15UmsznP59rh6od1h8JwYAopk");
 
+/// The denominator of boost multipliers for percentage calculations.
+pub const BOOST_DENOMINATOR: u64 = 1000;
+
 /// The seed of the boost PDA.
 pub const BOOST: &[u8] = b"boost";
 
@@ -12,6 +15,18 @@ pub const CONFIG: &[u8] = b"config";
 
 /// The seed of the stake PDA.
 pub const STAKE: &[u8] = b"stake";
+
+/// The seed of the leaderboard PDA.
+pub const LEADERBOARD: &[u8] = b"leaderboard";
+
+/// The seed of the checkpoint PDA.
+pub const CHECKPOINT: &[u8] = b"checkpoint";
+
+/// The time interval between checkpoints (in seconds)
+pub const CHECKPOINT_INTERVAL: i64 = 3600; // 1 hour
+
+/// The time interval between reservations (in seconds)
+pub const RESERVATION_INTERVAL: i64 = 60; // 1 minutes
 
 /// Program ID for const pda derivations
 const PROGRAM_ID: [u8; 32] = unsafe { *(&crate::id() as *const Pubkey as *const [u8; 32]) };
