@@ -3,7 +3,7 @@ use steel::*;
 
 use crate::{
     instruction::*,
-    state::{boost_pda, checkpoint_pda, config_pda, leaderboard_pda, stake_pda},
+    state::{boost_pda, checkpoint_pda, config_pda, directory_pda, stake_pda},
 };
 
 // Build claim instruction.
@@ -57,13 +57,13 @@ pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
 #[allow(deprecated)]
 pub fn initialize(signer: Pubkey) -> Instruction {
     let config_pda = config_pda();
-    let leaderboard_pda = leaderboard_pda();
+    let directory_pda = directory_pda();
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(config_pda.0, false),
-            AccountMeta::new(leaderboard_pda.0, false),
+            AccountMeta::new(directory_pda.0, false),
             AccountMeta::new_readonly(system_program::ID, false),
         ],
         data: Initialize {}
@@ -128,20 +128,6 @@ pub fn open(signer: Pubkey, payer: Pubkey, mint: Pubkey) -> Instruction {
     }
 }
 
-// Build rank instruction.
-pub fn rank(signer: Pubkey, proof: Pubkey) -> Instruction {
-    let leaderboard = leaderboard_pda().0;
-    Instruction {
-        program_id: crate::ID,
-        accounts: vec![
-            AccountMeta::new(signer, true),
-            AccountMeta::new(leaderboard, false),
-            AccountMeta::new_readonly(proof, false),
-        ],
-        data: Rank {}.to_bytes(),
-    }
-}
-
 // Build rebase instruction.
 pub fn rebase(signer: Pubkey, mint: Pubkey, stake: Pubkey) -> Instruction {
     let boost_pda = boost_pda(mint);
@@ -169,13 +155,13 @@ pub fn rebase(signer: Pubkey, mint: Pubkey, stake: Pubkey) -> Instruction {
 // Build rotate instruction.
 pub fn rotate(signer: Pubkey, mint: Pubkey) -> Instruction {
     let boost_pda = boost_pda(mint);
-    let leaderboard = leaderboard_pda().0;
+    let directory = directory_pda().0;
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(boost_pda.0, false),
-            AccountMeta::new_readonly(leaderboard, false),
+            AccountMeta::new_readonly(directory, false),
             AccountMeta::new_readonly(sysvar::slot_hashes::ID, false),
         ],
         data: Rotate {}.to_bytes(),

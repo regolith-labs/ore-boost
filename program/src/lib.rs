@@ -3,7 +3,7 @@ mod deposit;
 mod initialize;
 mod new;
 mod open;
-mod rank;
+mod register;
 mod rotate;
 mod rebase;
 mod update_admin;
@@ -15,7 +15,7 @@ use deposit::*;
 use initialize::*;
 use new::*;
 use open::*;
-use rank::*;
+use register::*;
 use rotate::*;
 use rebase::*;
 use update_admin::*;
@@ -37,8 +37,8 @@ pub fn process_instruction(
         BoostInstruction::Claim => process_claim(accounts, data)?,
         BoostInstruction::Deposit => process_deposit(accounts, data)?,
         BoostInstruction::Open => process_open(accounts, data)?,
-        BoostInstruction::Rank => process_rank(accounts, data)?,
         BoostInstruction::Rebase => process_rebase(accounts, data)?,
+        BoostInstruction::Register => process_register(accounts, data)?,
         BoostInstruction::Rotate => process_rotate(accounts, data)?,
         BoostInstruction::Withdraw => process_withdraw(accounts, data)?,
 

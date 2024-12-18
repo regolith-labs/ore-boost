@@ -8,10 +8,10 @@ pub enum BoostInstruction {
     Claim = 0,
     Deposit = 1,
     Open = 2,
-    Rank = 3,
     Rebase = 4,
-    Rotate = 5,
-    Withdraw = 6,
+    Register = 5,
+    Rotate = 6,
+    Withdraw = 7,
     
     // Admin
     Initialize = 100,
@@ -55,11 +55,11 @@ pub struct Open {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Rank {}
+pub struct Rebase {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Rebase {}
+pub struct Register {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -89,8 +89,8 @@ instruction!(BoostInstruction, Deposit);
 instruction!(BoostInstruction, Initialize);
 instruction!(BoostInstruction, New);
 instruction!(BoostInstruction, Open);
-instruction!(BoostInstruction, Rank);
 instruction!(BoostInstruction, Rebase);
+instruction!(BoostInstruction, Register);
 instruction!(BoostInstruction, Rotate);
 instruction!(BoostInstruction, UpdateAdmin);
 instruction!(BoostInstruction, UpdateBoost);

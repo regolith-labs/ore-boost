@@ -18,14 +18,8 @@ pub struct Boost {
     /// The mint address of the token associated with this boost.
     pub mint: Pubkey,
 
-    /// The multiplier allocated to this token.
+    /// The multiplier allocated to this boost.
     pub multiplier: u64,
-
-    /// The miner this boost is reserved for.
-    pub reserved_for: Pubkey,
-
-    /// The timestamp of when this boost was last reserved.
-    pub reserved_at: i64,
     
     // The total amount of stake in this boost.
     pub total_stake: u64,
