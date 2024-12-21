@@ -9,7 +9,7 @@ pub struct Reservation {
     /// The bump used for signing.
     pub authority: Pubkey,
 
-    /// The boost this reservation is associated with.
+    /// The boost this miner is allowed to use.
     pub boost: Pubkey,
 
     /// A timestamp to ensure only one rotation is used per solution.

@@ -3,8 +3,26 @@ use steel::*;
 
 use crate::{
     instruction::*,
-    state::{boost_pda, checkpoint_pda, config_pda, directory_pda, stake_pda},
+    state::{boost_pda, checkpoint_pda, config_pda, directory_pda, reservation_pda, stake_pda},
 };
+
+
+
+// Build activate instruction.
+pub fn activate(signer: Pubkey, mint: Pubkey) -> Instruction {
+    let boost_pda = boost_pda(mint);
+    let directory_pda = directory_pda();
+    Instruction {
+        program_id: crate::ID,
+        accounts: vec![
+            AccountMeta::new(signer, true),
+            AccountMeta::new(boost_pda.0, false),
+            AccountMeta::new(directory_pda.0, false),
+            AccountMeta::new_readonly(config_pda().0, false),
+        ],
+        data: Activate {}.to_bytes(),
+    }
+}
 
 // Build claim instruction.
 pub fn claim(signer: Pubkey, beneficiary: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
@@ -25,6 +43,22 @@ pub fn claim(signer: Pubkey, beneficiary: Pubkey, mint: Pubkey, amount: u64) -> 
             amount: amount.to_le_bytes(),
         }
         .to_bytes(),
+    }
+}
+
+// Build deactivate instruction.
+pub fn deactivate(signer: Pubkey, mint: Pubkey) -> Instruction {
+    let boost_pda = boost_pda(mint);
+    let directory_pda = directory_pda();
+    Instruction {
+        program_id: crate::ID,
+        accounts: vec![
+            AccountMeta::new(signer, true),
+            AccountMeta::new(boost_pda.0, false),
+            AccountMeta::new(directory_pda.0, false),
+            AccountMeta::new_readonly(config_pda().0, false),
+        ],
+        data: Deactivate {}.to_bytes(),
     }
 }
 
@@ -54,7 +88,6 @@ pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
 }
 
 // Build initialize instruction.
-#[allow(deprecated)]
 pub fn initialize(signer: Pubkey) -> Instruction {
     let config_pda = config_pda();
     let directory_pda = directory_pda();
@@ -72,7 +105,6 @@ pub fn initialize(signer: Pubkey) -> Instruction {
 }
 
 // Build new instruction.
-#[allow(deprecated)]
 pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> Instruction {
     let boost_pda = boost_pda(mint);
     let boost_tokens_address =
@@ -109,7 +141,6 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> In
 }
 
 // Build open instruction.
-#[allow(deprecated)]
 pub fn open(signer: Pubkey, payer: Pubkey, mint: Pubkey) -> Instruction {
     let boost_pda = boost_pda(mint);
     let stake_pda = stake_pda(signer, boost_pda.0);
@@ -153,15 +184,17 @@ pub fn rebase(signer: Pubkey, mint: Pubkey, stake: Pubkey) -> Instruction {
 
 
 // Build rotate instruction.
-pub fn rotate(signer: Pubkey, mint: Pubkey) -> Instruction {
-    let boost_pda = boost_pda(mint);
-    let directory = directory_pda().0;
+pub fn rotate(signer: Pubkey, proof: Pubkey) -> Instruction {
+    let directory_pda = directory_pda();
+    let reservation_pda = reservation_pda(proof);
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
-            AccountMeta::new(boost_pda.0, false),
-            AccountMeta::new_readonly(directory, false),
+            AccountMeta::new_readonly(directory_pda.0, false),
+            AccountMeta::new_readonly(proof, false),
+            AccountMeta::new(reservation_pda.0, false),
+            AccountMeta::new_readonly(TREASURY_TOKENS_ADDRESS, false),
             AccountMeta::new_readonly(sysvar::slot_hashes::ID, false),
         ],
         data: Rotate {}.to_bytes(),

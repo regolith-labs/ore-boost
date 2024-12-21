@@ -28,9 +28,6 @@ pub const RESERVATION: &[u8] = b"reservation";
 /// The time interval between checkpoints (in seconds)
 pub const CHECKPOINT_INTERVAL: i64 = 3600; // 1 hour
 
-/// The time interval between reservations (in seconds)
-pub const RESERVATION_INTERVAL: i64 = 60; // 1 minutes
-
 /// Program ID for const pda derivations
 const PROGRAM_ID: [u8; 32] = unsafe { *(&crate::id() as *const Pubkey as *const [u8; 32]) };
 

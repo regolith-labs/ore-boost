@@ -1,3 +1,5 @@
+mod activate;
+mod deactivate;
 mod claim;
 mod deposit;
 mod initialize;
@@ -10,6 +12,8 @@ mod update_admin;
 mod update_boost;
 mod withdraw;
 
+use activate::*;
+use deactivate::*;
 use claim::*;
 use deposit::*;
 use initialize::*;
@@ -43,6 +47,8 @@ pub fn process_instruction(
         BoostInstruction::Withdraw => process_withdraw(accounts, data)?,
 
         // Admin
+        BoostInstruction::Activate => process_activate(accounts, data)?,
+        BoostInstruction::Deactivate => process_deactivate(accounts, data)?,
         BoostInstruction::Initialize => process_initialize(accounts, data)?,
         BoostInstruction::New => process_new(accounts, data)?,
         BoostInstruction::UpdateAdmin => process_update_admin(accounts, data)?,
