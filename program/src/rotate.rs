@@ -44,14 +44,16 @@ pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
     let mut random_number = u64::from_le_bytes(noise.try_into().unwrap()) as usize;
 
     // For each boost, try to assign it
-    for _i in 0..5 {
-        let boost = directory.boosts[random_number % directory.len];
-        let noise = &hashv(&[&random_number.to_le_bytes()]).to_bytes()[..8];
-        random_number = u64::from_le_bytes(noise.try_into().unwrap()) as usize;
-        let k = random_number as u64 % treasury_tokens.amount;
-        if k < proof.balance {
-            reservation.boost = boost;
-            break;
+    if directory.len > 0 {
+        for _i in 0..5 {
+            let boost = directory.boosts[random_number % directory.len];
+            let noise = &hashv(&[&random_number.to_le_bytes()]).to_bytes()[..8];
+            random_number = u64::from_le_bytes(noise.try_into().unwrap()) as usize;
+            let k = random_number as u64 % treasury_tokens.amount;
+            if k < proof.balance {
+                reservation.boost = boost;
+                break;
+            }
         }
     }
 
