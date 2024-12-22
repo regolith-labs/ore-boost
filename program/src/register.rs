@@ -5,10 +5,11 @@ use steel::*;
 /// Registers a a miner
 pub fn process_register(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
     // Load accounts
-    let [signer_info, proof_info, reservation_info, system_program] = accounts else {
+    let [signer_info, payer_info, proof_info, reservation_info, system_program] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
+    payer_info.is_signer()?;
     let proof = proof_info
         .as_account::<Proof>(&ore_api::ID)?
         .assert(|p| p.miner == *signer_info.key)?;
@@ -22,7 +23,7 @@ pub fn process_register(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRe
     create_account::<Reservation>(
         reservation_info,
         system_program,
-        signer_info,
+        payer_info,
         &ore_boost_api::ID,
         &[RESERVATION, proof_info.key.as_ref()],
     )?;

@@ -182,6 +182,21 @@ pub fn rebase(signer: Pubkey, mint: Pubkey, stake: Pubkey) -> Instruction {
     }
 }
 
+// Build register instruction.
+pub fn register(signer: Pubkey, payer: Pubkey, proof: Pubkey) -> Instruction {
+    let reservation_pda = reservation_pda(proof);
+    Instruction {
+        program_id: crate::ID,
+        accounts: vec![
+            AccountMeta::new(signer, true),
+            AccountMeta::new(payer, true),
+            AccountMeta::new_readonly(proof, false),
+            AccountMeta::new(reservation_pda.0, false),
+            AccountMeta::new_readonly(system_program::ID, false),
+        ],
+        data: Register {}.to_bytes(),
+    }
+}
 
 // Build rotate instruction.
 pub fn rotate(signer: Pubkey, proof: Pubkey) -> Instruction {
