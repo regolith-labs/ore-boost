@@ -123,6 +123,7 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> In
             AccountMeta::new(boost_rewards_address, false),
             AccountMeta::new(checkpoint_pda.0, false),
             AccountMeta::new_readonly(config_pda.0, false),
+            AccountMeta::new(directory_pda().0, false),
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new_readonly(ore_api::consts::MINT_ADDRESS, false),
             AccountMeta::new(proof_pda.0, false),
