@@ -1,20 +1,9 @@
 use std::mem::size_of;
 
 use ore_api::{consts::{MINT_ADDRESS, TREASURY_ADDRESS}, state::Proof};
-use ore_boost_api::state::{Directory, Reservation};
+use ore_boost_api::{consts::BOOST_RESERVATION_SCALAR, state::{Directory, Reservation}};
 use solana_program::{keccak::hashv, slot_hashes::SlotHash};
 use steel::*;
-
-// B boosts
-// M miners (active)
-// T treasury tokens
-// R proof balance of a given miner
-
-// Probably that a miner gets a boost.
-// p(boost) = (R / T) * B
-
-// Probably that a boost has at least one miner.
-// p(miner) = SUM[0..M] (R / T) 
 
 /// Rotates a boost reservation for a randomly selected miner on the directory, weighted by their balance.
 pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
@@ -43,9 +32,9 @@ pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
     let noise = &last_hash[last_hash.len() - 8..];
     let mut random_number = u64::from_le_bytes(noise.try_into().unwrap()) as usize;
 
-    // For each boost, try to assign it
+    // For each boost, try to reserve it
     if directory.len > 0 {
-        for _i in 0..5 {
+        for _ in 0..BOOST_RESERVATION_SCALAR {
             let boost = directory.boosts[random_number % directory.len];
             let noise = &hashv(&[&random_number.to_le_bytes()]).to_bytes()[..8];
             random_number = u64::from_le_bytes(noise.try_into().unwrap()) as usize;
