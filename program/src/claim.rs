@@ -2,7 +2,7 @@ use ore_boost_api::instruction::Claim;
 use ore_boost_api::state::{Boost, Stake};
 use steel::*;
 
-/// Claim staking rewards.
+/// Claim distributes rewards to a staker.
 pub fn process_claim(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     // Parse args.
     let args = Claim::try_from_bytes(data)?;

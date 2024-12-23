@@ -2,7 +2,7 @@ use ore_api::state::Proof;
 use ore_boost_api::{consts::{BOOST, CHECKPOINT_INTERVAL}, state::{Boost, Checkpoint, Stake}};
 use steel::*;
 
-/// Rebases ...
+/// Rebase checkpoints a stake account, committing pending stake, and updating claimable rewards.
 pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
     // Load accounts
     let clock = Clock::get()?;
@@ -74,7 +74,7 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
         // Commit pending stake.
         checkpoint.total_pending_stake = checkpoint.total_pending_stake.checked_add(stake.pending_balance).unwrap();
         stake.balance = stake.balance.checked_add(stake.pending_balance).unwrap();
-        stake.pending_balance = 0;   
+        stake.pending_balance = 0;
     }
 
     // Increment the current id.

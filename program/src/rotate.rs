@@ -5,7 +5,7 @@ use ore_boost_api::{consts::BOOST_RESERVATION_SCALAR, state::{Directory, Reserva
 use solana_program::{keccak::hashv, slot_hashes::SlotHash};
 use steel::*;
 
-/// Rotates a boost reservation for a randomly selected miner on the directory, weighted by their balance.
+/// Rotates a reservation to a randomly selected boost in the directory.
 pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
     // Load accounts
     let [signer_info, directory_info, proof_info, reservation_info, treasury_token_info, slot_hashes_sysvar] = accounts else {

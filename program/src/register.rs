@@ -2,7 +2,7 @@ use ore_api::state::Proof;
 use ore_boost_api::{consts::RESERVATION, state::Reservation};
 use steel::*;
 
-/// Registers a a miner
+/// Registers a reservation account for a miner.
 pub fn process_register(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
     // Load accounts
     let [signer_info, payer_info, proof_info, reservation_info, system_program] = accounts else {
