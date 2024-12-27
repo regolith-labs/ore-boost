@@ -1,14 +1,12 @@
-use std::mem::size_of;
-
 use ore_api::{consts::{MINT_ADDRESS, TREASURY_ADDRESS}, state::Proof};
 use ore_boost_api::{consts::BOOST_RESERVATION_SCALAR, state::{Directory, Reservation}};
-use solana_program::{keccak::hashv, slot_hashes::SlotHash};
+use solana_program::keccak::hashv;
 use steel::*;
 
 /// Rotates a reservation to a randomly selected boost in the directory.
 pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
     // Load accounts
-    let [signer_info, directory_info, proof_info, reservation_info, treasury_token_info, slot_hashes_sysvar] = accounts else {
+    let [signer_info, directory_info, proof_info, reservation_info, treasury_token_info] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
@@ -21,18 +19,20 @@ pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
         .assert_mut(|r| r.authority == *proof_info.key)?
         .assert_mut(|r| r.ts < proof.last_hash_at)?;
     let treasury_tokens = treasury_token_info.as_associated_token_account(&TREASURY_ADDRESS, &MINT_ADDRESS)?;
-    slot_hashes_sysvar.is_sysvar(&sysvar::slot_hashes::ID)?;
 
     // Reset the reservation
     reservation.boost = Pubkey::default();
     reservation.ts = proof.last_hash_at;
 
     // Sample random number
-    let last_hash = &slot_hashes_sysvar.data.borrow()[0..size_of::<SlotHash>()];
-    let noise = &last_hash[last_hash.len() - 8..];
+    let noise = &proof.challenge[proof.challenge.len() - 8..];
     let mut random_number = u64::from_le_bytes(noise.try_into().unwrap()) as usize;
 
-    // For each boost, try to reserve it
+    // Try to reserve a boost. 
+    // 
+    // Each iteration through the loop is a roll of the dice to get a boost. The probability that 
+    // a roll of the dice succeeds in reserving a is proportional to the miners unclaimed ORE 
+    // relative to all the unclaimed ORE in the treasury.
     if directory.len > 0 {
         for _ in 0..BOOST_RESERVATION_SCALAR {
             let boost = directory.boosts[random_number % directory.len];

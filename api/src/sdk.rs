@@ -211,7 +211,6 @@ pub fn rotate(signer: Pubkey, proof: Pubkey) -> Instruction {
             AccountMeta::new_readonly(proof, false),
             AccountMeta::new(reservation_pda.0, false),
             AccountMeta::new_readonly(TREASURY_TOKENS_ADDRESS, false),
-            AccountMeta::new_readonly(sysvar::slot_hashes::ID, false),
         ],
         data: Rotate {}.to_bytes(),
     }

@@ -8,7 +8,7 @@ pub struct Directory {
     /// The list of all boosts.
     pub boosts: [Pubkey; 256],
 
-    /// The number of currently stored
+    /// The number of boosts currently active
     pub len: usize,
 }
 

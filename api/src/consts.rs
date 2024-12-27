@@ -7,7 +7,7 @@ pub const INITIALIZER_ADDRESS: Pubkey = pubkey!("HBUh9g46wk2X89CvaNN15UmsznP59rh
 /// The denominator of boost multipliers for percentage calculations.
 pub const BOOST_DENOMINATOR: u64 = 1000;
 
-/// The number of times we sample boosts and try to reserve one for a miner.
+/// The number of attempts a miner gets to reserve a boost multiplier.
 pub const BOOST_RESERVATION_SCALAR: u64 = 5;
 
 /// The seed of the boost PDA.
