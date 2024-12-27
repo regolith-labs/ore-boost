@@ -1,4 +1,4 @@
-use ore_api::{consts::{MINT_ADDRESS, TREASURY_ADDRESS, TREASURY_TOKENS_ADDRESS}, state::proof_pda};
+use ore_api::{consts::{TREASURY_ADDRESS, TREASURY_TOKENS_ADDRESS}, state::proof_pda};
 use steel::*;
 
 use crate::{
