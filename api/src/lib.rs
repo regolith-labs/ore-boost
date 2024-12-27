@@ -14,4 +14,4 @@ pub mod prelude {
 
 use steel::*;
 
-declare_id!("booSTBGJ6GD1gRdUAirEyRLqdET8GDup9VQJ9pXhppK");
+declare_id!("AGVYohsHF3hAofiBMjMBh7gt9rXUVXjtCsVZnoCEKN4M");
