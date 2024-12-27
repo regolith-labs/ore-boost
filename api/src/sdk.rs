@@ -1,4 +1,4 @@
-use ore_api::{consts::{TREASURY_ADDRESS, TREASURY_TOKENS_ADDRESS}, state::proof_pda};
+use ore_api::{consts::{MINT_ADDRESS, TREASURY_ADDRESS, TREASURY_TOKENS_ADDRESS}, state::proof_pda};
 use steel::*;
 
 use crate::{
@@ -27,7 +27,7 @@ pub fn activate(signer: Pubkey, mint: Pubkey) -> Instruction {
 // Build claim instruction.
 pub fn claim(signer: Pubkey, beneficiary: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     let boost_pda = boost_pda(mint);
-    let boost_rewards_address = spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
+    let boost_rewards_address = spl_associated_token_account::get_associated_token_address(&boost_pda.0, &ore_api::consts::MINT_ADDRESS);
     let stake_pda = stake_pda(signer, boost_pda.0);
     Instruction {
         program_id: crate::ID,

@@ -28,7 +28,8 @@ pub fn process_claim(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult
     let stake = stake_info
         .as_account_mut::<Stake>(&ore_boost_api::ID)?
         .assert_mut(|s| s.authority == *signer_info.key)?
-        .assert_mut(|s| s.boost == *boost_info.key)?;
+        .assert_mut(|s| s.boost == *boost_info.key)?
+        .assert_mut(|s| s.rewards >= amount)?;
     token_program.is_program(&spl_token::ID)?;
 
     // Update rewards.
