@@ -39,3 +39,5 @@ steel = { features = ["spl"], version = "2.0" }
 thiserror = "1.0.57"
 tokio = "1.35"
 
+[patch.crates-io]
+ore-api = { path = "../ore/api" }
