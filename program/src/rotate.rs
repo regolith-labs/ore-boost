@@ -25,7 +25,7 @@ pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
     reservation.ts = proof.last_hash_at;
 
     // Sample random number
-    let noise = &proof.challenge[proof.challenge.len() - 8..];
+    let noise = &reservation.noise[..8];
     let mut random_number = u64::from_le_bytes(noise.try_into().unwrap()) as usize;
 
     // Try to reserve a boost. 
@@ -45,6 +45,9 @@ pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
             }
         }
     }
+
+    // Update the noise
+    reservation.noise = hashv(&[&reservation.noise]).0;
 
     Ok(())
 }

@@ -12,6 +12,9 @@ pub struct Reservation {
     /// The boost this miner is allowed to use.
     pub boost: Pubkey,
 
+    /// Random hash used to sample noise for the boost rotations.
+    pub noise: [u8; 32],
+
     /// A timestamp to ensure only one rotation is executed per solution.
     pub ts: i64,
 }

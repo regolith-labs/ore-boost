@@ -1,5 +1,6 @@
 use ore_api::state::Proof;
 use ore_boost_api::{consts::RESERVATION, state::Reservation};
+use solana_program::keccak::hashv;
 use steel::*;
 
 /// Registers a reservation account for a miner.
@@ -30,6 +31,7 @@ pub fn process_register(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRe
     let reservation = reservation_info.as_account_mut::<Reservation>(&ore_boost_api::ID)?;
     reservation.authority = *proof_info.key;
     reservation.boost = Pubkey::default();
+    reservation.noise = hashv(&[proof_info.key.as_ref()]).0;
     reservation.ts = proof.last_hash_at;
 
     Ok(())
