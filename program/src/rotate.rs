@@ -1,6 +1,6 @@
 use ore_api::{consts::{MINT_ADDRESS, TREASURY_ADDRESS}, state::Proof};
 use ore_boost_api::{consts::BOOST_RESERVATION_SCALAR, state::{Directory, Reservation}};
-use solana_program::keccak::hashv;
+use solana_program::{keccak::hashv, log::sol_log};
 use steel::*;
 
 /// Rotates a reservation to a randomly selected boost in the directory.
@@ -48,6 +48,8 @@ pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
 
     // Update the noise
     reservation.noise = hashv(&[&reservation.noise]).0;
+
+    sol_log(&format!("Boost: {:?}", reservation.boost));
 
     Ok(())
 }
