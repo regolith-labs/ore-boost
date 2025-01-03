@@ -3,7 +3,7 @@ use ore_boost_api::{
     instruction::New,
     state::{Boost, Checkpoint, Config, Directory},
 };
-use solana_program::system_program;
+use solana_program::{log::sol_log, system_program};
 use steel::*;
 
 /// New creates a new boost.
@@ -19,32 +19,45 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
+    sol_log("A");
     signer_info.is_signer()?;
+    sol_log("B");
     boost_info
         .is_writable()?
         .is_empty()?
         .has_seeds(&[BOOST, mint_info.key.as_ref()], &ore_boost_api::ID)?;
+    sol_log("C");
     boost_tokens_info.is_writable()?.is_empty()?;
+    sol_log("D");
     boost_rewards_info.is_writable()?.is_empty()?;
+    sol_log("E");
     checkpoint_info
         .is_writable()?
         .is_empty()?
         .has_seeds(&[CHECKPOINT, boost_info.key.as_ref()], &ore_boost_api::ID)?;
+    sol_log("F");
     config_info
         .as_account::<Config>(&ore_boost_api::ID)?
         .assert(|c| c.authority == *signer_info.key)?;
+    sol_log("G");
     let directory = directory_info
         .as_account_mut::<Directory>(&ore_boost_api::ID)?
         .assert_mut(|d| d.len < 256)?;
+    sol_log("H");
     mint_info.as_mint()?;
+    sol_log("I");
     ore_mint_info.has_address(&ore_api::consts::MINT_ADDRESS)?.as_mint()?;
+    sol_log("J");
     proof_info.is_writable()?.is_empty()?;
+    sol_log("K");
     ore_program.is_program(&ore_api::ID)?;
+    sol_log("L");
     system_program.is_program(&system_program::ID)?;
     token_program.is_program(&spl_token::ID)?;
     associated_token_program.is_program(&spl_associated_token_account::ID)?;
     slot_hashes.is_sysvar(&sysvar::slot_hashes::ID)?;
-
+    sol_log("M");
+    
     // Add boost to directory.
     directory.boosts[directory.len] = *boost_info.key;
     directory.len += 1;
