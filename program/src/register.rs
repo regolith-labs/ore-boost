@@ -1,6 +1,6 @@
 use ore_api::state::Proof;
 use ore_boost_api::{consts::RESERVATION, state::Reservation};
-use solana_program::{keccak::hashv, log::sol_log};
+use solana_program::keccak::hashv;
 use steel::*;
 
 /// Registers a reservation account for a miner.
