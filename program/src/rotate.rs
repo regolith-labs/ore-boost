@@ -1,21 +1,18 @@
-use std::mem::size_of;
-
 use ore_api::{
     consts::{MINT_ADDRESS, TREASURY_ADDRESS},
     state::Proof,
 };
 use ore_boost_api::{
-    consts::BOOST_RESERVATION_SCALAR,
+    consts::ROTATION_SAMPLE_COUNT,
     state::{Directory, Reservation},
 };
-use solana_program::{keccak::hashv, log, slot_hashes::SlotHash};
+use solana_program::{keccak::hashv, log::sol_log};
 use steel::*;
 
 /// Rotates a reservation to a randomly selected boost in the directory.
 pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
     // Load accounts
-    let [signer_info, directory_info, proof_info, reservation_info, treasury_token_info, slot_hashes_sysvar] =
-        accounts
+    let [signer_info, directory_info, proof_info, reservation_info, treasury_token_info] = accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
@@ -30,39 +27,37 @@ pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
         .assert_mut(|r| r.ts < proof.last_hash_at)?;
     let treasury_tokens =
         treasury_token_info.as_associated_token_account(&TREASURY_ADDRESS, &MINT_ADDRESS)?;
-    slot_hashes_sysvar.is_sysvar(&sysvar::slot_hashes::ID)?;
 
     // Reset the reservation
     reservation.boost = Pubkey::default();
     reservation.ts = proof.last_hash_at;
 
     // Sample random number
-    let last_hash = &slot_hashes_sysvar.data.borrow()[0..size_of::<SlotHash>()];
-    let noise = &last_hash[last_hash.len() - 8..];
-    log::sol_log(format!("noise: {:?}", noise).as_str());
+    let noise = &reservation.noise[..8];
     let mut random_number = u64::from_le_bytes(noise.try_into().unwrap()) as usize;
-    log::sol_log(format!("random number: {:?}", random_number).as_str());
 
-    // For each boost, try to reserve it
+    // Try to reserve a boost.
+    //
+    // Each iteration through the loop is a roll of the dice to get a boost. The probability that
+    // any given sample succeeds in getting a boost is proportional to the miner's unclaimed ORE
+    // relative to all the unclaimed ORE in the treasury. The multiplier reservered is
+    // chosen uniformly amongst the set of all active multipliers.
     if directory.len > 0 {
-        for roll in 0..BOOST_RESERVATION_SCALAR {
-            log::sol_log(format!("roll: {:?}", roll).as_str());
+        for i in 0..ROTATION_SAMPLE_COUNT {
             let boost = directory.boosts[random_number % directory.len];
             let noise = &hashv(&[&random_number.to_le_bytes()]).to_bytes()[..8];
-            log::sol_log(format!("noise: {:?}", noise).as_str());
             random_number = u64::from_le_bytes(noise.try_into().unwrap()) as usize;
-            log::sol_log(format!("random number: {:?}", random_number).as_str());
             let k = random_number as u64 % treasury_tokens.amount;
-            log::sol_log(format!("k: {:?}", k).as_str());
             if k < proof.balance {
-                log::sol_log(format!("assigned: {:?}", boost).as_str());
                 reservation.boost = boost;
+                sol_log(&format!("Boost: {:?} Attempt: {}", reservation.boost, i));
                 break;
-            } else {
-                log::sol_log("next");
             }
         }
     }
+
+    // Update the noise
+    reservation.noise = hashv(&[&reservation.noise]).0;
 
     Ok(())
 }
