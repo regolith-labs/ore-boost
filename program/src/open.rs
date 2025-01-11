@@ -36,10 +36,10 @@ pub fn process_open(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult
     let stake = stake_info.as_account_mut::<Stake>(&ore_boost_api::ID)?;
     stake.authority = *signer_info.key;
     stake.balance = 0;
+    stake.balance_pending = 0;
     stake.boost = *boost_info.key;
     stake.id = boost.total_stakers;
     stake.last_deposit_at = clock.unix_timestamp;
-    stake.pending_balance = 0;
 
     // Increment the total number of stakers.
     boost.total_stakers = boost.total_stakers.checked_add(1).unwrap();

@@ -12,8 +12,8 @@ pub struct Checkpoint {
     /// The id of the next staker to be processed.
     pub current_id: u64,
 
-    /// The total amount of pending stake in this checkpoint.
-    pub total_pending_stake: u64,
+    /// The total amount of pending deposits in this checkpoint.
+    pub total_pending_deposits: u64,
 
     /// The number of total stakers in this checkpoint.
     pub total_stakers: u64,

@@ -12,6 +12,9 @@ pub struct Stake {
     /// The balance of this stake account.
     pub balance: u64,
 
+    /// The amount of uncommitted stake in this account.
+    pub balance_pending: u64,
+
     /// The boost this stake account is associated with.
     pub boost: Pubkey,
 
@@ -21,10 +24,7 @@ pub struct Stake {
     /// The timestamp of the last time stake was added to this account.
     pub last_deposit_at: i64,
 
-    /// The amount of uncommitted stake in this account.
-    pub pending_balance: u64,
-
-    /// The amount of yield claimable by this staker.
+    /// The amount of rewards claimable by this staker.
     pub rewards: u64
 }
 

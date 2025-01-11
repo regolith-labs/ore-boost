@@ -21,8 +21,8 @@ pub struct Boost {
     /// The multiplier allocated to this boost.
     pub multiplier: u64,
     
-    // The total amount of stake in this boost.
-    pub total_stake: u64,
+    // The total amount of stake deposited in this boost.
+    pub total_deposits: u64,
 
     /// The number of stakers in this boost.
     pub total_stakers: u64,

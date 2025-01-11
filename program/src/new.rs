@@ -14,7 +14,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     let multiplier = u64::from_le_bytes(args.multiplier);
 
     // Load accounts.
-    let [signer_info, boost_info, boost_tokens_info, boost_rewards_info, checkpoint_info, config_info, directory_info, mint_info, ore_mint_info, proof_info, ore_program, system_program, token_program, associated_token_program, slot_hashes] =
+    let [signer_info, boost_info, boost_deposits_info, boost_rewards_info, checkpoint_info, config_info, directory_info, mint_info, ore_mint_info, proof_info, ore_program, system_program, token_program, associated_token_program, slot_hashes] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -24,7 +24,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
         .is_writable()?
         .is_empty()?
         .has_seeds(&[BOOST, mint_info.key.as_ref()], &ore_boost_api::ID)?;
-    boost_tokens_info.is_writable()?.is_empty()?;
+    boost_deposits_info.is_writable()?.is_empty()?;
     boost_rewards_info.is_writable()?.is_empty()?;
     checkpoint_info
         .is_writable()?
@@ -61,7 +61,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     boost.expires_at = expires_at;
     boost.mint = *mint_info.key;
     boost.multiplier = multiplier;
-    boost.total_stake = 0;
+    boost.total_deposits = 0;
 
     // Initialize checkpoint account.
     create_account::<Checkpoint>(
@@ -74,7 +74,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     let checkpoint = checkpoint_info.as_account_mut::<Checkpoint>(&ore_boost_api::ID)?;
     checkpoint.boost = *boost_info.key;
     checkpoint.current_id = 0;
-    checkpoint.total_pending_stake = 0;
+    checkpoint.total_pending_deposits = 0;
     checkpoint.total_rewards = 0;
     checkpoint.total_stakers = 0;
     checkpoint.ts = 0;
@@ -102,7 +102,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     create_associated_token_account(
         signer_info,
         boost_info,
-        boost_tokens_info,
+        boost_deposits_info,
         mint_info,
         system_program,
         token_program,
@@ -110,15 +110,20 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     )?;
 
     // Create token account to accumulate staking rewards.
-    create_associated_token_account(
-        signer_info,
-        boost_info,
-        boost_rewards_info,
-        ore_mint_info,
-        system_program,
-        token_program,
-        associated_token_program,
-    )?;
-    
+    // 
+    // Note: The same token account is reused for both deposits and rewards if the mint is the ORE token.
+    // This is because you cannot create two associated token accounts for the same mint.
+    if mint_info.key != ore_mint_info.key {
+        create_associated_token_account(
+            signer_info,
+            boost_info,
+            boost_rewards_info,
+            ore_mint_info,
+            system_program,
+            token_program,
+            associated_token_program,
+        )?;
+    }
+
     Ok(())
 }

@@ -65,7 +65,7 @@ pub fn deactivate(signer: Pubkey, mint: Pubkey) -> Instruction {
 // Build deposit instruction.
 pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     let boost_pda = boost_pda(mint);
-    let boost_tokens_address =
+    let boost_deposits_address =
         spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
     let sender_address = spl_associated_token_account::get_associated_token_address(&signer, &mint);
     let stake_pda = stake_pda(signer, boost_pda.0);
@@ -74,7 +74,7 @@ pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(boost_pda.0, false),
-            AccountMeta::new(boost_tokens_address, false),
+            AccountMeta::new(boost_deposits_address, false),
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new(sender_address, false),
             AccountMeta::new(stake_pda.0, false),
@@ -107,7 +107,7 @@ pub fn initialize(signer: Pubkey) -> Instruction {
 // Build new instruction.
 pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> Instruction {
     let boost_pda = boost_pda(mint);
-    let boost_tokens_address =
+    let boost_deposits_address =
         spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
     let boost_rewards_address =
         spl_associated_token_account::get_associated_token_address(&boost_pda.0, &ore_api::consts::MINT_ADDRESS);
@@ -119,7 +119,7 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> In
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(boost_pda.0, false),
-            AccountMeta::new(boost_tokens_address, false),
+            AccountMeta::new(boost_deposits_address, false),
             AccountMeta::new(boost_rewards_address, false),
             AccountMeta::new(checkpoint_pda.0, false),
             AccountMeta::new_readonly(config_pda.0, false),
@@ -241,7 +241,7 @@ pub fn update_boost(
 // Build withdraw instruction.
 pub fn withdraw(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     let boost_pda = boost_pda(mint);
-    let boost_tokens_address =
+    let boost_deposits_address =
         spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
     let beneficiary_address =
         spl_associated_token_account::get_associated_token_address(&signer, &mint);
@@ -252,7 +252,7 @@ pub fn withdraw(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
             AccountMeta::new(signer, true),
             AccountMeta::new(beneficiary_address, false),
             AccountMeta::new(boost_pda.0, false),
-            AccountMeta::new(boost_tokens_address, false),
+            AccountMeta::new(boost_deposits_address, false),
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new(stake_pda.0, false),
             AccountMeta::new_readonly(spl_token::ID, false),

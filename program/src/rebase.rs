@@ -64,17 +64,17 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
             .assert_mut(|s| s.id == checkpoint.current_id)?;
 
         // Update staker rewards weighted by stake.
-        if boost.total_stake > 0 && checkpoint.current_id < checkpoint.total_stakers {
-            let rewards = (checkpoint.total_rewards as u128)
+        if boost.total_deposits > 0 && checkpoint.current_id < checkpoint.total_stakers {
+            let rewards: u64 = (checkpoint.total_rewards as u128)
                 .checked_mul(stake.balance as u128).unwrap()
-                .checked_div(boost.total_stake as u128).unwrap() as u64;
+                .checked_div(boost.total_deposits as u128).unwrap() as u64;
             stake.rewards = stake.rewards.checked_add(rewards).unwrap();
         }
 
         // Commit pending stake.
-        checkpoint.total_pending_stake = checkpoint.total_pending_stake.checked_add(stake.pending_balance).unwrap();
-        stake.balance = stake.balance.checked_add(stake.pending_balance).unwrap();
-        stake.pending_balance = 0;
+        checkpoint.total_pending_deposits = checkpoint.total_pending_deposits.checked_add(stake.balance_pending).unwrap();
+        stake.balance = stake.balance.checked_add(stake.balance_pending).unwrap();
+        stake.balance_pending = 0;
     }
 
     // Increment the current id.
@@ -83,9 +83,9 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
     // Finalize the checkpoint.
     if checkpoint.current_id >= boost.total_stakers {
         boost.locked = 0;
-        boost.total_stake = boost.total_stake.checked_add(checkpoint.total_pending_stake).unwrap();
+        boost.total_deposits = boost.total_deposits.checked_add(checkpoint.total_pending_deposits).unwrap();
         checkpoint.current_id = 0;
-        checkpoint.total_pending_stake = 0;
+        checkpoint.total_pending_deposits = 0;
         checkpoint.total_rewards = 0;
         checkpoint.total_stakers = boost.total_stakers;
         checkpoint.ts = clock.unix_timestamp;

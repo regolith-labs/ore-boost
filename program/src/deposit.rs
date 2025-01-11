@@ -8,7 +8,7 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
     let amount = u64::from_le_bytes(args.amount);
 
     // Load accounts.
-    let [signer_info, boost_info, boost_tokens_info, mint_info, sender_info, stake_info, token_program] =
+    let [signer_info, boost_info, boost_deposits_info, mint_info, sender_info, stake_info, token_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -17,7 +17,7 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
     boost_info
         .as_account::<Boost>(&ore_boost_api::ID)?
         .assert(|b| b.mint == *mint_info.key)?;
-    boost_tokens_info
+    boost_deposits_info
         .is_writable()?
         .as_associated_token_account(boost_info.key, mint_info.key)?;
     mint_info.as_mint()?;
@@ -33,7 +33,7 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
     token_program.is_program(&spl_token::ID)?;
 
     // Update balances.
-    stake.pending_balance = stake.pending_balance.checked_add(amount).unwrap();
+    stake.balance_pending = stake.balance_pending.checked_add(amount).unwrap();
 
     // Update timestamps.
     let clock = Clock::get()?;
@@ -43,7 +43,7 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
     transfer(
         signer_info,
         sender_info,
-        boost_tokens_info,
+        boost_deposits_info,
         token_program,
         amount,
     )?;
