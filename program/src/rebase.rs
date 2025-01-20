@@ -63,7 +63,7 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
             .assert_mut(|s| s.boost == *boost_info.key)?
             .assert_mut(|s| s.id == checkpoint.current_id)?;
 
-        // Increment staker rewards weighted by stake.
+        // Distribute staker rewards according to stake weight.
         if checkpoint.current_id < checkpoint.total_stakers && boost.total_deposits > 0 {
             let rewards: u64 = (checkpoint.total_rewards as u128)
                 .checked_mul(stake.balance as u128).unwrap()
