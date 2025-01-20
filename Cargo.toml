@@ -3,12 +3,12 @@ resolver = "2"
 members = ["api", "cli", "program"]
 
 [workspace.package]
-version = "0.3.0"
+version = "1.1.0"
 edition = "2021"
 license = "Apache-2.0"
 homepage = "https://ore.supply"
-documentation = "https://ore.supply"
-repository = "https://github.com/regolith-labs/ore"
+documentation = "https://docs.rs/ore-boost-api/latest/ore_boost_api/"
+repository = "https://github.com/regolith-labs/ore-boost"
 readme = "./README.md"
 keywords = ["solana", "crypto", "mining"]
 
@@ -22,7 +22,8 @@ const-crypto = "0.1.0"
 log = "0.4"
 futures = "0.3"
 num_enum = "0.7.2"
-ore-boost-api = { path = "api", version = "0.3" }
+ore-api = "3.0"
+ore-boost-api = { path = "api" }
 solana-cli-config = "^1.18"
 solana-client = "^1.18"
 solana-program = "^1.18"
@@ -30,11 +31,8 @@ solana-rpc-client = "^1.18"
 solana-sdk = "^1.18"
 solana-transaction-status = "^1.18"
 spl-token = { version = "^4", features = ["no-entrypoint"] }
-spl-associated-token-account = { version = "^2.3", features = [
-  "no-entrypoint",
-] }
+spl-associated-token-account = { version = "^2.3", features = ["no-entrypoint"] }
 static_assertions = "1.1.0"
 steel = { features = ["spl"], version = "2.0" }
 thiserror = "1.0.57"
 tokio = "1.35"
-

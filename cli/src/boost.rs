@@ -19,7 +19,7 @@ impl Cli {
         println!("Expires at: {:?}", boost.expires_at);
         println!("Mint: {:?}", mint);
         println!("Multiplier: {:?}", boost.multiplier);
-        println!("Total stake: {:?}", boost.total_stake);
+        println!("Total deposits: {:?}", boost.total_deposits);
         Ok(())
     }
 }

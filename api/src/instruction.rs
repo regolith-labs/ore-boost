@@ -5,16 +5,21 @@ use steel::*;
 #[rustfmt::skip]
 pub enum BoostInstruction {
     // User
-    Close = 0,
+    Claim = 0,
     Deposit = 1,
     Open = 2,
-    Withdraw = 3,
+    Rebase = 3,
+    Register = 4,
+    Rotate = 5,
+    Withdraw = 6,
     
     // Admin
-    Initialize = 100,
-    New = 101,
-    UpdateAdmin = 102,
-    UpdateBoost = 103,
+    Activate = 100,
+    Deactivate = 101,
+    Initialize = 102,
+    New = 103,
+    UpdateAdmin = 104,
+    UpdateBoost = 105,
 }
 
 impl BoostInstruction {
@@ -25,7 +30,17 @@ impl BoostInstruction {
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Close {}
+pub struct Activate {}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct Claim {
+    pub amount: [u8; 8],
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct Deactivate {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -35,26 +50,30 @@ pub struct Deposit {
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Initialize {
-    #[deprecated(since = "0.3.0", note = "Bump no longer used")]
-    pub config_bump: u8,
-}
+pub struct Initialize {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct New {
-    #[deprecated(since = "0.3.0", note = "Bump no longer used")]
-    pub bump: u8,
     pub expires_at: [u8; 8],
     pub multiplier: [u8; 8],
 }
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Open {
-    #[deprecated(since = "0.3.0", note = "Bump no longer used")]
-    pub stake_bump: u8,
-}
+pub struct Open {}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct Rebase {}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct Register {}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct Rotate {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -75,11 +94,16 @@ pub struct Withdraw {
     pub amount: [u8; 8],
 }
 
-instruction!(BoostInstruction, Close);
+instruction!(BoostInstruction, Activate);
+instruction!(BoostInstruction, Claim);
+instruction!(BoostInstruction, Deactivate);
 instruction!(BoostInstruction, Deposit);
 instruction!(BoostInstruction, Initialize);
 instruction!(BoostInstruction, New);
 instruction!(BoostInstruction, Open);
+instruction!(BoostInstruction, Rebase);
+instruction!(BoostInstruction, Register);
+instruction!(BoostInstruction, Rotate);
 instruction!(BoostInstruction, UpdateAdmin);
 instruction!(BoostInstruction, UpdateBoost);
 instruction!(BoostInstruction, Withdraw);

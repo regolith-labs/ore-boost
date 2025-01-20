@@ -10,11 +10,7 @@ use args::*;
 use clap::{command, Parser, Subcommand};
 use solana_client::{client_error::Result as ClientResult, nonblocking::rpc_client::RpcClient};
 use solana_sdk::{
-    commitment_config::CommitmentConfig,
-    instruction::Instruction,
-    signature::{read_keypair_file, Keypair, Signature},
-    signer::Signer,
-    transaction::Transaction,
+    commitment_config::CommitmentConfig, compute_budget::ComputeBudgetInstruction, instruction::Instruction, signature::{read_keypair_file, Keypair, Signature}, signer::Signer, transaction::Transaction
 };
 
 struct Cli {
@@ -126,7 +122,9 @@ impl Cli {
     pub async fn send_and_confirm(&self, ix: Instruction) -> ClientResult<Signature> {
         let signer = self.signer();
         let client = self.rpc_client.clone();
-        let mut tx = Transaction::new_with_payer(&[ix], Some(&signer.pubkey()));
+        let compute_budget_ix = ComputeBudgetInstruction::set_compute_unit_limit(1_000_000);
+        let compute_price_ix = ComputeBudgetInstruction::set_compute_unit_price(100_000);
+        let mut tx = Transaction::new_with_payer(&[compute_budget_ix, compute_price_ix, ix], Some(&signer.pubkey()));
         let blockhash = client.get_latest_blockhash().await?;
         tx.sign(&[&signer], blockhash);
         client.send_transaction(&tx).await

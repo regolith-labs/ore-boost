@@ -12,14 +12,20 @@ pub struct Boost {
     /// The unix timestamp this boost expires.
     pub expires_at: i64,
 
-    /// The mint address
+    /// Flag indicating if this boost is locked for checkpointing.
+    pub locked: u64,
+
+    /// The mint address of the token associated with this boost.
     pub mint: Pubkey,
 
-    /// The multiplier allocated to this token.
+    /// The multiplier allocated to this boost.
     pub multiplier: u64,
+    
+    // The total amount of stake deposited in this boost.
+    pub total_deposits: u64,
 
-    // The total amount of stake in this boost.
-    pub total_stake: u64,
+    /// The number of stakers in this boost.
+    pub total_stakers: u64,
 }
 
 account!(BoostAccount, Boost);
