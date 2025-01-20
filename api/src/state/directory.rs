@@ -1,7 +1,7 @@
 use steel::*;
 use super::BoostAccount;
 
-/// Directory ...
+/// Directory holds the list of active boosts.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Directory {    

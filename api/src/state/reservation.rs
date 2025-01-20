@@ -2,7 +2,7 @@ use steel::*;
 
 use super::BoostAccount;
 
-/// Boost ...
+/// Reservation tracks the current boost that a miner is allowed to use.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Reservation {

@@ -2,7 +2,7 @@ use steel::*;
 
 use super::BoostAccount;
 
-/// Boost ...
+/// Boost tracks the mining multiplier and stake deposits of a boost account.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Boost {

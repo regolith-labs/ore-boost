@@ -2,7 +2,7 @@ use steel::*;
 
 use super::BoostAccount;
 
-/// Stake ...
+/// Stake holds onto the deposits and yield of a boost staker. 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Stake {

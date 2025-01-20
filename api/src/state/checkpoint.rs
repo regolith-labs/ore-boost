@@ -2,7 +2,7 @@ use steel::*;
 
 use super::BoostAccount;
 
-/// Checkpoint ...
+/// Checkpoint holds the checkpoint state of a particular boost.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Checkpoint {
@@ -18,7 +18,7 @@ pub struct Checkpoint {
     /// The number of total stakers in this checkpoint.
     pub total_stakers: u64,
 
-    /// The total amount of rewards to distribute.
+    /// The total amount of rewards to distribute in this checkpoint.
     pub total_rewards: u64,
 
     /// The timestamp of when the last checkpoint finished.

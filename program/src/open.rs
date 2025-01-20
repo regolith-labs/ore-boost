@@ -40,6 +40,7 @@ pub fn process_open(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult
     stake.boost = *boost_info.key;
     stake.id = boost.total_stakers;
     stake.last_deposit_at = clock.unix_timestamp;
+    stake.rewards = 0;
 
     // Increment the total number of stakers.
     boost.total_stakers = boost.total_stakers.checked_add(1).unwrap();

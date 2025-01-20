@@ -2,7 +2,7 @@ use steel::*;
 
 use super::BoostAccount;
 
-/// Config ...
+/// Config holds global program config variables.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Config {
