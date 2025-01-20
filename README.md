@@ -18,10 +18,9 @@
 - [`UpdateAdmin`](program/src/update_admin.rs) – Updates the admin key.
 - [`UpdateBoost`](program/src/update_boost.rs) – Updates the data on a boost.
 - [`Withdraw`](program/src/withdraw.rs) – Withdraws tokens from a stake account.
-- [`Rank`](program/src/rank.rs) – Pushes a miner into the leaderboard of top 32 proof balances.
-- [`Reserve`](program/src/reserve.rs) – Reserves a boost for a randomly selected miner according to their weight on the leaderboard.
+- [`Rotate`](program/src/rotate.rs) – Rotates the reservation to a randomly selected boost according to their unclaimed ORE weight.
 - [`Rebase`](program/src/rebase.rs) – Adds a staker to the checkpoint, distributing rewards, and committing pending stake.
-- [`Payout`](program/src/payout.rs) – Called by ORE program to trigger a boost to claim its rewards.
+- [`Register`](program/src/register.rs) – Opens a reservation account for a miner.
 - [`Claim`](program/src/claim.rs) – Allows a staker to claim their rewards.
 
 ## State
@@ -29,7 +28,7 @@
  - [`Config`](api/src/state/config.rs) – A singleton account which manages program-wide variables.
  - [`Stake`](api/src/state/stake.rs) - An account (1 per user per mint) which records how many tokens of a given mint a user has staked. 
  - [`Checkpoint`](api/src/state/checkpoint.rs) - An account (1 per boost) which records the current state of the staking checkpoint.
- - [`Leaderboard`](api/src/state/leaderboard.rs) - A singleton account which tracks the top 32 miners by proof balance.
+ - [`Directory`](api/src/state/directory.rs) - A singleton account listing which boosts are active.
 
 ## Tests
 
