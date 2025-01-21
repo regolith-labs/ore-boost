@@ -34,6 +34,9 @@ pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
     // any given sample succeeds in getting a boost is proportional to the miner's unclaimed ORE 
     // relative to all the unclaimed ORE in the treasury. The multiplier reservered is
     // chosen uniformly amongst the set of all active multipliers.
+    // 
+    // For any rotation, the probability of getting a boost is:
+    // p(boost) = 1 - (1 - (proof.balance / treasury.balance))^ROTATION_SAMPLE_COUNT
     if directory.len > 0 {
         for i in 0..ROTATION_SAMPLE_COUNT {
             let boost = directory.boosts[random_number % directory.len];
