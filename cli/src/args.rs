@@ -30,3 +30,6 @@ pub struct GetBoostArgs {
 pub struct DeactivateArgs {
     pub mint: String,
 }
+
+#[derive(Parser, Debug)]
+pub struct DirectoryArgs {}

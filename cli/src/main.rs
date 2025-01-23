@@ -67,6 +67,9 @@ enum Commands {
 
     #[command(about = "Deactivate a boost")]
     Deactivate(DeactivateArgs),
+
+    #[command(about = "Fetch the directory")]
+    Directory(DirectoryArgs),
 }
 
 #[tokio::main]
@@ -107,6 +110,9 @@ async fn main() {
         }
         Commands::Deactivate(args) => {
             cli.deactivate(args).await.unwrap();
+        }
+        Commands::Directory(_) => {
+            cli.directory().await.unwrap();
         }
     };
 }
