@@ -2,6 +2,7 @@ mod args;
 mod boost;
 mod initialize;
 mod new;
+mod deactivate;
 mod update_boost;
 
 use std::sync::Arc;
@@ -63,6 +64,9 @@ enum Commands {
 
     #[command(about = "Initialize the boost program")]
     Initialize(InitializeArgs),
+
+    #[command(about = "Deactivate a boost")]
+    Deactivate(DeactivateArgs),
 }
 
 #[tokio::main]
@@ -100,6 +104,9 @@ async fn main() {
         }
         Commands::UpdateBoost(args) => {
             cli.update_boost(args).await.unwrap();
+        }
+        Commands::Deactivate(args) => {
+            cli.deactivate(args).await.unwrap();
         }
     };
 }

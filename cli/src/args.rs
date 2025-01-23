@@ -25,3 +25,8 @@ pub struct UpdateBoostArgs {
 pub struct GetBoostArgs {
     pub mint: String,
 }
+
+#[derive(Parser, Debug)]
+pub struct DeactivateArgs {
+    pub mint: String,
+}
