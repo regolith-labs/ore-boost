@@ -2488,7 +2488,7 @@ dependencies = [
 
 [[package]]
 name = "ore-boost-api"
-version = "1.1.0"
+version = "1.2.0"
 dependencies = [
  "array-const-fn-init",
  "bytemuck",
@@ -2505,7 +2505,7 @@ dependencies = [
 
 [[package]]
 name = "ore-boost-program"
-version = "1.1.0"
+version = "1.2.0"
 dependencies = [
  "ore-api",
  "ore-boost-api",
@@ -2518,7 +2518,7 @@ dependencies = [
 
 [[package]]
 name = "ore-boosts-cli"
-version = "1.1.0"
+version = "1.2.0"
 dependencies = [
  "clap 4.5.17",
  "futures",

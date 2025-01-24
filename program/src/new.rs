@@ -46,7 +46,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     slot_hashes.is_sysvar(&sysvar::slot_hashes::ID)?;
 
     // Add boost to directory.
-    directory.boosts[directory.len] = *boost_info.key;
+    directory.boosts[directory.len as usize] = *boost_info.key;
     directory.len += 1;
 
     // Initialize the boost account.

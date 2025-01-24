@@ -39,7 +39,7 @@ pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
     // p(boost) = 1 - (1 - (proof.balance / treasury.balance))^ROTATION_SAMPLE_COUNT
     if directory.len > 0 {
         for i in 0..ROTATION_SAMPLE_COUNT {
-            let boost = directory.boosts[random_number % directory.len];
+            let boost = directory.boosts[random_number % directory.len as usize];
             let noise = &hashv(&[&random_number.to_le_bytes()]).to_bytes()[..8];
             random_number = u64::from_le_bytes(noise.try_into().unwrap()) as usize;
             let k = random_number as u64 % treasury_tokens.amount;
