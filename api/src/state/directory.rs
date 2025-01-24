@@ -9,7 +9,7 @@ pub struct Directory {
     pub boosts: [Pubkey; 256],
 
     /// The number of boosts currently active
-    pub len: usize,
+    pub len: u64,
 }
 
 account!(BoostAccount, Directory); 

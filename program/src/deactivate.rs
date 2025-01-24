@@ -15,11 +15,11 @@ pub fn process_deactivate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Program
         .assert(|c| c.authority == *signer_info.key)?;
 
     // Find and remove boost from directory
-    for i in 0..directory.len {
+    for i in 0..(directory.len as usize) {
         if directory.boosts[i] == *boost_info.key {
             // Move last element to this position and decrease length
-            directory.boosts[i] = directory.boosts[directory.len - 1];
-            directory.boosts[directory.len - 1] = Pubkey::default();
+            directory.boosts[i] = directory.boosts[directory.len as usize - 1];
+            directory.boosts[directory.len as usize - 1] = Pubkey::default();
             directory.len -= 1;
             break;
         }

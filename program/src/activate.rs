@@ -22,7 +22,7 @@ pub fn process_activate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRe
     }
 
     // Add boost to directory if not found
-    directory.boosts[directory.len] = *boost_info.key;
+    directory.boosts[directory.len as usize] = *boost_info.key;
     directory.len += 1;
 
     Ok(())
