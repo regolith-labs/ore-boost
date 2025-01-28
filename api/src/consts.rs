@@ -8,7 +8,7 @@ pub const INITIALIZER_ADDRESS: Pubkey = pubkey!("HBUh9g46wk2X89CvaNN15UmsznP59rh
 pub const BOOST_DENOMINATOR: u64 = 1000;
 
 /// The number of attempts (random samples) a miner gets to reserve a boost multiplier.
-pub const ROTATION_SAMPLE_COUNT: u64 = 5;
+pub const ROTATION_SAMPLE_COUNT: u64 = 15;
 
 /// The seed of the boost PDA.
 pub const BOOST: &[u8] = b"boost";
