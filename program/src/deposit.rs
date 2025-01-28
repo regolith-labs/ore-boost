@@ -21,16 +21,17 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
         .is_writable()?
         .as_associated_token_account(boost_info.key, mint_info.key)?;
     mint_info.as_mint()?;
-    sender_info
+    let sender = sender_info
         .is_writable()?
-        .as_token_account()?
-        .assert(|t| t.owner == *signer_info.key)?
-        .assert(|t| t.mint == *mint_info.key)?;
+        .as_associated_token_account(signer_info.key, mint_info.key)?;
     let stake = stake_info
         .as_account_mut::<Stake>(&ore_boost_api::ID)?
         .assert_mut(|s| s.authority == *signer_info.key)?
         .assert_mut(|s| s.boost == *boost_info.key)?;
     token_program.is_program(&spl_token::ID)?;
+
+    // Normalize amount.
+    let amount = amount.min(sender.amount);
 
     // Update balances.
     stake.balance_pending = stake.balance_pending.checked_add(amount).unwrap();
