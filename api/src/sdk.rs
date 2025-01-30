@@ -194,6 +194,7 @@ pub fn register(signer: Pubkey, payer: Pubkey, proof: Pubkey) -> Instruction {
             AccountMeta::new_readonly(proof, false),
             AccountMeta::new(reservation_pda.0, false),
             AccountMeta::new_readonly(system_program::ID, false),
+            AccountMeta::new_readonly(sysvar::slot_hashes::ID, false),
         ],
         data: Register {}.to_bytes(),
     }
