@@ -9,6 +9,9 @@ use super::BoostAccount;
 pub struct StakeLookupTable {
     /// The address of the lookup table
     pub lookup_table: Pubkey,
+
+    /// The bump used for signing
+    pub bump: u64,
 }
 
 account!(BoostAccount, StakeLookupTable);

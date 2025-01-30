@@ -60,11 +60,14 @@ pub fn stake_pda(authority: Pubkey, boost: Pubkey) -> (Pubkey, u8) {
     Pubkey::find_program_address(&[STAKE, authority.as_ref(), boost.as_ref()], &crate::id())
 }
 
-/// Fetch the PDA of the stake lookup table that a particular stake account belongs to.
-pub fn stake_lookup_table_pda(stake_id: u64, boost: Pubkey) -> (Pubkey, u8) {
-    let lut_id = find_stake_lookup_table_id(stake_id).to_le_bytes();
+/// Fetch the PDA of the stake lookup table.
+pub fn stake_lookup_table_pda(boost: Pubkey, lut_id: u64) -> (Pubkey, u8) {
     Pubkey::find_program_address(
-        &[STAKE_LOOKUP_TABLE, boost.as_ref(), lut_id.as_slice()],
+        &[
+            STAKE_LOOKUP_TABLE,
+            boost.as_ref(),
+            lut_id.to_le_bytes().as_slice(),
+        ],
         &crate::id(),
     )
 }
@@ -74,6 +77,6 @@ pub fn stake_lookup_table_pda(stake_id: u64, boost: Pubkey) -> (Pubkey, u8) {
 /// Each lookup stable can hold 256 pubkey addresses.
 /// So units of 256 stakers are grouped together into a lookup table,
 /// with integer division (trims the remainder).
-fn find_stake_lookup_table_id(stake_id: u64) -> u64 {
+pub fn find_stake_lookup_table_id(stake_id: u64) -> u64 {
     stake_id / 256
 }

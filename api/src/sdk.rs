@@ -1,14 +1,19 @@
-use ore_api::{consts::{TREASURY_ADDRESS, TREASURY_TOKENS_ADDRESS}, state::proof_pda};
+use ore_api::{
+    consts::{TREASURY_ADDRESS, TREASURY_TOKENS_ADDRESS},
+    state::proof_pda,
+};
+use solana_program::{address_lookup_table, clock::Slot};
 use steel::*;
 
 use crate::{
     instruction::*,
-    state::{boost_pda, checkpoint_pda, config_pda, directory_pda, reservation_pda, stake_pda},
+    state::{
+        boost_pda, checkpoint_pda, config_pda, directory_pda, reservation_pda,
+        stake_lookup_table_pda, stake_pda,
+    },
 };
 
-
-
-// Build activate instruction.
+/// Build activate instruction.
 pub fn activate(signer: Pubkey, mint: Pubkey) -> Instruction {
     let boost_pda = boost_pda(mint);
     let directory_pda = directory_pda();
@@ -24,10 +29,13 @@ pub fn activate(signer: Pubkey, mint: Pubkey) -> Instruction {
     }
 }
 
-// Build claim instruction.
+/// Build claim instruction.
 pub fn claim(signer: Pubkey, beneficiary: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     let boost_pda = boost_pda(mint);
-    let boost_rewards_address = spl_associated_token_account::get_associated_token_address(&boost_pda.0, &ore_api::consts::MINT_ADDRESS);
+    let boost_rewards_address = spl_associated_token_account::get_associated_token_address(
+        &boost_pda.0,
+        &ore_api::consts::MINT_ADDRESS,
+    );
     let stake_pda = stake_pda(signer, boost_pda.0);
     Instruction {
         program_id: crate::ID,
@@ -46,7 +54,45 @@ pub fn claim(signer: Pubkey, beneficiary: Pubkey, mint: Pubkey, amount: u64) -> 
     }
 }
 
-// Build deactivate instruction.
+/// Build create stake lookup table instruction.
+///
+/// This instructions creates an address lookup table of stake accounts,
+/// and a PDA owned by this program to
+/// 1) derive a deterministic address pointing to the lookup table
+/// 2) hold escrowed authority of the lookup table
+pub fn create_stake_lookup_table(
+    signer: Pubkey,
+    boost: Pubkey,
+    lut_id: u64,
+    lut_slot: Slot,
+) -> Instruction {
+    let (stake_lookup_table_pda, stake_bump) = stake_lookup_table_pda(boost, lut_id);
+    let (lookup_table_pda, lut_bump) =
+        solana_program::address_lookup_table::instruction::derive_lookup_table_address(
+            &stake_lookup_table_pda,
+            lut_slot,
+        );
+    Instruction {
+        program_id: crate::ID,
+        accounts: vec![
+            AccountMeta::new(signer, true),
+            AccountMeta::new(stake_lookup_table_pda, false),
+            AccountMeta::new(lookup_table_pda, false),
+            AccountMeta::new_readonly(boost, false),
+            AccountMeta::new_readonly(system_program::ID, false),
+            AccountMeta::new_readonly(address_lookup_table::program::ID, false),
+        ],
+        data: CreateStakeLookupTable {
+            stake_bump,
+            lut_id: lut_id.to_le_bytes(),
+            lut_slot: lut_slot.to_le_bytes(),
+            lut_bump,
+        }
+        .to_bytes(),
+    }
+}
+
+/// Build deactivate instruction.
 pub fn deactivate(signer: Pubkey, mint: Pubkey) -> Instruction {
     let boost_pda = boost_pda(mint);
     let directory_pda = directory_pda();
@@ -62,7 +108,7 @@ pub fn deactivate(signer: Pubkey, mint: Pubkey) -> Instruction {
     }
 }
 
-// Build deposit instruction.
+/// Build deposit instruction.
 pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     let boost_pda = boost_pda(mint);
     let boost_deposits_address =
@@ -87,7 +133,7 @@ pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     }
 }
 
-// Build initialize instruction.
+/// Build initialize instruction.
 pub fn initialize(signer: Pubkey) -> Instruction {
     let config_pda = config_pda();
     let directory_pda = directory_pda();
@@ -99,18 +145,19 @@ pub fn initialize(signer: Pubkey) -> Instruction {
             AccountMeta::new(directory_pda.0, false),
             AccountMeta::new_readonly(system_program::ID, false),
         ],
-        data: Initialize {}
-        .to_bytes(),
+        data: Initialize {}.to_bytes(),
     }
 }
 
-// Build new instruction.
+/// Build new instruction.
 pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> Instruction {
     let boost_pda = boost_pda(mint);
     let boost_deposits_address =
         spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
-    let boost_rewards_address =
-        spl_associated_token_account::get_associated_token_address(&boost_pda.0, &ore_api::consts::MINT_ADDRESS);
+    let boost_rewards_address = spl_associated_token_account::get_associated_token_address(
+        &boost_pda.0,
+        &ore_api::consts::MINT_ADDRESS,
+    );
     let checkpoint_pda = checkpoint_pda(boost_pda.0);
     let config_pda = config_pda();
     let proof_pda = proof_pda(boost_pda.0);
@@ -141,7 +188,7 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> In
     }
 }
 
-// Build open instruction.
+/// Build open instruction.
 pub fn open(signer: Pubkey, payer: Pubkey, mint: Pubkey) -> Instruction {
     let boost_pda = boost_pda(mint);
     let stake_pda = stake_pda(signer, boost_pda.0);
@@ -155,15 +202,17 @@ pub fn open(signer: Pubkey, payer: Pubkey, mint: Pubkey) -> Instruction {
             AccountMeta::new(stake_pda.0, false),
             AccountMeta::new_readonly(system_program::ID, false),
         ],
-        data: Open {}
-        .to_bytes(),
+        data: Open {}.to_bytes(),
     }
 }
 
-// Build rebase instruction.
+/// Build rebase instruction.
 pub fn rebase(signer: Pubkey, mint: Pubkey, stake: Pubkey) -> Instruction {
     let boost_pda = boost_pda(mint);
-    let boost_rewards = spl_associated_token_account::get_associated_token_address(&boost_pda.0, &ore_api::consts::MINT_ADDRESS);
+    let boost_rewards = spl_associated_token_account::get_associated_token_address(
+        &boost_pda.0,
+        &ore_api::consts::MINT_ADDRESS,
+    );
     let checkpoint_pda = checkpoint_pda(boost_pda.0);
     Instruction {
         program_id: crate::ID,
@@ -183,7 +232,7 @@ pub fn rebase(signer: Pubkey, mint: Pubkey, stake: Pubkey) -> Instruction {
     }
 }
 
-// Build register instruction.
+/// Build register instruction.
 pub fn register(signer: Pubkey, payer: Pubkey, proof: Pubkey) -> Instruction {
     let reservation_pda = reservation_pda(proof);
     Instruction {
@@ -199,7 +248,7 @@ pub fn register(signer: Pubkey, payer: Pubkey, proof: Pubkey) -> Instruction {
     }
 }
 
-// Build rotate instruction.
+/// Build rotate instruction.
 pub fn rotate(signer: Pubkey, proof: Pubkey) -> Instruction {
     let directory_pda = directory_pda();
     let reservation_pda = reservation_pda(proof);
@@ -216,7 +265,7 @@ pub fn rotate(signer: Pubkey, proof: Pubkey) -> Instruction {
     }
 }
 
-// Build update_boost instruction.
+/// Build update_boost instruction.
 pub fn update_boost(
     signer: Pubkey,
     boost: Pubkey,
@@ -238,7 +287,7 @@ pub fn update_boost(
     }
 }
 
-// Build withdraw instruction.
+/// Build withdraw instruction.
 pub fn withdraw(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     let boost_pda = boost_pda(mint);
     let boost_deposits_address =

@@ -4,6 +4,12 @@ use clap::Parser;
 pub struct InitializeArgs {}
 
 #[derive(Parser, Debug)]
+pub struct CreateStakeLookupTableArgs {
+    pub boost: String,
+    pub lut_id: u64,
+}
+
+#[derive(Parser, Debug)]
 pub struct NewArgs {
     pub mint: String,
     pub expires_at: i64,
