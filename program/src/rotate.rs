@@ -3,6 +3,9 @@ use ore_boost_api::{consts::ROTATION_SAMPLE_COUNT, state::{Directory, Reservatio
 use solana_program::{keccak::hashv, log::sol_log};
 use steel::*;
 
+// P(boost) base probability for every miner.
+const BASE_RESERVATION_PROBABILITY: u64 = 50;
+
 /// Rotates a reservation to a randomly selected boost in the directory.
 pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
     // Load accounts
@@ -29,24 +32,37 @@ pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
     let mut random_number = u64::from_le_bytes(noise.try_into().unwrap()) as usize;
 
     // Try to reserve a boost. 
-    // 
-    // Each iteration through the loop is a roll of the dice to get a boost. The probability that 
-    // any given sample succeeds in getting a boost is proportional to the miner's unclaimed ORE 
-    // relative to all the unclaimed ORE in the treasury. The multiplier reservered is
-    // chosen uniformly amongst the set of all active multipliers.
-    // 
-    // For any rotation, the probability of getting a boost is:
-    // p(boost) = 1 - (1 - (proof.balance / treasury.balance))^ROTATION_SAMPLE_COUNT
     if directory.len > 0 {
-        for i in 0..ROTATION_SAMPLE_COUNT {
-            let boost = directory.boosts[random_number % directory.len as usize];
-            let noise = &hashv(&[&random_number.to_le_bytes()]).to_bytes()[..8];
-            random_number = u64::from_le_bytes(noise.try_into().unwrap()) as usize;
-            let k = random_number as u64 % treasury_tokens.amount;
-            if k < proof.balance {
-                reservation.boost = boost;
-                sol_log(&format!("Boost: {:?} Attempt: {}", reservation.boost, i));
-                break;
+        // Base probability
+        // 
+        // Gives a fixed % probability of getting a boost to every miner.
+        let boost = directory.boosts[random_number % directory.len as usize];
+        let noise = &hashv(&[&random_number.to_le_bytes()]).to_bytes()[..8];
+        random_number = u64::from_le_bytes(noise.try_into().unwrap()) as usize;
+        let b = random_number as u64 % 100;
+        if b < BASE_RESERVATION_PROBABILITY {
+            reservation.boost = boost;
+            sol_log(&format!("Boost: {:?} Attempt: {}", reservation.boost, "base"));
+        } else {
+            // Proof weighted rotation
+            //
+            // Each iteration through the loop is a roll of the dice to get a boost. The probability that 
+            // any given sample succeeds in getting a boost is proportional to the miner's unclaimed ORE 
+            // relative to all the unclaimed ORE in the treasury. The multiplier reservered is
+            // chosen uniformly amongst the set of all active multipliers.
+            // 
+            // For any rotation, the probability of getting a boost is:
+            // p(boost) = 1 - (1 - (proof.balance / treasury.balance))^ROTATION_SAMPLE_COUNT
+            for i in 0..ROTATION_SAMPLE_COUNT {
+                let boost = directory.boosts[random_number % directory.len as usize];
+                let noise = &hashv(&[&random_number.to_le_bytes()]).to_bytes()[..8];
+                random_number = u64::from_le_bytes(noise.try_into().unwrap()) as usize;
+                let k = random_number as u64 % treasury_tokens.amount;
+                if k < proof.balance {
+                    reservation.boost = boost;
+                    sol_log(&format!("Boost: {:?} Attempt: {}", reservation.boost, i));
+                    break;
+                }
             }
         }
     }
