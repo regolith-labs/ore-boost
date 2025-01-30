@@ -1,27 +1,33 @@
 mod activate;
-mod deactivate;
 mod claim;
+mod create_stake_lookup_table;
+mod deactivate;
 mod deposit;
+mod extend_stake_lookup_table;
 mod initialize;
 mod new;
 mod open;
+mod rebase;
+mod rebase_many;
 mod register;
 mod rotate;
-mod rebase;
 mod update_admin;
 mod update_boost;
 mod withdraw;
 
 use activate::*;
-use deactivate::*;
 use claim::*;
+use create_stake_lookup_table::*;
+use deactivate::*;
 use deposit::*;
+use extend_stake_lookup_table::*;
 use initialize::*;
 use new::*;
 use open::*;
+use rebase::*;
+use rebase_many::*;
 use register::*;
 use rotate::*;
-use rebase::*;
 use update_admin::*;
 use update_boost::*;
 use withdraw::*;
@@ -39,9 +45,14 @@ pub fn process_instruction(
     match ix {
         // User
         BoostInstruction::Claim => process_claim(accounts, data)?,
+        BoostInstruction::CreateStakeLookupTable => {
+            process_create_stake_lookup_table(accounts, data)?
+        }
         BoostInstruction::Deposit => process_deposit(accounts, data)?,
+        BoostInstruction::ExtendStakeLookupTable => (),
         BoostInstruction::Open => process_open(accounts, data)?,
         BoostInstruction::Rebase => process_rebase(accounts, data)?,
+        BoostInstruction::RebaseMany => (),
         BoostInstruction::Register => process_register(accounts, data)?,
         BoostInstruction::Rotate => process_rotate(accounts, data)?,
         BoostInstruction::Withdraw => process_withdraw(accounts, data)?,

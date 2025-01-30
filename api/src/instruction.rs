@@ -12,6 +12,9 @@ pub enum BoostInstruction {
     Register = 4,
     Rotate = 5,
     Withdraw = 6,
+    RebaseMany = 7,
+    CreateStakeLookupTable = 8,
+    ExtendStakeLookupTable = 9,
     
     // Admin
     Activate = 100,
@@ -40,6 +43,14 @@ pub struct Claim {
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct CreateStakeLookupTable {
+    pub lut_id: [u8; 8],
+    pub lut_slot: [u8; 8],
+    pub bump: [u8; 8],
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct Deactivate {}
 
 #[repr(C)]
@@ -47,6 +58,10 @@ pub struct Deactivate {}
 pub struct Deposit {
     pub amount: [u8; 8],
 }
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct ExtendStakeLookupTable {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -66,6 +81,10 @@ pub struct Open {}
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct Rebase {}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct RebaseMany {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -96,12 +115,15 @@ pub struct Withdraw {
 
 instruction!(BoostInstruction, Activate);
 instruction!(BoostInstruction, Claim);
+instruction!(BoostInstruction, CreateStakeLookupTable);
 instruction!(BoostInstruction, Deactivate);
 instruction!(BoostInstruction, Deposit);
+instruction!(BoostInstruction, ExtendStakeLookupTable);
 instruction!(BoostInstruction, Initialize);
 instruction!(BoostInstruction, New);
 instruction!(BoostInstruction, Open);
 instruction!(BoostInstruction, Rebase);
+instruction!(BoostInstruction, RebaseMany);
 instruction!(BoostInstruction, Register);
 instruction!(BoostInstruction, Rotate);
 instruction!(BoostInstruction, UpdateAdmin);

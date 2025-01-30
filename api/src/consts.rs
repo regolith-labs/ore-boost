@@ -19,6 +19,9 @@ pub const CONFIG: &[u8] = b"config";
 /// The seed of the stake PDA.
 pub const STAKE: &[u8] = b"stake";
 
+/// The seed of the stake lookup table PDA.
+pub const STAKE_LOOKUP_TABLE: &[u8] = b"stake-lookup-table";
+
 /// The seed of the directory PDA.
 pub const DIRECTORY: &[u8] = b"directory";
 
