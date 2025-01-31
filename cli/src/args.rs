@@ -39,3 +39,8 @@ pub struct DeactivateArgs {
 
 #[derive(Parser, Debug)]
 pub struct DirectoryArgs {}
+
+#[derive(Parser, Debug)]
+pub struct OpenArgs {
+    pub mint: String,
+}

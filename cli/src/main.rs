@@ -4,6 +4,7 @@ mod create_stake_lookup_table;
 mod deactivate;
 mod initialize;
 mod new;
+mod open;
 mod update_boost;
 
 use std::sync::Arc;
@@ -79,6 +80,9 @@ enum Commands {
 
     #[command(about = "Fetch the directory")]
     Directory(DirectoryArgs),
+
+    #[command(about = "Open a stake account")]
+    Open(OpenArgs),
 }
 
 #[tokio::main]
@@ -125,6 +129,9 @@ async fn main() {
         }
         Commands::Directory(_) => {
             cli.directory().await.unwrap();
+        }
+        Commands::Open(args) => {
+            cli.open(args).await;
         }
     };
 }

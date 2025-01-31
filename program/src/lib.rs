@@ -49,7 +49,9 @@ pub fn process_instruction(
             process_create_stake_lookup_table(accounts, data)?
         }
         BoostInstruction::Deposit => process_deposit(accounts, data)?,
-        BoostInstruction::ExtendStakeLookupTable => (),
+        BoostInstruction::ExtendStakeLookupTable => {
+            process_extend_stake_lookup_table(accounts, data)?
+        }
         BoostInstruction::Open => process_open(accounts, data)?,
         BoostInstruction::Rebase => process_rebase(accounts, data)?,
         BoostInstruction::RebaseMany => (),
