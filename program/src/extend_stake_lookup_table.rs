@@ -1,5 +1,5 @@
 use ore_boost_api::prelude::*;
-use solana_program::{address_lookup_table, log::sol_log};
+use solana_program::address_lookup_table;
 use steel::*;
 
 /// Inserts stake account into lookup table.
@@ -14,9 +14,7 @@ pub fn process_extend_stake_lookup_table(
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?.has_address(&INITIALIZER_ADDRESS)?;
-    sol_log("boost");
     boost_info.as_account::<Boost>(&ore_boost_api::ID)?;
-    sol_log("stake");
     let stake = stake_info
         .as_account::<Stake>(&ore_boost_api::ID)?
         .assert(|s| s.boost == *boost_info.key)?;
@@ -59,21 +57,17 @@ pub fn extend_stake_lookup_table<'a>(
 ) -> ProgramResult {
     // Validate lookup table.
     let lut_id = find_stake_lookup_table_id(stake.id).to_le_bytes();
-    sol_log(format!("lut id: {:?}", lut_id).as_str());
     let stake_lookup_table_seeds = vec![
         STAKE_LOOKUP_TABLE,
         boost_info.key.as_ref(),
         lut_id.as_slice(),
     ];
-    sol_log("stake lookup table");
     let stake_lookup_table = stake_lookup_table_info
         .has_seeds(stake_lookup_table_seeds.as_slice(), &ore_boost_api::ID)?
         .as_account::<StakeLookupTable>(&ore_boost_api::ID)?;
-    sol_log("lookup table");
     lookup_table_info.has_address(&stake_lookup_table.lookup_table)?;
     lookup_table_program.is_program(&address_lookup_table::program::ID)?;
 
-    sol_log("extend lookup table");
     // Extend lookup table.
     let extend_lookup_table_ix = address_lookup_table::instruction::extend_lookup_table(
         *lookup_table_info.key,

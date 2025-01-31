@@ -74,9 +74,9 @@ pub fn stake_lookup_table_pda(boost: Pubkey, lut_id: u64) -> (Pubkey, u8) {
 
 /// Find the stake lookup table id that a particular stake account belongs to.
 ///
-/// Each lookup stable can hold 256 pubkey addresses.
+/// Each lookup table can hold 256 pubkey addresses.
 /// So units of 256 stakers are grouped together into a lookup table,
-/// with integer division (trims the remainder).
+/// mapped with integer division (trims the remainder).
 pub fn find_stake_lookup_table_id(stake_id: u64) -> u64 {
     stake_id / 256
 }
