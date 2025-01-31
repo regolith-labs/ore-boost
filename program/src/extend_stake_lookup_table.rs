@@ -13,7 +13,7 @@ pub fn process_extend_stake_lookup_table(
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-    signer_info.is_signer()?;
+    signer_info.is_signer()?.has_address(&INITIALIZER_ADDRESS);
     sol_log("boost");
     boost_info.as_account::<Boost>(&ore_boost_api::ID)?;
     sol_log("stake");
