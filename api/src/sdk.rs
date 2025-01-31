@@ -8,8 +8,8 @@ use steel::*;
 use crate::{
     instruction::*,
     state::{
-        boost_pda, checkpoint_pda, config_pda, directory_pda, find_stake_lookup_table_id,
-        reservation_pda, stake_lookup_table_pda, stake_pda,
+        boost_pda, checkpoint_pda, config_pda, directory_pda, reservation_pda,
+        stake_lookup_table_pda, stake_pda,
     },
 };
 
@@ -211,7 +211,13 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> In
 }
 
 /// Build open instruction.
-pub fn open(signer: Pubkey, payer: Pubkey, mint: Pubkey) -> Instruction {
+pub fn open(
+    signer: Pubkey,
+    payer: Pubkey,
+    mint: Pubkey,
+    stake_lookup_table: Pubkey,
+    lookup_table: Pubkey,
+) -> Instruction {
     let boost_pda = boost_pda(mint);
     let stake_pda = stake_pda(signer, boost_pda.0);
     Instruction {
@@ -222,7 +228,10 @@ pub fn open(signer: Pubkey, payer: Pubkey, mint: Pubkey) -> Instruction {
             AccountMeta::new(boost_pda.0, false),
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new(stake_pda.0, false),
+            AccountMeta::new_readonly(stake_lookup_table, false),
+            AccountMeta::new(lookup_table, false),
             AccountMeta::new_readonly(system_program::ID, false),
+            AccountMeta::new_readonly(address_lookup_table::program::ID, false),
         ],
         data: Open {}.to_bytes(),
     }
