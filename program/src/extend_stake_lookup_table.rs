@@ -2,6 +2,7 @@ use ore_boost_api::prelude::*;
 use solana_program::address_lookup_table;
 use steel::*;
 
+/// Inserts stake account into lookup table.
 pub fn process_extend_stake_lookup_table(
     accounts: &[AccountInfo<'_>],
     _data: &[u8],
@@ -17,6 +18,44 @@ pub fn process_extend_stake_lookup_table(
     let stake = stake_info
         .as_account_mut::<Stake>(&ore_boost_api::ID)?
         .assert_mut(|s| s.boost == *boost_info.key)?;
+    system_program.is_program(&system_program::ID)?;
+
+    // Extend lookup table.
+    extend_stake_lookup_table(
+        signer_info,
+        boost_info,
+        stake_info,
+        stake,
+        stake_lookup_table_info,
+        lookup_table_info,
+        system_program,
+        lookup_table_program,
+    )
+}
+
+/// Inserts stake account into lookup table.
+///
+/// Proccessor (instruction) is responsible for validating the
+/// 1) signer
+/// 2) stake account
+/// 3) boost account
+/// 4) system program
+///
+/// The legacy "open" stake account instruction did not insert into a lookup table.
+/// So there is a stand alone processor for inserting these legacy stake accounts,
+/// while new stake accounts are atomically inserted into a lookup table on creation.
+#[allow(clippy::too_many_arguments)]
+pub fn extend_stake_lookup_table<'a>(
+    signer_info: &AccountInfo<'a>,
+    boost_info: &AccountInfo<'a>,
+    stake_info: &AccountInfo<'a>,
+    stake: &mut Stake,
+    stake_lookup_table_info: &AccountInfo<'a>,
+    lookup_table_info: &AccountInfo<'a>,
+    system_program: &AccountInfo<'a>,
+    lookup_table_program: &AccountInfo<'a>,
+) -> ProgramResult {
+    // Validate lookup table.
     let lut_id = find_stake_lookup_table_id(stake.id).to_le_bytes();
     let stake_lookup_table_seeds = vec![
         STAKE_LOOKUP_TABLE,
@@ -27,6 +66,7 @@ pub fn process_extend_stake_lookup_table(
         .has_seeds(stake_lookup_table_seeds.as_slice(), &ore_boost_api::ID)?
         .as_account::<StakeLookupTable>(&ore_boost_api::ID)?;
     lookup_table_info.has_address(&stake_lookup_table.lookup_table)?;
+    lookup_table_program.is_program(&address_lookup_table::program::ID)?;
 
     // Extend lookup table.
     let extend_lookup_table_ix = address_lookup_table::instruction::extend_lookup_table(
