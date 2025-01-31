@@ -44,3 +44,8 @@ pub struct DirectoryArgs {}
 pub struct OpenArgs {
     pub mint: String,
 }
+
+#[derive(Parser, Debug)]
+pub struct ExtendStakeLookupTableArgs {
+    pub boost: String,
+}

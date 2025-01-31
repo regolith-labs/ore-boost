@@ -2,6 +2,7 @@ mod args;
 mod boost;
 mod create_stake_lookup_table;
 mod deactivate;
+mod extend_stake_lookup_table;
 mod initialize;
 mod new;
 mod open;
@@ -83,6 +84,9 @@ enum Commands {
 
     #[command(about = "Open a stake account")]
     Open(OpenArgs),
+
+    #[command(about = "Extend a stake lookup table account")]
+    ExtendStakeLookupTable(ExtendStakeLookupTableArgs),
 }
 
 #[tokio::main]
@@ -132,6 +136,9 @@ async fn main() {
         }
         Commands::Open(args) => {
             cli.open(args).await;
+        }
+        Commands::ExtendStakeLookupTable(args) => {
+            cli.extend_stake_lookup_table(args).await;
         }
     };
 }

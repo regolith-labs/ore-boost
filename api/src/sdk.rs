@@ -8,8 +8,8 @@ use steel::*;
 use crate::{
     instruction::*,
     state::{
-        boost_pda, checkpoint_pda, config_pda, directory_pda, reservation_pda,
-        stake_lookup_table_pda, stake_pda,
+        boost_pda, checkpoint_pda, config_pda, directory_pda, find_stake_lookup_table_id,
+        reservation_pda, stake_lookup_table_pda, stake_pda,
     },
 };
 
@@ -129,6 +129,29 @@ pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
             amount: amount.to_le_bytes(),
         }
         .to_bytes(),
+    }
+}
+
+/// Build extend stake lookup table instruction.
+pub fn extend_stake_lookup_table(
+    signer: Pubkey,
+    boost: Pubkey,
+    stake: Pubkey,
+    stake_lookup_table: Pubkey,
+    lookup_table: Pubkey,
+) -> Instruction {
+    Instruction {
+        program_id: crate::ID,
+        accounts: vec![
+            AccountMeta::new(signer, true),
+            AccountMeta::new_readonly(boost, false),
+            AccountMeta::new_readonly(stake, false),
+            AccountMeta::new_readonly(stake_lookup_table, false),
+            AccountMeta::new(lookup_table, false),
+            AccountMeta::new_readonly(system_program::ID, false),
+            AccountMeta::new_readonly(address_lookup_table::program::ID, false),
+        ],
+        data: ExtendStakeLookupTable {}.to_bytes(),
     }
 }
 
