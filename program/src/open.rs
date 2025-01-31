@@ -5,11 +5,13 @@ use ore_boost_api::{
 use solana_program::system_program;
 use steel::*;
 
+use crate::extend_stake_lookup_table::extend_stake_lookup_table;
+
 /// Open creates a new stake account.
 pub fn process_open(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
     // Load accounts.
-    // let [signer_info, payer_info, boost_info, mint_info, stake_info, stake_lookup_table_info, lookup_table_info, system_program, lookup_table_program] =
-    let [signer_info, payer_info, boost_info, mint_info, stake_info, system_program] = accounts
+    let [signer_info, payer_info, boost_info, mint_info, stake_info, stake_lookup_table_info, lookup_table_info, system_program, lookup_table_program] =
+        accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
@@ -46,22 +48,17 @@ pub fn process_open(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult
     // Increment the total number of stakers.
     boost.total_stakers = boost.total_stakers.checked_add(1).unwrap();
 
-    // TODO: turn off for now
-    // to open stake without inserting into lut as to simulate the current situation,
-    // then test the stand alone insert into lut instruction,
-    // then turn this back on and try atomic open and insert
-    //
-    // // Insert into lookup table.
-    // extend_stake_lookup_table(
-    //     signer_info,
-    //     boost_info,
-    //     stake_info,
-    //     stake,
-    //     stake_lookup_table_info,
-    //     lookup_table_info,
-    //     system_program,
-    //     lookup_table_program,
-    // )?;
+    // Insert into lookup table.
+    extend_stake_lookup_table(
+        signer_info,
+        boost_info,
+        stake_info,
+        stake,
+        stake_lookup_table_info,
+        lookup_table_info,
+        system_program,
+        lookup_table_program,
+    )?;
 
     Ok(())
 }
