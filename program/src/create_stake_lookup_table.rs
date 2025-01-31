@@ -1,5 +1,5 @@
 use ore_boost_api::prelude::*;
-use solana_program::{address_lookup_table, log::sol_log};
+use solana_program::address_lookup_table;
 use steel::*;
 
 pub fn process_create_stake_lookup_table(
@@ -22,12 +22,10 @@ pub fn process_create_stake_lookup_table(
         boost_info.key.as_ref(),
         args.lut_id.as_slice(),
     ];
-    sol_log("stake lookup");
     stake_lookup_table_info
         .is_writable()?
         .is_empty()?
         .has_seeds(stake_lookup_table_seeds.as_slice(), &ore_boost_api::ID)?;
-    sol_log("lookup");
     lookup_table_info.is_writable()?.is_empty()?.has_seeds(
         &[
             stake_lookup_table_info.key.as_ref(),
@@ -36,7 +34,6 @@ pub fn process_create_stake_lookup_table(
         &address_lookup_table::program::ID,
     )?;
 
-    sol_log("create stake lookup");
     // Initalize stake lookup table account.
     create_account::<StakeLookupTable>(
         stake_lookup_table_info,
@@ -48,8 +45,8 @@ pub fn process_create_stake_lookup_table(
     let stake_lookup_table =
         stake_lookup_table_info.as_account_mut::<StakeLookupTable>(&ore_boost_api::ID)?;
     stake_lookup_table.lookup_table = *lookup_table_info.key;
+    stake_lookup_table.bump = args.bump;
 
-    sol_log("create lookup");
     // Initalize lookup table account.
     let lut_slot = u64::from_le_bytes(args.lut_slot);
     let (create_lookup_table_ix, _) = address_lookup_table::instruction::create_lookup_table_signed(
@@ -68,7 +65,7 @@ pub fn process_create_stake_lookup_table(
         &create_lookup_table_ix,
         create_lookup_table_accounts.as_slice(),
         stake_lookup_table_seeds.as_slice(),
-        args.stake_bump,
+        args.bump,
     )?;
 
     Ok(())

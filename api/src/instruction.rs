@@ -44,10 +44,9 @@ pub struct Claim {
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct CreateStakeLookupTable {
-    pub stake_bump: u8,
+    pub bump: u8,
     pub lut_id: [u8; 8],
     pub lut_slot: [u8; 8],
-    pub lut_bump: u8,
 }
 
 #[repr(C)]

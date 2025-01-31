@@ -11,7 +11,7 @@ pub struct StakeLookupTable {
     pub lookup_table: Pubkey,
 
     /// The bump used for signing
-    pub bump: u64,
+    pub bump: u8,
 }
 
 account!(BoostAccount, StakeLookupTable);

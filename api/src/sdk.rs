@@ -66,8 +66,8 @@ pub fn create_stake_lookup_table(
     lut_id: u64,
     lut_slot: Slot,
 ) -> Instruction {
-    let (stake_lookup_table_pda, stake_bump) = stake_lookup_table_pda(boost, lut_id);
-    let (lookup_table_pda, lut_bump) =
+    let (stake_lookup_table_pda, bump) = stake_lookup_table_pda(boost, lut_id);
+    let (lookup_table_pda, _) =
         solana_program::address_lookup_table::instruction::derive_lookup_table_address(
             &stake_lookup_table_pda,
             lut_slot,
@@ -83,10 +83,9 @@ pub fn create_stake_lookup_table(
             AccountMeta::new_readonly(address_lookup_table::program::ID, false),
         ],
         data: CreateStakeLookupTable {
-            stake_bump,
+            bump,
             lut_id: lut_id.to_le_bytes(),
             lut_slot: lut_slot.to_le_bytes(),
-            lut_bump,
         }
         .to_bytes(),
     }
