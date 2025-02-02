@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use ore_boost_api::state::{find_stake_lookup_table_id, Checkpoint, StakeLookupTable};
+use ore_boost_api::state::{find_stake_lookup_table_id, Boost, Checkpoint, StakeLookupTable};
 use solana_sdk::signer::Signer;
 use steel::{AccountDeserialize, Pubkey};
 
@@ -12,14 +12,14 @@ impl Cli {
         let rpc_client = &self.rpc_client;
         let mint = Pubkey::from_str(args.mint.as_str()).unwrap();
         let (boost_pda, _) = ore_boost_api::state::boost_pda(mint);
-        let (checkpoint_pda, _) = ore_boost_api::state::checkpoint_pda(boost_pda);
-        let checkpoint_data = rpc_client
+        let boost_data = self
+            .rpc_client
             .as_ref()
-            .get_account_data(&checkpoint_pda)
+            .get_account_data(&boost_pda)
             .await
             .unwrap();
-        let checkpoint = Checkpoint::try_from_bytes(checkpoint_data.as_slice()).unwrap();
-        let lut_id = find_stake_lookup_table_id(checkpoint.total_stakers + 1);
+        let boost = Boost::try_from_bytes(boost_data.as_slice()).unwrap();
+        let lut_id = find_stake_lookup_table_id(boost.total_stakers);
         let (stake_lookup_table_pda, _) =
             ore_boost_api::state::stake_lookup_table_pda(boost_pda, lut_id);
         let stake_lookup_table_data = rpc_client
