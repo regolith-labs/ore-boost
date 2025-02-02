@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use ore_boost_api::state::{find_stake_lookup_table_id, Boost, Checkpoint, StakeLookupTable};
+use ore_boost_api::state::{find_stake_lookup_table_id, Boost, StakeLookupTable};
 use solana_sdk::signer::Signer;
 use steel::{AccountDeserialize, Pubkey};
 

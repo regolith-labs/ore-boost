@@ -12,9 +12,8 @@ pub enum BoostInstruction {
     Register = 4,
     Rotate = 5,
     Withdraw = 6,
-    RebaseMany = 7,
-    CreateStakeLookupTable = 8,
-    ExtendStakeLookupTable = 9,
+    CreateStakeLookupTable = 7,
+    ExtendStakeLookupTable = 8,
     
     // Admin
     Activate = 100,
@@ -123,7 +122,6 @@ instruction!(BoostInstruction, Initialize);
 instruction!(BoostInstruction, New);
 instruction!(BoostInstruction, Open);
 instruction!(BoostInstruction, Rebase);
-instruction!(BoostInstruction, RebaseMany);
 instruction!(BoostInstruction, Register);
 instruction!(BoostInstruction, Rotate);
 instruction!(BoostInstruction, UpdateAdmin);

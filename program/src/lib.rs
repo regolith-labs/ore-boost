@@ -8,7 +8,6 @@ mod initialize;
 mod new;
 mod open;
 mod rebase;
-mod rebase_many;
 mod register;
 mod rotate;
 mod update_admin;
@@ -25,7 +24,6 @@ use initialize::*;
 use new::*;
 use open::*;
 use rebase::*;
-use rebase_many::*;
 use register::*;
 use rotate::*;
 use update_admin::*;
@@ -54,7 +52,6 @@ pub fn process_instruction(
         }
         BoostInstruction::Open => process_open(accounts, data)?,
         BoostInstruction::Rebase => process_rebase(accounts, data)?,
-        BoostInstruction::RebaseMany => (),
         BoostInstruction::Register => process_register(accounts, data)?,
         BoostInstruction::Rotate => process_rotate(accounts, data)?,
         BoostInstruction::Withdraw => process_withdraw(accounts, data)?,
