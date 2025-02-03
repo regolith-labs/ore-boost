@@ -25,7 +25,7 @@ pub fn process_open(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult
     system_program.is_program(&system_program::ID)?;
 
     // Initialize the stake account.
-    create_account::<Stake>(
+    create_program_account::<Stake>(
         stake_info,
         system_program,
         payer_info,

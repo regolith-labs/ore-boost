@@ -19,9 +19,9 @@ pub fn process_register(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRe
         .is_empty()?
         .has_seeds(&[RESERVATION, proof_info.key.as_ref()], &ore_boost_api::ID)?;
     system_program.is_program(&solana_program::system_program::ID)?;
-    
+
     // Create the reservation account.
-    create_account::<Reservation>(
+    create_program_account::<Reservation>(
         reservation_info,
         system_program,
         payer_info,

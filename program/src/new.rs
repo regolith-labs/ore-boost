@@ -37,7 +37,9 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
         .as_account_mut::<Directory>(&ore_boost_api::ID)?
         .assert_mut(|d| d.len < 256)?;
     mint_info.as_mint()?;
-    ore_mint_info.has_address(&ore_api::consts::MINT_ADDRESS)?.as_mint()?;
+    ore_mint_info
+        .has_address(&ore_api::consts::MINT_ADDRESS)?
+        .as_mint()?;
     proof_info.is_writable()?.is_empty()?;
     ore_program.is_program(&ore_api::ID)?;
     system_program.is_program(&system_program::ID)?;
@@ -50,7 +52,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     directory.len += 1;
 
     // Initialize the boost account.
-    create_account::<Boost>(
+    create_program_account::<Boost>(
         boost_info,
         system_program,
         signer_info,
@@ -64,7 +66,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     boost.total_deposits = 0;
 
     // Initialize checkpoint account.
-    create_account::<Checkpoint>(
+    create_program_account::<Checkpoint>(
         checkpoint_info,
         system_program,
         signer_info,
@@ -81,10 +83,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
 
     // Open a proof account for this boost.
     invoke_signed(
-        &ore_api::sdk::open(
-            *boost_info.key, 
-            *boost_info.key, 
-            *signer_info.key), 
+        &ore_api::sdk::open(*boost_info.key, *boost_info.key, *signer_info.key),
         &[
             boost_info.clone(),
             boost_info.clone(),
@@ -93,9 +92,9 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
             system_program.clone(),
             slot_hashes.clone(),
             ore_program.clone(),
-        ], 
-        &ore_boost_api::ID, 
-        &[BOOST, mint_info.key.as_ref()]
+        ],
+        &ore_boost_api::ID,
+        &[BOOST, mint_info.key.as_ref()],
     )?;
 
     // Create token account to hold staked tokens.
@@ -110,7 +109,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     )?;
 
     // Create token account to accumulate staking rewards.
-    // 
+    //
     // Note: The same token account is reused for both deposits and rewards if the mint is the ORE token.
     // This is because you cannot create two associated token accounts for the same mint.
     if mint_info.key != ore_mint_info.key {
