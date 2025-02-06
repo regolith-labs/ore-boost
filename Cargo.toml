@@ -22,7 +22,8 @@ const-crypto = "0.1.0"
 log = "0.4"
 futures = "0.3"
 num_enum = "0.7.2"
-ore-api = { git = "https://github.com/regolith-labs/ore", branch = "rebase-worker" }
+## ore-api = { git = "https://github.com/regolith-labs/ore", branch = "rebase-worker" }
+ore-api = { git = "https://github.com/regolith-labs/ore", rev = "25aabc5" }
 ore-boost-api = { path = "api" }
 solana-cli-config = "^2.1"
 solana-client = "^2.1"
