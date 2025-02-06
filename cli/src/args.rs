@@ -11,6 +11,11 @@ pub struct NewArgs {
 }
 
 #[derive(Parser, Debug)]
+pub struct OpenArgs {
+    pub mint: String,
+}
+
+#[derive(Parser, Debug)]
 pub struct UpdateBoostArgs {
     pub mint: String,
 
