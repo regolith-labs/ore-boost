@@ -50,7 +50,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     directory.len += 1;
 
     // Initialize the boost account.
-    create_account::<Boost>(
+    create_program_account::<Boost>(
         boost_info,
         system_program,
         signer_info,
@@ -64,7 +64,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     boost.total_deposits = 0;
 
     // Initialize checkpoint account.
-    create_account::<Checkpoint>(
+    create_program_account::<Checkpoint>(
         checkpoint_info,
         system_program,
         signer_info,

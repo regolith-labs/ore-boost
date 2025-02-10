@@ -19,7 +19,7 @@ pub fn process_initialize(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Program
     system_program.is_program(&system_program::ID)?;
 
     // Initialize config account.
-    create_account::<Config>(
+    create_program_account::<Config>(
         config_info,
         system_program,
         signer_info,
@@ -30,7 +30,7 @@ pub fn process_initialize(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Program
     config.authority = *signer_info.key;
 
     // Initialize directory account.
-    create_account::<Directory>(
+    create_program_account::<Directory>(
         directory_info,
         system_program,
         signer_info,

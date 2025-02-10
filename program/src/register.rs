@@ -24,7 +24,7 @@ pub fn process_register(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRe
     slot_hashes_sysvar.is_sysvar(&sysvar::slot_hashes::ID)?;
     
     // Create the reservation account.
-    create_account::<Reservation>(
+    create_program_account::<Reservation>(
         reservation_info,
         system_program,
         payer_info,
