@@ -1,0 +1,28 @@
+[package]
+name = "checkpoint"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+repository.workspace = true
+readme.workspace = true
+keywords.workspace = true
+
+[dependencies]
+anyhow = "1.0.95"
+async-trait = "0.1.86"
+bincode.workspace = true
+env_logger = "0.11.6"
+helius = "0.2.4"
+log.workspace = true
+ore-boost-api = { path = "../api" }
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.138"
+solana-account-decoder = "2.1.12"
+solana-client.workspace = true
+solana-sdk.workspace = true
+steel.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["full"] }
+url = "2.5.4"
