@@ -77,7 +77,6 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
             // time has not elapsed or error
             log::info!("{:?} -- {:?}", boost_pda, err);
             tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
-            attempt += 1;
             continue;
         }
         // filter stake accounts
