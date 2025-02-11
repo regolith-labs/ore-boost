@@ -34,10 +34,10 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
         log::info!("{} -- attempt: {}", boost_pda, attempt);
         // notify admin if worker is stalling
         if attempt.eq(&MAX_ATTEMPTS) {
+            attempt = 0;
             if let Err(err) = notifier::notify().await {
                 log::info!("{:?} -- {:?}", boost_pda, err);
                 tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
-                attempt = 0;
                 continue;
             }
         }
