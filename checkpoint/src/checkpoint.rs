@@ -7,9 +7,10 @@ use solana_sdk::{instruction::Instruction, pubkey::Pubkey, signer::Signer};
 
 use crate::client::{AsyncClient, Client};
 use crate::error::Error::ClockStillTicking;
-use crate::lookup_tables;
+use crate::{lookup_tables, notifier};
 
 const MAX_ACCOUNTS_PER_TX: usize = 38;
+const MAX_ATTEMPTS: usize = 10;
 
 pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
     // derive address
@@ -25,10 +26,21 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
     // 1) fetch checkpoint
     // 2) check for checkpoint interval
     // 3) rebase, or sleep and break
+    let mut attempt = 0;
     loop {
         log::info!("///////////////////////////////////////////////////////////");
         log::info!("// checkpoint");
-        log::info!("{:?} -- {:?}", boost_pda, checkpoint);
+        log::info!("{} -- {:?}", boost_pda, checkpoint);
+        log::info!("{} -- attempt: {}", boost_pda, attempt);
+        // notify admin if worker is stalling
+        if attempt.eq(&MAX_ATTEMPTS) {
+            if let Err(err) = notifier::notify().await {
+                log::info!("{:?} -- {:?}", boost_pda, err);
+                tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                attempt = 0;
+                continue;
+            }
+        }
         // fetch checkpoint
         match client.rpc.get_checkpoint(&checkpoint_pda).await {
             Ok(cp) => {
@@ -39,10 +51,12 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
                         Ok((luts, sa)) => {
                             lookup_tables = luts;
                             stake_accounts = sa;
+                            attempt = 0;
                         }
                         Err(err) => {
                             log::error!("{:?} -- {:?}", boost_pda, err);
                             tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                            attempt += 1;
                             continue;
                         }
                     }
@@ -54,6 +68,7 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
             Err(err) => {
                 log::error!("{:?} -- {:?}", boost_pda, err);
                 tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                attempt += 1;
                 continue;
             }
         }
@@ -62,6 +77,7 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
             // time has not elapsed or error
             log::info!("{:?} -- {:?}", boost_pda, err);
             tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+            attempt += 1;
             continue;
         }
         // filter stake accounts
@@ -70,7 +86,7 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
         let remaining_stake_accounts =
             filter_stake_accounts(stake_accounts.as_slice(), &checkpoint, &boost_pda);
         // rebase all stake accounts
-        if let Err(err) = rebase_all(
+        match rebase_all(
             client,
             mint,
             &boost_pda,
@@ -79,8 +95,14 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
         )
         .await
         {
-            log::error!("{:?} -- {:?}", boost_pda, err);
-            tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+            Ok(()) => {
+                tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+            }
+            Err(err) => {
+                log::info!("{:?} -- {:?}", boost_pda, err);
+                tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                attempt += 1;
+            }
         }
     }
 }

@@ -2,6 +2,7 @@ mod checkpoint;
 mod client;
 mod error;
 mod lookup_tables;
+mod notifier;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
