@@ -100,12 +100,11 @@ impl Client {
             .rpc
             .send_jito_bundle(transactions, jito_api_url)
             .await?;
-        log::info!("bundle id: {:?}", bundle_id);
         self.confirm_jito_bundle(bundle_id.as_str()).await?;
         Ok(bundle_id)
     }
-    /// returns ok if confirmed
-    pub async fn send_jito_bundle(&self, ixs: &[&[Instruction]]) -> Result<()> {
+    /// returns bundle-id if confirmed
+    pub async fn send_jito_bundle(&self, ixs: &[&[Instruction]]) -> Result<String> {
         let jito_api_url = "https://mainnet.block-engine.jito.wtf/api/v1/bundles";
         if ixs.len().gt(&5) {
             return Err(anyhow::anyhow!(TooManyTransactionsInJitoBundle));
@@ -127,9 +126,8 @@ impl Client {
             .rpc
             .send_jito_bundle(transactions, jito_api_url)
             .await?;
-        log::info!("bundle id: {:?}", bundle_id);
         self.confirm_jito_bundle(bundle_id.as_str()).await?;
-        Ok(())
+        Ok(bundle_id)
     }
     async fn confirm_jito_bundle(&self, bundle_id: &str) -> Result<()> {
         let mut retries = 0;
@@ -142,11 +140,10 @@ impl Client {
                 Ok(()) => {
                     return Ok(());
                 }
-                Err(err) => {
-                    log::error!("{:?}", err);
+                Err(_err) => {
                     retries += 1;
                     if retries == max_retires {
-                        return Err(UnconfirmedJitoBundle).map_err(From::from);
+                        return Err(anyhow::anyhow!(UnconfirmedJitoBundle));
                     }
                     tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
                 }
@@ -180,7 +177,7 @@ impl Client {
             .json::<serde_json::Value>()
             .await?;
         if let Some(error) = response.clone().get("error") {
-            return Err(anyhow::anyhow!(error.to_string())).map_err(From::from);
+            return Err(anyhow::anyhow!(error.to_string()));
         }
         #[derive(serde::Deserialize, Debug)]
         struct Inner {
@@ -202,14 +199,8 @@ impl Client {
             .first()
             .ok_or(anyhow::anyhow!(EmptyJitoBundleConfirmation))?;
         match first.status.as_str() {
-            "Landed" => {
-                log::info!("jito confirmation: {:?}", response);
-                Ok(())
-            }
-            status => {
-                log::info!("bundle status: {}", status);
-                Err(anyhow::anyhow!(UnconfirmedJitoBundle))
-            }
+            "Landed" => Ok(()),
+            _status => Err(anyhow::anyhow!(UnconfirmedJitoBundle)),
         }
     }
     /// returns base58 encoded transaction string

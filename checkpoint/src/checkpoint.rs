@@ -83,7 +83,7 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
         // against the checkpoint current-id,
         // recovering from a partial checkpoint if necessary
         let remaining_stake_accounts =
-            filter_stake_accounts(stake_accounts.as_slice(), &checkpoint, &boost_pda);
+            remaining_stake_accounts(stake_accounts.as_mut_slice(), &checkpoint, &boost_pda);
         // rebase all stake accounts
         match rebase_all(
             client,
@@ -106,12 +106,15 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
     }
 }
 
-/// filter stake accounts against checkpoint current-id
-fn filter_stake_accounts(
-    stake_accounts: &[(Pubkey, Stake)],
+/// sort then filter stake accounts against checkpoint current-id
+fn remaining_stake_accounts(
+    stake_accounts: &mut [(Pubkey, Stake)],
     checkpoint: &Checkpoint,
     boost_pda: &Pubkey,
 ) -> Vec<Pubkey> {
+    // sort by stake id
+    stake_accounts.sort_by(|(_, left), (_, right)| left.id.cmp(&right.id));
+    // filter for remaining
     let remaining_accounts: Vec<_> = stake_accounts
         .iter()
         .filter_map(|(pubkey, stake)| {
@@ -163,7 +166,7 @@ async fn rebase_all(
     stake_accounts: &[Pubkey],
     lookup_tables: &[Pubkey],
 ) -> Result<()> {
-    log::info!("{:?} -- rebasing stake accounts", boost);
+    log::info!("{} -- rebasing stake accounts", boost);
     // pack instructions for rebase
     if stake_accounts.is_empty() {
         // if total stakers is zero
@@ -171,11 +174,11 @@ async fn rebase_all(
         // use default account to reset checkpoint for new stakers
         let ix = ore_boost_api::sdk::rebase(client.keypair.pubkey(), *mint, Pubkey::default());
         log::info!(
-            "{:?} -- remaining accounts is empty -- but checkpoint is still elpased. resetting.",
+            "{} -- remaining accounts is empty -- but checkpoint is still elpased. resetting.",
             boost
         );
         let sig = client.send_transaction(&[ix]).await?;
-        log::info!("{:?} -- reset signature: {:?}", boost, sig);
+        log::info!("{} -- reset signature: {:?}", boost, sig);
     } else {
         // chunk stake accounts into batches
         let mut bundles: Vec<Vec<Instruction>> = vec![];
@@ -191,13 +194,13 @@ async fn rebase_all(
         // bundle transactions
         for tx in bundles.chunks(4) {
             let bundle: Vec<&[Instruction]> = tx.iter().map(|vec| vec.as_slice()).collect();
-            log::info!("{:?} -- submitting rebase", boost);
+            log::info!("{} -- submitting rebase", boost);
             let bundle_id = client
                 .send_jito_bundle_with_luts(bundle.as_slice(), lookup_tables)
                 .await?;
-            log::info!("{:?} -- confirmed rebase bundle id: {:?}", boost, bundle_id);
+            log::info!("{} -- rebase bundle id: {:?}", boost, bundle_id);
         }
     }
-    log::info!("{:?} -- checkpoint complete", boost);
+    log::info!("{} -- checkpoint complete", boost);
     Ok(())
 }

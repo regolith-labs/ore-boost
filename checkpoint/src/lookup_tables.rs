@@ -107,7 +107,7 @@ async fn extend_lookup_table(
     lookup_table: &Pubkey,
     stake_accounts: &[Pubkey],
 ) -> Result<()> {
-    log::info!("{:?} -- extending lookup table", boost);
+    log::info!("{} -- extending lookup table", boost);
     let mut bundles: Vec<Vec<Instruction>> = Vec::with_capacity(5);
     for chunk in stake_accounts.chunks(26) {
         let signer = client.keypair.pubkey();
@@ -120,17 +120,19 @@ async fn extend_lookup_table(
         bundles.push(vec![extend_ix]);
         if bundles.len().eq(&5) {
             let compiled: Vec<&[Instruction]> = bundles.iter().map(|vec| vec.as_slice()).collect();
-            log::info!("{:?} -- sending extend instructions as bundle", boost);
-            client.send_jito_bundle(compiled.as_slice()).await?;
+            log::info!("{} -- sending extend instructions as bundle", boost);
+            let bundle_id = client.send_jito_bundle(compiled.as_slice()).await?;
+            log::info!("{} -- extend bundle id: {}", boost, bundle_id);
             bundles.clear();
         }
     }
     // submit last jito bundle
     if !bundles.is_empty() {
-        log::info!("{:?} -- found left over extend bundles", boost);
+        log::info!("{} -- found left over extend bundles", boost);
         let compiled: Vec<&[Instruction]> = bundles.iter().map(|vec| vec.as_slice()).collect();
-        log::info!("{:?} -- sending extend instructions as bundle", boost);
-        client.send_jito_bundle(compiled.as_slice()).await?;
+        log::info!("{} -- sending extend instructions as bundle", boost);
+        let bundle_id = client.send_jito_bundle(compiled.as_slice()).await?;
+        log::info!("{} -- extend bundle id: {}", boost, bundle_id);
     }
     Ok(())
 }
