@@ -13,20 +13,21 @@ use crate::client::{AsyncClient, Client};
 const MAX_ACCOUNTS_PER_LUT: usize = 256;
 
 type LookupTables = Vec<Pubkey>;
-type StakeAccounts = Vec<(Pubkey, Stake)>;
 /// sync lookup tables
 ///
 /// add and/or extend lookup tables
 /// for new stake accounts for next checkpoint
-pub async fn sync(client: &Client, boost: &Pubkey) -> Result<(LookupTables, StakeAccounts)> {
+pub async fn sync(
+    client: &Client,
+    boost: &Pubkey,
+    stake_accounts: &[(Pubkey, Stake)],
+) -> Result<LookupTables> {
     log::info!("{} -- syncing lookup tables", boost);
     // read existing lookup table addresses
     let existing = read_file(boost)?;
     log::info!("{} -- existing lookup tables: {:?}", boost, existing);
     // fetch lookup table accounts for the stake addresses they hold
     let lookup_tables = client.rpc.get_lookup_tables(existing.as_slice()).await?;
-    // fetch all stake accounts
-    let stake_accounts = client.rpc.get_boost_stake_accounts(boost).await?;
     // filter for stake accounts that don't already have a lookup table
     let tabled_stake_account_addresses = lookup_tables
         .iter()
@@ -52,7 +53,7 @@ pub async fn sync(client: &Client, boost: &Pubkey) -> Result<(LookupTables, Stak
         untabled_stake_account_addresses.len()
     );
     if untabled_stake_account_addresses.is_empty() {
-        return Ok((existing, stake_accounts));
+        return Ok(existing);
     }
     // check for a lookup table that still has capacity
     let capacity = lookup_tables
@@ -96,7 +97,7 @@ pub async fn sync(client: &Client, boost: &Pubkey) -> Result<(LookupTables, Stak
     }
     // read latest lookup tables
     let lookup_tables = read_file(boost)?;
-    Ok((lookup_tables, stake_accounts))
+    Ok(lookup_tables)
 }
 
 async fn extend_lookup_table(

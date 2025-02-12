@@ -17,15 +17,14 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
     let (boost_pda, _) = ore_boost_api::state::boost_pda(*mint);
     let (checkpoint_pda, _) = ore_boost_api::state::checkpoint_pda(boost_pda);
     // get accounts
+    let mut total_stakers = 0;
     let _boost = client.rpc.get_boost(&boost_pda).await?;
     let mut checkpoint = client.rpc.get_checkpoint(&checkpoint_pda).await?;
-    let _time = check_for_time(client, &checkpoint, &boost_pda).await;
     // sync lookup tables
-    let (mut lookup_tables, mut stake_accounts) = lookup_tables::sync(client, &boost_pda).await?;
+    let mut stake_accounts = client.rpc.get_boost_stake_accounts(&boost_pda).await?;
+    let mut lookup_tables =
+        lookup_tables::sync(client, &boost_pda, stake_accounts.as_slice()).await?;
     // start checkpoint loop
-    // 1) fetch checkpoint
-    // 2) check for checkpoint interval
-    // 3) rebase, or sleep and break
     let mut attempt = 0;
     loop {
         log::info!("///////////////////////////////////////////////////////////");
@@ -41,16 +40,46 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
                 continue;
             }
         }
+        // fetch boost for total stakers count
+        match client.rpc.get_boost(&boost_pda).await {
+            Ok(boost) => {
+                // check for new stakers
+                if boost.total_stakers.gt(&total_stakers) {
+                    log::info!("{} -- found new stakers", boost_pda);
+                    // fetch stake accounts
+                    match client.rpc.get_boost_stake_accounts(&boost_pda).await {
+                        Ok(sa) => {
+                            stake_accounts = sa;
+                            total_stakers = boost.total_stakers;
+                        }
+                        Err(err) => {
+                            log::error!("{:?} -- {:?}", boost_pda, err);
+                            tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                            attempt += 1;
+                            continue;
+                        }
+                    }
+                }
+            }
+            Err(err) => {
+                log::error!("{:?} -- {:?}", boost_pda, err);
+                tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                attempt += 1;
+                continue;
+            }
+        }
         // fetch checkpoint
         match client.rpc.get_checkpoint(&checkpoint_pda).await {
             Ok(cp) => {
+                // always update checkpoint regardless of new timestamp
+                // because the current-id may have moved
+                checkpoint = cp;
                 // if new checkpoint, sync lookup tables
                 if cp.ts.ne(&checkpoint.ts) {
                     // sync lookup tables
-                    match lookup_tables::sync(client, &boost_pda).await {
-                        Ok((luts, sa)) => {
+                    match lookup_tables::sync(client, &boost_pda, stake_accounts.as_slice()).await {
+                        Ok(luts) => {
                             lookup_tables = luts;
-                            stake_accounts = sa;
                             attempt = 0;
                         }
                         Err(err) => {
@@ -61,9 +90,6 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
                         }
                     }
                 }
-                // always update checkpoint regardless of new timestamp
-                // because the current-id may have moved
-                checkpoint = cp;
             }
             Err(err) => {
                 log::error!("{:?} -- {:?}", boost_pda, err);
