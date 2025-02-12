@@ -8,10 +8,7 @@ use anyhow::Result;
 use ore_boost_api::state::Stake;
 use solana_sdk::{address_lookup_table, instruction::Instruction, pubkey::Pubkey, signer::Signer};
 
-use crate::{
-    client::{AsyncClient, Client},
-    error::Error::InvalidPubkeyBytes,
-};
+use crate::client::{AsyncClient, Client};
 
 const MAX_ACCOUNTS_PER_LUT: usize = 256;
 

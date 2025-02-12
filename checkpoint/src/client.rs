@@ -1,11 +1,12 @@
+use std::str::FromStr;
 use std::sync::Arc;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use helius::types::{
-    Cluster, CreateSmartTransactionConfig, SmartTransaction, SmartTransactionConfig, Timeout,
-};
+use helius::jito::JITO_TIP_ACCOUNTS;
+use helius::types::{Cluster, CreateSmartTransactionConfig, SmartTransactionConfig, Timeout};
 use ore_boost_api::state::{Boost, Checkpoint, Stake};
+use rand::seq::IndexedRandom;
 use solana_account_decoder::UiAccountEncoding;
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_client::rpc_config::{
@@ -17,11 +18,12 @@ use solana_sdk::address_lookup_table::AddressLookupTableAccount;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
 use solana_sdk::signer::Signer;
+use solana_sdk::system_instruction;
 use solana_sdk::{signature::Keypair, signer::EncodableKey};
 use steel::{sysvar, AccountDeserialize, Clock, Discriminator, Instruction};
 
 use crate::error::Error::{
-    EmptyJitoBundle, EmptyJitoBundleConfirmation, InvalidHeliusCluster,
+    EmptyJitoBundle, EmptyJitoBundleConfirmation, EmptyTipAccounts, InvalidHeliusCluster,
     MissingHeliusSolanaAsyncClient, TooManyTransactionsInJitoBundle, UnconfirmedJitoBundle,
 };
 
@@ -45,7 +47,13 @@ impl Client {
     pub async fn send_transaction(&self, ixs: &[Instruction]) -> Result<Signature> {
         let signer = Arc::clone(&self.keypair);
         let signers: Vec<Arc<dyn Signer>> = vec![signer];
-        let tx = SmartTransactionConfig::new(ixs.to_vec(), signers, Timeout::default());
+        let tx = SmartTransactionConfig::new(
+            ixs.to_vec(),
+            signers,
+            Timeout {
+                duration: std::time::Duration::from_secs(10),
+            },
+        );
         let sig = self.rpc.send_smart_transaction(tx).await?;
         Ok(sig)
     }
@@ -68,7 +76,9 @@ impl Client {
         let tx = SmartTransactionConfig {
             create_config: tx,
             send_options: RpcSendTransactionConfig::default(),
-            timeout: Timeout::default(),
+            timeout: Timeout {
+                duration: std::time::Duration::from_secs(10),
+            },
         };
         let sig = self.rpc.send_smart_transaction(tx).await?;
         Ok(sig)
@@ -205,25 +215,32 @@ impl Client {
     }
     /// returns base58 encoded transaction string
     async fn create_jito_transaction(&self, ixs: &[Instruction]) -> Result<String> {
-        let signer = Arc::clone(&self.keypair);
-        let signers: Vec<Arc<dyn Signer>> = vec![signer];
-        let config = CreateSmartTransactionConfig::new(ixs.to_vec(), signers);
-        let (tx, _) = self
-            .rpc
-            .create_smart_transaction_with_tip(config, Some(100_000))
-            .await?;
-        Ok(tx)
+        // build tip instruction
+        let tip_amount = 10_000;
+        let tip_account = *JITO_TIP_ACCOUNTS
+            .choose(&mut rand::rng())
+            .ok_or(EmptyTipAccounts)?;
+        let tip_account = Pubkey::from_str(tip_account)?;
+        let payer = self.keypair.pubkey();
+        let tip_ix = system_instruction::transfer(&payer, &tip_account, tip_amount);
+        let ixs = [ixs, &[tip_ix]].concat();
+        // build transaction
+        let string = self.create_transaction(ixs.as_slice()).await?;
+        Ok(string)
     }
     /// returns base58 encoded transaction string
     async fn create_transaction(&self, ixs: &[Instruction]) -> Result<String> {
-        let signer = Arc::clone(&self.keypair);
-        let signers: Vec<Arc<dyn Signer>> = vec![signer];
-        let config = CreateSmartTransactionConfig::new(ixs.to_vec(), signers);
-        let (tx, _) = self.rpc.create_smart_transaction(&config).await?;
-        let bytes = match tx {
-            SmartTransaction::Legacy(tx) => bincode::serialize(&tx)?,
-            SmartTransaction::Versioned(tx) => bincode::serialize(&tx)?,
-        };
+        // build transaction
+        let rpc = self.rpc.get_async_client()?;
+        let hash = rpc.get_latest_blockhash().await?;
+        let message =
+            solana_sdk::message::v0::Message::try_compile(&self.keypair.pubkey(), ixs, &[], hash)?;
+        let tx = solana_sdk::transaction::VersionedTransaction::try_new(
+            solana_sdk::message::VersionedMessage::V0(message),
+            &[self.keypair.as_ref()],
+        )?;
+        // encode
+        let bytes = bincode::serialize(&tx)?;
         let string = solana_sdk::bs58::encode(bytes).into_string();
         Ok(string)
     }
@@ -232,21 +249,22 @@ impl Client {
         ixs: &[Instruction],
         luts: &[Pubkey],
     ) -> Result<String> {
-        let signer = Arc::clone(&self.keypair);
-        let signers: Vec<Arc<dyn Signer>> = vec![signer];
+        // build transaction
+        let rpc = self.rpc.get_async_client()?;
         let lookup_tables = self.rpc.get_lookup_tables(luts).await?;
-        let config = CreateSmartTransactionConfig {
-            instructions: ixs.to_vec(),
-            signers,
-            lookup_tables: Some(lookup_tables),
-            fee_payer: None,
-            priority_fee_cap: None,
-        };
-        let (tx, _) = self.rpc.create_smart_transaction(&config).await?;
-        let bytes = match tx {
-            SmartTransaction::Legacy(tx) => bincode::serialize(&tx)?,
-            SmartTransaction::Versioned(tx) => bincode::serialize(&tx)?,
-        };
+        let hash = rpc.get_latest_blockhash().await?;
+        let message = solana_sdk::message::v0::Message::try_compile(
+            &self.keypair.pubkey(),
+            ixs,
+            lookup_tables.as_slice(),
+            hash,
+        )?;
+        let tx = solana_sdk::transaction::VersionedTransaction::try_new(
+            solana_sdk::message::VersionedMessage::V0(message),
+            &[self.keypair.as_ref()],
+        )?;
+        // encode
+        let bytes = bincode::serialize(&tx)?;
         let string = solana_sdk::bs58::encode(bytes).into_string();
         Ok(string)
     }
@@ -255,21 +273,20 @@ impl Client {
         ixs: &[Instruction],
         luts: &[Pubkey],
     ) -> Result<String> {
-        let signer = Arc::clone(&self.keypair);
-        let signers: Vec<Arc<dyn Signer>> = vec![signer];
-        let lookup_tables = self.rpc.get_lookup_tables(luts).await?;
-        let config = CreateSmartTransactionConfig {
-            instructions: ixs.to_vec(),
-            signers,
-            lookup_tables: Some(lookup_tables),
-            fee_payer: None,
-            priority_fee_cap: None,
-        };
-        let (tx, _) = self
-            .rpc
-            .create_smart_transaction_with_tip(config, Some(100_000))
+        // build tip instruction
+        let tip_amount = 10_000;
+        let tip_account = *JITO_TIP_ACCOUNTS
+            .choose(&mut rand::rng())
+            .ok_or(EmptyTipAccounts)?;
+        let tip_account = Pubkey::from_str(tip_account)?;
+        let payer = self.keypair.pubkey();
+        let tip_ix = system_instruction::transfer(&payer, &tip_account, tip_amount);
+        let ixs = [ixs, &[tip_ix]].concat();
+        // build transaction
+        let string = self
+            .create_transaction_with_luts(ixs.as_slice(), luts)
             .await?;
-        Ok(tx)
+        Ok(string)
     }
 }
 

@@ -9,7 +9,7 @@ use crate::client::{AsyncClient, Client};
 use crate::error::Error::ClockStillTicking;
 use crate::{lookup_tables, notifier};
 
-const MAX_ACCOUNTS_PER_TX: usize = 38;
+const MAX_ACCOUNTS_PER_TX: usize = 20;
 const MAX_ATTEMPTS: usize = 10;
 
 pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
