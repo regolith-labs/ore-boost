@@ -1,6 +1,7 @@
 use std::{
     fs::{File, OpenOptions},
     io::{BufRead, BufReader, Write},
+    str::FromStr,
 };
 
 use anyhow::Result;
@@ -153,14 +154,13 @@ fn write_file(luts: &[Lut], boost: &Pubkey) -> Result<()> {
     log::info!("{:?} -- writing new lookup tables", boost);
     let luts_path = luts_path()?;
     let path = format!("{}-{}", luts_path, boost);
-    log::info!("path: {}", path);
     let mut file = OpenOptions::new()
         .create(true) // open or create
         .append(true) // append
         .open(path)?;
     for lut in luts {
-        file.write_all(lut.to_bytes().as_slice())?;
-        file.write_all(b"\n")?;
+        let line = format!("{}\n", lut);
+        file.write_all(line.as_bytes())?;
     }
     log::info!("{:?} -- new lookup tables written", boost);
     Ok(())
@@ -171,6 +171,7 @@ fn read_file(boost: &Pubkey) -> Result<Vec<Lut>> {
     log::info!("{:?} -- reading prior lookup tables", boost);
     let luts_path = luts_path()?;
     let path = format!("{}-{}", luts_path, boost);
+    // get or create file
     let file = match File::open(path.as_str()) {
         Ok(f) => f,
         Err(err) => match err.kind() {
@@ -190,27 +191,25 @@ fn read_file(boost: &Pubkey) -> Result<Vec<Lut>> {
     };
     log::info!("{:?} -- found prior lookup tables file", boost);
     let mut luts = vec![];
-    let mut line = vec![];
-    let mut reader = BufReader::new(file);
+    let reader = BufReader::new(file);
     // read lines
-    while reader.read_until(b'\n', &mut line)? > 0 {
-        // pop new line char
-        line.pop();
-        // decode
-        let bytes = line.clone();
-        let pubkey: Result<[u8; 32]> = bytes
-            .try_into()
-            .map_err(|_| anyhow::anyhow!(InvalidPubkeyBytes));
-        if let Ok(ref arr) = pubkey {
-            let pubkey = Pubkey::new_from_array(*arr);
-            // add pubkey to list
-            luts.push(pubkey);
+    for line_res in reader.lines() {
+        // handle bytes
+        let line = match line_res {
+            Ok(line) => line,
+            Err(err) => {
+                log::error!("{} -- error decoding cache file {:?}", boost, err);
+                continue;
+            }
         };
-        if let Err(err) = pubkey {
-            log::error!("{:?}", err);
+        // decode
+        match Pubkey::from_str(line.as_str()) {
+            Ok(pubkey) => luts.push(pubkey),
+            Err(err) => {
+                log::error!("{} -- error decoding lut pubkey {:?}", boost, err);
+                continue;
+            }
         }
-        // clear and read next line
-        line.clear();
     }
     log::info!("{:?} -- parsed prior lookup tables", boost);
     Ok(luts)
