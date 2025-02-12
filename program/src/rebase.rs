@@ -60,8 +60,12 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
         // Load stake account.
         let stake = stake_info
             .as_account_mut::<Stake>(&ore_boost_api::ID)?
-            .assert_mut(|s| s.boost == *boost_info.key)?
-            .assert_mut(|s| s.id == checkpoint.current_id)?;
+            .assert_mut(|s| s.boost == *boost_info.key)?;
+
+        // Silently return if the provided stake account is not the expected stake account.
+        if stake.id != checkpoint.current_id {
+            return Ok(());
+        }
 
         // Distribute staker rewards according to stake weight.
         if checkpoint.current_id < checkpoint.total_stakers && boost.total_deposits > 0 {
