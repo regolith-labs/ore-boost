@@ -12,7 +12,31 @@ use crate::{lookup_tables, notifier};
 const MAX_ACCOUNTS_PER_TX: usize = 20;
 const MAX_ATTEMPTS: usize = 10;
 
-pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
+pub async fn run_all(client: Arc<Client>) -> Result<()> {
+    // fetch all boosts
+    let boosts = client.rpc.get_boosts().await?;
+    // spawn task for each boost checkpoint
+    let mut handles = vec![];
+    for b in boosts {
+        let client = Arc::clone(&client);
+        let handle = tokio::spawn(async move {
+            if let Err(err) = run(client.as_ref(), &b.mint).await {
+                // log error then return
+                let (pda, _) = ore_boost_api::state::boost_pda(b.mint);
+                log::error!("{} -- exit", pda);
+                return Err(err);
+            }
+            Ok::<_, anyhow::Error>(())
+        });
+        handles.push(handle);
+    }
+    // await checkpoints
+    // early exit all tasks if one returns err
+    futures::future::try_join_all(handles).await?;
+    Ok(())
+}
+
+async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
     // derive address
     let (boost_pda, _) = ore_boost_api::state::boost_pda(*mint);
     let (checkpoint_pda, _) = ore_boost_api::state::checkpoint_pda(boost_pda);
@@ -218,7 +242,7 @@ async fn rebase_all(
             bundles.push(transaction);
         }
         // bundle transactions
-        for tx in bundles.chunks(4) {
+        for tx in bundles.chunks(5) {
             let bundle: Vec<&[Instruction]> = tx.iter().map(|vec| vec.as_slice()).collect();
             log::info!("{} -- submitting rebase", boost);
             let bundle_id = client

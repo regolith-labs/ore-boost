@@ -724,6 +724,7 @@ dependencies = [
  "async-trait",
  "bincode",
  "env_logger",
+ "futures",
  "helius",
  "log",
  "ore-boost-api",

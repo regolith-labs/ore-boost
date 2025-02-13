@@ -4,7 +4,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use async_trait::async_trait;
 use helius::jito::JITO_TIP_ACCOUNTS;
-use helius::types::{Cluster, CreateSmartTransactionConfig, SmartTransactionConfig, Timeout};
+use helius::types::{Cluster, CreateSmartTransactionSeedConfig, Timeout};
 use ore_boost_api::state::{Boost, Checkpoint, Stake};
 use rand::seq::IndexedRandom;
 use solana_account_decoder::UiAccountEncoding;
@@ -45,16 +45,21 @@ impl Client {
         Ok(client)
     }
     pub async fn send_transaction(&self, ixs: &[Instruction]) -> Result<Signature> {
-        let signer = Arc::clone(&self.keypair);
-        let signers: Vec<Arc<dyn Signer>> = vec![signer];
-        let tx = SmartTransactionConfig::new(
-            ixs.to_vec(),
-            signers,
-            Timeout {
-                duration: std::time::Duration::from_secs(10),
-            },
-        );
-        let sig = self.rpc.send_smart_transaction(tx).await?;
+        let signer = self.keypair.as_ref().secret().to_bytes();
+        let tx = CreateSmartTransactionSeedConfig::new(ixs.to_vec(), vec![signer]);
+        let sig = self
+            .rpc
+            .send_smart_transaction_with_seeds(
+                tx,
+                Some(RpcSendTransactionConfig {
+                    skip_preflight: true,
+                    ..Default::default()
+                }),
+                Some(Timeout {
+                    duration: std::time::Duration::from_secs(10),
+                }),
+            )
+            .await?;
         Ok(sig)
     }
     #[allow(dead_code)]
@@ -63,24 +68,23 @@ impl Client {
         ixs: &[Instruction],
         luts: &[Pubkey],
     ) -> Result<Signature> {
-        let signer = Arc::clone(&self.keypair);
-        let signers: Vec<Arc<dyn Signer>> = vec![signer];
+        let signer = self.keypair.as_ref().secret().to_bytes();
+        let tx = CreateSmartTransactionSeedConfig::new(ixs.to_vec(), vec![signer]);
         let lookup_tables = self.rpc.get_lookup_tables(luts).await?;
-        let tx = CreateSmartTransactionConfig {
-            instructions: ixs.to_vec(),
-            signers,
-            lookup_tables: Some(lookup_tables),
-            fee_payer: None,
-            priority_fee_cap: None,
-        };
-        let tx = SmartTransactionConfig {
-            create_config: tx,
-            send_options: RpcSendTransactionConfig::default(),
-            timeout: Timeout {
-                duration: std::time::Duration::from_secs(10),
-            },
-        };
-        let sig = self.rpc.send_smart_transaction(tx).await?;
+        let tx = tx.with_lookup_tables(lookup_tables);
+        let sig = self
+            .rpc
+            .send_smart_transaction_with_seeds(
+                tx,
+                Some(RpcSendTransactionConfig {
+                    skip_preflight: true,
+                    ..Default::default()
+                }),
+                Some(Timeout {
+                    duration: std::time::Duration::from_secs(10),
+                }),
+            )
+            .await?;
         Ok(sig)
     }
     /// returns bundle-id if confirmed
@@ -294,6 +298,7 @@ impl Client {
 pub trait AsyncClient {
     fn get_async_client(&self) -> Result<Arc<RpcClient>>;
     async fn get_boost(&self, boost: &Pubkey) -> Result<Boost>;
+    async fn get_boosts(&self) -> Result<Vec<Boost>>;
     async fn get_boost_stake_accounts(&self, boost: &Pubkey) -> Result<Vec<(Pubkey, Stake)>>;
     async fn get_checkpoint(&self, checkpoint: &Pubkey) -> Result<Checkpoint>;
     async fn get_clock(&self) -> Result<Clock>;
@@ -317,6 +322,16 @@ impl AsyncClient for helius::Helius {
         let data = self.get_async_client()?.get_account_data(boost).await?;
         let boost = Boost::try_from_bytes(data.as_slice())?;
         Ok(*boost)
+    }
+    async fn get_boosts(&self) -> Result<Vec<Boost>> {
+        let accounts = get_program_accounts::<Boost>(
+            self.get_async_client()?.as_ref(),
+            &ore_boost_api::ID,
+            vec![],
+        )
+        .await?;
+        let accounts = accounts.into_iter().map(|(_, boost)| boost).collect();
+        Ok(accounts)
     }
     async fn get_boost_stake_accounts(&self, boost: &Pubkey) -> Result<Vec<(Pubkey, Stake)>> {
         let accounts = get_program_accounts::<Stake>(
