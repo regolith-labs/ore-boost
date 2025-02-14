@@ -36,7 +36,7 @@ pub async fn run_all(client: Arc<Client>) -> Result<()> {
     Ok(())
 }
 
-async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
+pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
     // derive address
     let (boost_pda, _) = ore_boost_api::state::boost_pda(*mint);
     let (checkpoint_pda, _) = ore_boost_api::state::checkpoint_pda(boost_pda);
