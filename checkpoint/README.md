@@ -1,8 +1,5 @@
 # Checkpoint Worker
 
-## TODO
-### GPA for all boosts and spawn a thread per.
-
 ## Lookup Tables
 ### Creates and extends Lookup Tables dynamically, between checkpoints.
 ### Persists Lookup Table pubkeys to a local config file.
