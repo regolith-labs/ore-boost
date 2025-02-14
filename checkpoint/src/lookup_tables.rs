@@ -108,7 +108,7 @@ async fn extend_lookup_table(
 ) -> Result<()> {
     log::info!("{} -- extending lookup table", boost);
     let mut bundles: Vec<Vec<Instruction>> = Vec::with_capacity(5);
-    for chunk in stake_accounts.chunks(26) {
+    for chunk in stake_accounts.chunks(20) {
         let signer = client.keypair.pubkey();
         let extend_ix = address_lookup_table::instruction::extend_lookup_table(
             *lookup_table,
