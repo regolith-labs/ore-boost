@@ -20,11 +20,14 @@ pub async fn run_all(client: Arc<Client>) -> Result<()> {
     for b in boosts {
         let client = Arc::clone(&client);
         let handle = tokio::spawn(async move {
-            if let Err(err) = run(client.as_ref(), &b.mint).await {
-                // log error then return
-                let (pda, _) = ore_boost_api::state::boost_pda(b.mint);
-                log::error!("{} -- exit", pda);
-                return Err(err);
+            // if let Err(err) = run(client.as_ref(), &b.mint).await {
+            //     // log error then return
+            //     let (pda, _) = ore_boost_api::state::boost_pda(b.mint);
+            //     log::error!("{} -- exit", pda);
+            //     return Err(err);
+            // }
+            loop {
+                tokio::time::sleep(tokio::time::Duration::from_secs(6_000_000_000)).await;
             }
             Ok::<_, anyhow::Error>(())
         });
