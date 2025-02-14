@@ -20,6 +20,9 @@ pub async fn run_all(client: Arc<Client>) -> Result<()> {
     for b in boosts {
         let client = Arc::clone(&client);
         let handle = tokio::spawn(async move {
+            // sleep on start to stagger workers
+            tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+            // start worker
             if let Err(err) = run(client.as_ref(), &b.mint).await {
                 // log error then return
                 let (pda, _) = ore_boost_api::state::boost_pda(b.mint);
