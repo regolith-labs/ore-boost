@@ -27,6 +27,8 @@ pub async fn run_all(client: Arc<Client>) -> Result<()> {
                 // log error then return
                 let (pda, _) = ore_boost_api::state::boost_pda(b.mint);
                 log::error!("{} -- exit", pda);
+                // notify admin
+                notifier::notify().await?;
                 return Err(err);
             }
             Ok::<_, anyhow::Error>(())
@@ -103,11 +105,13 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
                 checkpoint = cp;
                 // if new checkpoint, sync lookup tables
                 if cp.ts.ne(&checkpoint.ts) {
+                    // reset attempts
+                    // new timestamp implies successful checkpoint
+                    attempt = 0;
                     // sync lookup tables
                     match lookup_tables::sync(client, &boost_pda, stake_accounts.as_slice()).await {
                         Ok(luts) => {
                             lookup_tables = luts;
-                            attempt = 0;
                         }
                         Err(err) => {
                             log::error!("{:?} -- {:?}", boost_pda, err);
