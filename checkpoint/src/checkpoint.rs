@@ -28,7 +28,9 @@ pub async fn run_all(client: Arc<Client>) -> Result<()> {
                 let (pda, _) = ore_boost_api::state::boost_pda(b.mint);
                 log::error!("{} -- exit", pda);
                 // notify admin
-                notifier::notify().await?;
+                if let Err(err) = notifier::notify().await {
+                    log::info!("{:?} -- notifier error on exit {:?}", pda, err);
+                }
                 return Err(err);
             }
             Ok::<_, anyhow::Error>(())
@@ -64,7 +66,7 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
         if attempt.eq(&MAX_ATTEMPTS) {
             attempt = 0;
             if let Err(err) = notifier::notify().await {
-                log::info!("{:?} -- {:?}", boost_pda, err);
+                log::info!("{:?} -- notifier error {:?}", boost_pda, err);
                 tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
                 continue;
             }
