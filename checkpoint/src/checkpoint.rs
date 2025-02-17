@@ -3,6 +3,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use ore_boost_api::state::Stake;
 use ore_boost_api::{consts::CHECKPOINT_INTERVAL, state::Checkpoint};
+use solana_sdk::compute_budget;
 use solana_sdk::{instruction::Instruction, pubkey::Pubkey, signer::Signer};
 
 use crate::client::{AsyncClient, Client};
@@ -11,6 +12,9 @@ use crate::{lookup_tables, notifier};
 
 const MAX_ACCOUNTS_PER_TX: usize = 20;
 const MAX_ATTEMPTS: usize = 10;
+const CUS_PAYOUT: u32 = 30_000;
+const CUS_REBASE: u32 = 7_000;
+const CUS_JITO_TIP: u32 = 1_000;
 
 pub async fn run_all(client: Arc<Client>) -> Result<()> {
     // fetch all boosts
@@ -251,8 +255,10 @@ async fn rebase_all(
             bundles.push(transaction);
         }
         // bundle transactions
-        for tx in bundles.chunks(5) {
-            let bundle: Vec<&[Instruction]> = tx.iter().map(|vec| vec.as_slice()).collect();
+        for bundle in bundles.chunks(5) {
+            // insert compute unit
+            let bundle = insert_compute_units(bundle);
+            let bundle: Vec<&[Instruction]> = bundle.iter().map(|vec| vec.as_slice()).collect();
             log::info!("{} -- submitting rebase", boost);
             let bundle_id = client
                 .send_jito_bundle_with_luts(bundle.as_slice(), lookup_tables)
@@ -262,4 +268,31 @@ async fn rebase_all(
     }
     log::info!("{} -- checkpoint complete", boost);
     Ok(())
+}
+
+fn insert_compute_units(bundle: &[Vec<Instruction>]) -> Vec<Vec<Instruction>> {
+    let bundle_size = bundle.len();
+    bundle
+        .iter()
+        .enumerate()
+        .map(|(index, tx)| {
+            // add the payout compute units to the first transaction
+            let mut compute_units = match index {
+                0 => CUS_PAYOUT,
+                _ => 0,
+            };
+            // every transaction gets the rebase compute units for each instruction
+            let num_instructions = tx.len() as u32;
+            compute_units += num_instructions * CUS_REBASE;
+            // add the jito tip compute units to the last transaction
+            if index.eq(&(bundle_size - 1)) {
+                compute_units += CUS_JITO_TIP;
+            }
+            // build compute units instruction
+            let ix =
+                compute_budget::ComputeBudgetInstruction::set_compute_unit_limit(compute_units);
+            // add to transaction
+            [&[ix], tx.as_slice()].concat()
+        })
+        .collect()
 }
