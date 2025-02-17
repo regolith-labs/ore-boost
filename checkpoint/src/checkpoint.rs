@@ -10,7 +10,7 @@ use crate::client::{AsyncClient, Client};
 use crate::error::Error::ClockStillTicking;
 use crate::{lookup_tables, notifier};
 
-const MAX_ACCOUNTS_PER_TX: usize = 20;
+const MAX_ACCOUNTS_PER_TX: usize = 30;
 const MAX_ATTEMPTS: usize = 10;
 const CUS_PAYOUT: u32 = 30_000;
 const CUS_REBASE: u32 = 7_000;
