@@ -1,7 +1,5 @@
 use ore_boost_api::{
-    consts::BOOST,
-    instruction::Withdraw,
-    state::{Boost, Stake},
+    consts::BOOST, error::BoostError, instruction::Withdraw, state::{Boost, Stake}
 };
 use steel::*;
 
@@ -25,7 +23,7 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     let boost = boost_info
         .as_account_mut::<Boost>(&ore_boost_api::ID)?
         .assert_mut(|b| b.mint == *mint_info.key)?
-        .assert_mut(|b| b.locked == 0)?;
+        .assert_mut_err(|b| b.locked == 0, BoostError::BoostLocked.into())?;
     boost_deposits_info
         .is_writable()?
         .as_associated_token_account(boost_info.key, mint_info.key)?;
