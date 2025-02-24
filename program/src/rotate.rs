@@ -10,7 +10,7 @@ use solana_program::{keccak::hashv, log::sol_log};
 use steel::*;
 
 // P(boost) base probability for every miner.
-const BASE_RESERVATION_PROBABILITY: u64 = 10;
+const BASE_RESERVATION_PROBABILITY: u64 = 15;
 
 /// Rotates a reservation to a randomly selected boost in the directory.
 pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
