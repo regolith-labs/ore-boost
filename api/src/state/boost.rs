@@ -2,25 +2,22 @@ use steel::*;
 
 use super::BoostAccount;
 
-/// Boost tracks the mining multiplier and stake deposits of a boost account.
+/// Boost tracks the rewards multiplier and total stake balances of an incentive.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Boost {
-    /// The bump used for signing.
-    pub bump: u64,
-
     /// The unix timestamp this boost expires.
     pub expires_at: i64,
-
-    /// Flag indicating if this boost is locked for checkpointing.
-    pub locked: u64,
 
     /// The mint address of the token associated with this boost.
     pub mint: Pubkey,
 
-    /// The multiplier allocated to this boost.
+    /// The rewards multiplier associated with this boost.
     pub multiplier: u64,
-    
+
+    /// The cumulative rewards currently collected by this boost.
+    pub rewards_cumulative: Numeric,
+
     // The total amount of stake deposited in this boost.
     pub total_deposits: u64,
 
