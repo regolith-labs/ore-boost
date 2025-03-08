@@ -28,7 +28,7 @@ pub fn process_initialize(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Program
     config.current = Pubkey::default();
     config.len = 0;
     config.noise = [0; 32];
-    config.staker_take_rate = 5000;
+    config.staker_take_rate = 5_000;
     config.ts = 0;
 
     Ok(())

@@ -15,9 +15,6 @@ pub struct Stake {
     /// The boost this stake account is associated with.
     pub boost: Pubkey,
 
-    /// The id of this stake account.
-    pub id: u64,
-
     /// The timestamp of the last time stake was claimed.
     pub last_claim_at: i64,
 
