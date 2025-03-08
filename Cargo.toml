@@ -24,15 +24,27 @@ futures = "0.3"
 num_enum = "0.7.2"
 ore-api = "3.1"
 ore-boost-api = { path = "api" }
-solana-cli-config = "^2.1"
-solana-client = "^2.1"
-solana-program = "^2.1"
-solana-rpc-client = "^2.1"
-solana-sdk = "^2.1"
-solana-transaction-status = "^2.1"
+ore-boost-api-v3 = { git = "https://github.com/regolith-labs/ore-boost.git", branch = "hardhat/boost-v3" }
+solana-cli-config = "=2.1"
+solana-client = "=2.1"
+solana-program = "=2.1"
+solana-rpc-client = "=2.1"
+solana-sdk = "=2.1"
+solana-transaction-status = "=2.1"
 spl-token = { version = "^4", features = ["no-entrypoint"] }
 spl-associated-token-account = { version = "^6", features = ["no-entrypoint"] }
 static_assertions = "1.1.0"
 steel = { features = ["spl"], version = "3.0" }
 thiserror = "1.0.57"
 tokio = "1.35"
+
+[patch.crates-io]
+ore-api = { git = "https://github.com/regolith-labs/ore.git", branch = "hardhat/steel-v4" }
+# ore-api = { path = "../ore/api" }
+steel = { git = "https://github.com/regolith-labs/steel.git", branch = "hardhat/numeric" }
+
+[profile.release]
+overflow-checks = true
+
+[profile.dev]
+overflow-checks = true

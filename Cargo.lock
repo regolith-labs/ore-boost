@@ -2782,8 +2782,7 @@ dependencies = [
 [[package]]
 name = "ore-api"
 version = "3.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e39a43365aa90e4987c735cbb5b5d11ac67ed0253e9f4adb527c1f52bfd1033"
+source = "git+https://github.com/regolith-labs/ore.git?branch=hardhat/steel-v4#3a528d92a1ad41bead22c1157bd3650aa6353db6"
 dependencies = [
  "array-const-fn-init",
  "bytemuck",
@@ -6974,3 +6973,8 @@ dependencies = [
  "cc",
  "pkg-config",
 ]
+
+[[patch.unused]]
+name = "steel"
+version = "4.0.0"
+source = "git+https://github.com/regolith-labs/steel.git?branch=hardhat/numeric#7080b36ef45c445e5b8b143db6ba2b13eb8093e7"
