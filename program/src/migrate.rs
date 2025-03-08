@@ -13,10 +13,10 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-    let signer = signer_info.is_signer()?;
+    signer_info.is_signer()?;
     config_info
         .as_account_mut::<Config>(&ore_boost_api::ID)?
-        .assert_mut(|c| c.authority == *signer_info.key)?;
+        .assert_mut(|c| c.authority == *signer_info.key)?; // Migration can only be called by the admin
     payer_info.is_signer()?;
     let boost = boost_info
         .as_account_mut::<Boost>(&ore_boost_api::ID)?
