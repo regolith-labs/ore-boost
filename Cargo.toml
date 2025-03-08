@@ -39,5 +39,12 @@ thiserror = "1.0.57"
 tokio = "1.35"
 
 [patch.crates-io]
-ore-api = { git = "https://github.com/regolith-labs/ore.git", branch = "hardhat/steel-v4" }
+# ore-api = { git = "https://github.com/regolith-labs/ore.git", branch = "hardhat/steel-v4" }
+ore-api = { path = "../ore/api" }
 steel = { git = "https://github.com/regolith-labs/steel.git", branch = "hardhat/numeric" }
+
+[profile.release]
+overflow-checks = true
+
+[profile.dev]
+overflow-checks = true

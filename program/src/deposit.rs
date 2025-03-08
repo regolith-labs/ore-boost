@@ -9,15 +9,16 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
     let amount = u64::from_le_bytes(args.amount);
 
     // Load accounts.
-    let [signer_info, boost_info, boost_deposits_info, boost_proof_info, boost_rewards_info, mint_info, sender_info, stake_info, ore_program, token_program] =
+    let clock = Clock::get()?;
+    let [signer_info, boost_info, boost_deposits_info, boost_proof_info, boost_rewards_info, mint_info, sender_info, stake_info, treasury_info, treasury_tokens_info, ore_program, token_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
     let boost = boost_info
-        .as_account::<Boost>(&ore_boost_api::ID)?
-        .assert(|b| b.mint == *mint_info.key)?;
+        .as_account_mut::<Boost>(&ore_boost_api::ID)?
+        .assert_mut(|b| b.mint == *mint_info.key)?;
     boost_deposits_info
         .is_writable()?
         .as_associated_token_account(boost_info.key, mint_info.key)?;
@@ -38,12 +39,11 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
     ore_program.is_program(&ore_api::ID)?;
     token_program.is_program(&spl_token::ID)?;
 
-    // Record rewards accrued to this boost.
+    // Accumulate personal stake rewards.
     boost.rewards_cumulative += Numeric::from_fraction(proof.balance, boost.total_deposits);
-
-    // Claim rewards for this boost.
+    stake.accumulate_rewards(boost, &clock);
     invoke_signed(
-        &ore_api::sdk::claim(*boost_info.key, *boost_rewards_info.key, proof_balance),
+        &ore_api::sdk::claim(*boost_info.key, *boost_rewards_info.key, proof.balance),
         &[
             boost_info.clone(),
             boost_rewards_info.clone(),
@@ -57,24 +57,18 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
         &[BOOST, boost.mint.as_ref()],
     )?;
 
-    // // Normalize amount.
-    // let amount = amount.min(sender.amount);
-
-    // // Update balances.
-    // stake.balance_pending = stake.balance_pending.checked_add(amount).unwrap();
-
-    // // Update timestamps.
-    // let clock = Clock::get()?;
-    // stake.last_deposit_at = clock.unix_timestamp;
-
-    // // Transfer tokens.
-    // transfer(
-    //     signer_info,
-    //     sender_info,
-    //     boost_deposits_info,
-    //     token_program,
-    //     amount,
-    // )?;
+    // Update deposit balances.
+    let amount = amount.min(sender.amount());
+    boost.total_deposits += amount;
+    stake.balance += amount;
+    stake.last_deposit_at = clock.unix_timestamp;
+    transfer(
+        signer_info,
+        sender_info,
+        boost_deposits_info,
+        token_program,
+        amount,
+    )?;
 
     Ok(())
 }
