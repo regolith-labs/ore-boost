@@ -38,7 +38,7 @@ pub fn process_open(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult
     stake.balance = 0;
     stake.boost = *boost_info.key;
     stake.id = boost.total_stakers;
-    stake.last_boost_rewards = Numeric::ZERO;
+    stake.last_boost_cumulative_rewards = Numeric::ZERO;
     stake.last_claim_at = clock.unix_timestamp;
     stake.last_deposit_at = clock.unix_timestamp;
     stake.rewards = 0;

@@ -1,4 +1,3 @@
-use const_crypto::ed25519;
 use solana_program::{pubkey, pubkey::Pubkey};
 
 /// The authority allowed to initialize the program.
