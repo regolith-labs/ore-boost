@@ -1,27 +1,29 @@
 mod activate;
-mod deactivate;
 mod claim;
+mod deactivate;
 mod deposit;
 mod initialize;
+mod migrate;
 mod new;
 mod open;
+mod rebase;
 mod register;
 mod rotate;
-mod rebase;
 mod update_admin;
 mod update_boost;
 mod withdraw;
 
 use activate::*;
-use deactivate::*;
 use claim::*;
+use deactivate::*;
 use deposit::*;
 use initialize::*;
+use migrate::*;
 use new::*;
 use open::*;
+use rebase::*;
 use register::*;
 use rotate::*;
-use rebase::*;
 use update_admin::*;
 use update_boost::*;
 use withdraw::*;
@@ -53,6 +55,9 @@ pub fn process_instruction(
         BoostInstruction::New => process_new(accounts, data)?,
         BoostInstruction::UpdateAdmin => process_update_admin(accounts, data)?,
         BoostInstruction::UpdateBoost => process_update_boost(accounts, data)?,
+
+        // Migration
+        BoostInstruction::Migrate => process_migrate(accounts, data)?,
     }
 
     Ok(())
