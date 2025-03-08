@@ -2839,8 +2839,7 @@ dependencies = [
 [[package]]
 name = "ore-boost-api"
 version = "1.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0a9faab35b67977d3e45d8e40a938f0515e527ced34aa51668d3399c833619b"
+source = "git+https://github.com/regolith-labs/ore-boost.git?branch=hardhat/v2-migration#5096b0449d91e1c9e4cd775c2cc07b22cbef4021"
 dependencies = [
  "array-const-fn-init",
  "bytemuck",
@@ -2863,7 +2862,7 @@ dependencies = [
  "bytemuck",
  "ore-api",
  "ore-boost-api 1.4.0",
- "ore-boost-api 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ore-boost-api 1.4.0 (git+https://github.com/regolith-labs/ore-boost.git?branch=hardhat/v2-migration)",
  "rand 0.8.5",
  "solana-program",
  "solana-program-test",
@@ -6311,7 +6310,7 @@ dependencies = [
 [[package]]
 name = "steel"
 version = "4.0.0"
-source = "git+https://github.com/regolith-labs/steel.git?branch=hardhat/numeric#5f21f61d1eb1a7b8de464f2b85e9d150f0a862e7"
+source = "git+https://github.com/regolith-labs/steel.git?branch=hardhat/numeric#7080b36ef45c445e5b8b143db6ba2b13eb8093e7"
 dependencies = [
  "bytemuck",
  "fixed",
