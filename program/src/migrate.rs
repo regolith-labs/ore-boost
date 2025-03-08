@@ -1,6 +1,6 @@
 use ore_api::consts::INITIALIZER_ADDRESS;
 use ore_boost_api::{
-    consts::STAKE,
+    consts::{BOOST, STAKE},
     state::{Boost, Stake},
 };
 use solana_program::system_program;
@@ -24,10 +24,10 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
         .assert(|b| b.mint == boost.mint)?;
     let boost_deposits = boost_deposits_info
         .is_writable()?
-        .as_associated_token_account(boost_info.key, &boost.mint.key)?;
+        .as_associated_token_account(boost_info.key, &boost.mint)?;
     let boost_deposits_v3 = boost_deposits_v3_info
         .is_writable()?
-        .as_associated_token_account(boost_v3_info.key, &boost.mint.key)?;
+        .as_associated_token_account(boost_v3_info.key, &boost.mint)?;
     let boost_rewards = boost_rewards_info
         .is_writable()?
         .as_associated_token_account(boost_info.key, &ore_api::consts::MINT_ADDRESS)?;
@@ -55,7 +55,7 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
         boost_deposits_v3_info,
         token_program,
         stake.balance,
-        &[BOOST, boost.mint.key.as_ref()],
+        &[BOOST, boost.mint.as_ref()],
     )?;
 
     // Migrate rewards.
@@ -65,7 +65,7 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
         boost_rewards_v3_info,
         token_program,
         stake.rewards,
-        &[BOOST, boost.mint.key.as_ref()],
+        &[BOOST, boost.mint.as_ref()],
     )?;
 
     // Decrement amounts.

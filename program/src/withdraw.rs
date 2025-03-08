@@ -1,5 +1,8 @@
 use ore_boost_api::{
-    consts::BOOST, error::BoostError, instruction::Withdraw, state::{Boost, Stake}
+    consts::BOOST,
+    error::BoostError,
+    instruction::Withdraw,
+    state::{Boost, Stake},
 };
 use steel::*;
 
@@ -19,7 +22,7 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     beneficiary_info
         .is_writable()?
         .as_token_account()?
-        .assert(|t| t.mint == *mint_info.key)?;
+        .assert(|t| t.mint() == *mint_info.key)?;
     let boost = boost_info
         .as_account_mut::<Boost>(&ore_boost_api::ID)?
         .assert_mut(|b| b.mint == *mint_info.key)?
@@ -46,7 +49,10 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     stake.balance = stake.balance.checked_sub(committed_withdraw).unwrap();
 
     // Update the boost balance
-    boost.total_deposits = boost.total_deposits.checked_sub(committed_withdraw).unwrap();
+    boost.total_deposits = boost
+        .total_deposits
+        .checked_sub(committed_withdraw)
+        .unwrap();
 
     // Transfer tokens from boost to beneficiary
     transfer_signed(
