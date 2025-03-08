@@ -21,10 +21,16 @@ default = []
 [dependencies]
 ore-api.workspace = true
 ore-boost-api.workspace = true
+ore-boost-api-v1.workspace = true
 solana-program.workspace = true
 spl-token.workspace = true
 spl-associated-token-account.workspace = true
 steel.workspace = true
 
 [dev-dependencies]
+base64 = "0.21"
+bytemuck = "1.13"
 rand = "0.8.5"
+solana-program-test = "2.1"
+solana-sdk = "2.1"
+tokio = { version = "1.35", features = ["full"] }
