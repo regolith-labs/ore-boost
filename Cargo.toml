@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["api", "checkpoint", "program"]
+members = ["api", "program"]
 
 [workspace.package]
 version = "1.4.0"
@@ -21,6 +21,7 @@ clap = { version = "4.4.12", features = ["derive"] }
 const-crypto = "0.1.0"
 log = "0.4"
 futures = "0.3"
+fixed = "=1.28"
 num_enum = "0.7.2"
 ore-api = "3.1"
 ore-boost-api = { path = "api" }
@@ -33,6 +34,10 @@ solana-transaction-status = "^2.1"
 spl-token = { version = "^4", features = ["no-entrypoint"] }
 spl-associated-token-account = { version = "^6", features = ["no-entrypoint"] }
 static_assertions = "1.1.0"
-steel = { features = ["spl"], version = "3.0" }
+steel = { version = "4.0", features = ["spl"] }
 thiserror = "1.0.57"
 tokio = "1.35"
+
+[patch.crates-io]
+ore-api = { git = "https://github.com/regolith-labs/ore.git", branch = "hardhat/steel-v4" }
+steel = { git = "https://github.com/regolith-labs/steel.git", branch = "hardhat/numeric" }
