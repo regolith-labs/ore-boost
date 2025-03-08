@@ -40,8 +40,8 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
     token_program.is_program(&spl_token::ID)?;
 
     // Accumulate personal stake rewards.
-    boost.rewards_cumulative += Numeric::from_fraction(proof.balance, boost.total_deposits);
-    stake.accumulate_rewards(boost, &clock);
+    boost.rewards_factor += Numeric::from_fraction(proof.balance, boost.total_deposits);
+    stake.accumulate_rewards(boost);
     invoke_signed(
         &ore_api::sdk::claim(*boost_info.key, *boost_rewards_info.key, proof.balance),
         &[

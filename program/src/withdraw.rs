@@ -13,7 +13,6 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     let amount = u64::from_le_bytes(args.amount);
 
     // Load accounts.
-    let clock = Clock::get()?;
     let [signer_info, beneficiary_info, boost_info, boost_deposits_info, boost_proof_info, boost_rewards_info, mint_info, stake_info, treasury_info, treasury_tokens_info, ore_program, token_program] =
         accounts
     else {
@@ -45,8 +44,8 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     token_program.is_program(&spl_token::ID)?;
 
     // Accumulate personal stake rewards.
-    boost.rewards_cumulative += Numeric::from_fraction(proof.balance, boost.total_deposits);
-    stake.accumulate_rewards(boost, &clock);
+    boost.rewards_factor += Numeric::from_fraction(proof.balance, boost.total_deposits);
+    stake.accumulate_rewards(boost);
     invoke_signed(
         &ore_api::sdk::claim(*boost_info.key, *boost_rewards_info.key, proof.balance),
         &[
