@@ -16,7 +16,7 @@ pub struct Boost {
     pub multiplier: u64,
 
     /// The cumulative rewards currently collected by this boost.
-    pub rewards_cumulative: Numeric,
+    pub rewards_factor: Numeric,
 
     // The total amount of stake deposited in this boost.
     pub total_deposits: u64,

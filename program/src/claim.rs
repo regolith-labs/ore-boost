@@ -38,8 +38,8 @@ pub fn process_claim(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult
     token_program.is_program(&spl_token::ID)?;
 
     // Update stake rewards.
-    boost.rewards_cumulative += Numeric::from_fraction(proof.balance, boost.total_deposits);
-    stake.accumulate_rewards(boost, &clock);
+    boost.rewards_factor += Numeric::from_fraction(proof.balance, boost.total_deposits);
+    stake.accumulate_rewards(boost);
     invoke_signed(
         &ore_api::sdk::claim(*boost_info.key, *boost_rewards_info.key, proof.balance),
         &[
@@ -56,6 +56,7 @@ pub fn process_claim(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult
     )?;
 
     // Transfer tokens from boost to beneficiary.
+    stake.last_claim_at = clock.unix_timestamp;
     stake.rewards -= amount;
     transfer_signed(
         boost_info,
