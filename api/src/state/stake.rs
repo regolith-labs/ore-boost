@@ -37,6 +37,9 @@ impl Stake {
         }
         if boost.rewards_factor > self.last_rewards_factor {
             let accumulated_rewards = boost.rewards_factor - self.last_rewards_factor;
+            if accumulated_rewards < Numeric::ZERO {
+                panic!("Accumulated rewards is negative");
+            }
             let personal_rewards = accumulated_rewards * Numeric::from_u64(self.balance);
             self.rewards += personal_rewards.to_u64();
         }

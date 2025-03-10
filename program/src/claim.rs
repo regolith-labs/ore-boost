@@ -6,6 +6,8 @@ use steel::*;
 
 /// Claim distributes rewards to a staker.
 pub fn process_claim(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
+    panic!("Program is in withdraw-only mode");
+
     // Parse args.
     let args = Claim::try_from_bytes(data)?;
     let amount = u64::from_le_bytes(args.amount);
@@ -23,13 +25,12 @@ pub fn process_claim(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult
         .as_token_account()?
         .assert(|t| t.mint() == ore_api::consts::MINT_ADDRESS)?;
     let boost = boost_info.as_account_mut::<Boost>(&ore_boost_api::ID)?;
-    let proof = boost_proof_info
+    let boost_proof = boost_proof_info
         .as_account::<Proof>(&ore_api::ID)?
         .assert(|p| p.authority == *boost_info.key)?;
     boost_rewards_info
         .is_writable()?
-        .as_associated_token_account(boost_info.key, &ore_api::consts::MINT_ADDRESS)?
-        .assert(|t| t.amount() >= amount)?;
+        .as_associated_token_account(boost_info.key, &ore_api::consts::MINT_ADDRESS)?;
     let stake = stake_info
         .as_account_mut::<Stake>(&ore_boost_api::ID)?
         .assert_mut(|s| s.authority == *signer_info.key)?
@@ -38,9 +39,13 @@ pub fn process_claim(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult
     token_program.is_program(&spl_token::ID)?;
 
     // Update stake rewards.
-    stake.accumulate_rewards(boost, &proof);
+    stake.accumulate_rewards(boost, &boost_proof);
     invoke_signed(
-        &ore_api::sdk::claim(*boost_info.key, *boost_rewards_info.key, proof.balance),
+        &ore_api::sdk::claim(
+            *boost_info.key,
+            *boost_rewards_info.key,
+            boost_proof.balance,
+        ),
         &[
             boost_info.clone(),
             boost_rewards_info.clone(),
