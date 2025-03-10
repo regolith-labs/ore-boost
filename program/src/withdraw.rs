@@ -44,8 +44,7 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     token_program.is_program(&spl_token::ID)?;
 
     // Accumulate personal stake rewards.
-    boost.rewards_factor += Numeric::from_fraction(proof.balance, boost.total_deposits);
-    stake.accumulate_rewards(boost);
+    stake.accumulate_rewards(boost, &proof);
     invoke_signed(
         &ore_api::sdk::claim(*boost_info.key, *boost_rewards_info.key, proof.balance),
         &[

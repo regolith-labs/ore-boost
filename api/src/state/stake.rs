@@ -1,3 +1,4 @@
+use ore_api::state::Proof;
 use steel::*;
 
 use super::{Boost, BoostAccount};
@@ -29,14 +30,17 @@ pub struct Stake {
 }
 
 impl Stake {
-    // Accumulate personal stake rewards.
-    pub fn accumulate_rewards(&mut self, boost: &Boost) {
-        if self.balance > 0 && boost.rewards_factor > self.last_rewards_factor {
+    // Accumulate staking rewards.
+    pub fn accumulate_rewards(&mut self, boost: &mut Boost, proof: &Proof) {
+        if boost.total_deposits > 0 {
+            boost.rewards_factor += Numeric::from_fraction(proof.balance, boost.total_deposits);
+        }
+        if boost.rewards_factor > self.last_rewards_factor {
             let accumulated_rewards = boost.rewards_factor - self.last_rewards_factor;
             let personal_rewards = accumulated_rewards * Numeric::from_u64(self.balance);
-            self.rewards += personal_rewards.floor().to_i80f48().to_num::<u64>();
-            self.last_rewards_factor = boost.rewards_factor;
+            self.rewards += personal_rewards.to_u64();
         }
+        self.last_rewards_factor = boost.rewards_factor;
     }
 }
 

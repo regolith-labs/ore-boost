@@ -4,6 +4,8 @@ use steel::*;
 
 /// Deposit adds tokens to a stake account.
 pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
+    panic!("Program is in withdraw-only mode");
+
     // Parse args.
     let args = Deposit::try_from_bytes(data)?;
     let amount = u64::from_le_bytes(args.amount);
@@ -40,8 +42,7 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
     token_program.is_program(&spl_token::ID)?;
 
     // Accumulate personal stake rewards.
-    boost.rewards_factor += Numeric::from_fraction(proof.balance, boost.total_deposits);
-    stake.accumulate_rewards(boost);
+    stake.accumulate_rewards(boost, &proof);
     invoke_signed(
         &ore_api::sdk::claim(*boost_info.key, *boost_rewards_info.key, proof.balance),
         &[

@@ -8,7 +8,8 @@ use steel::*;
 /// Open creates a new stake account.
 pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
     // Load accounts.
-    let [signer_info, authority_info, config_info, payer_info, boost_info, boost_v1_info, boost_rewards_info, boost_rewards_v1_info, boost_deposits_info, boost_deposits_v1_info, mint_info, stake_info, stake_v1_info, system_program, token_program] =
+    let clock = Clock::get()?;
+    let [signer_info, authority_info, config_info, payer_info, boost_info, boost_v1_info, boost_deposits_info, boost_deposits_v1_info, boost_rewards_info, boost_rewards_v1_info, mint_info, stake_info, stake_v1_info, system_program, token_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -25,12 +26,12 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
     let boost_v1 = boost_v1_info
         .as_account::<ore_boost_api_v1::state::Boost>(&ore_boost_api_v1::ID)? // TODO Parsing
         .assert(|b| b.mint == *mint_info.key)?;
+    boost_deposits_info.as_associated_token_account(&boost_info.key, mint_info.key)?;
+    boost_deposits_v1_info.as_associated_token_account(&boost_v1_info.key, mint_info.key)?;
     boost_rewards_info
         .as_associated_token_account(&boost_info.key, &ore_api::consts::MINT_ADDRESS)?;
     boost_rewards_v1_info
         .as_associated_token_account(&boost_v1_info.key, &ore_api::consts::MINT_ADDRESS)?;
-    boost_deposits_info.as_associated_token_account(&boost_info.key, mint_info.key)?;
-    boost_deposits_v1_info.as_associated_token_account(&boost_v1_info.key, mint_info.key)?;
     mint_info.as_mint()?;
     stake_info.is_empty()?.is_writable()?.has_seeds(
         &[STAKE, signer_info.key.as_ref(), boost_info.key.as_ref()],
@@ -42,6 +43,7 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
         .assert(|s| s.id == boost.total_stakers)?; // TODO Parsing
     system_program.is_program(&system_program::ID)?;
     token_program.is_program(&spl_token::ID)?;
+
     // Initialize the stake account.
     create_program_account::<Stake>(
         stake_info,
@@ -50,7 +52,6 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
         &ore_boost_api::ID,
         &[STAKE, signer_info.key.as_ref(), boost_info.key.as_ref()],
     )?;
-    let clock = Clock::get()?;
     let stake = stake_info.as_account_mut::<Stake>(&ore_boost_api::ID)?;
     stake.authority = *signer_info.key;
     stake.balance = 0;
