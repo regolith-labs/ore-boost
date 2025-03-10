@@ -1,6 +1,6 @@
 use ore_api::consts::INITIALIZER_ADDRESS;
 use ore_boost_api::{
-    consts::{BOOST, STAKE},
+    consts::BOOST,
     state::{Boost, Stake},
 };
 use solana_program::system_program;
@@ -15,23 +15,24 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?.has_address(&INITIALIZER_ADDRESS)?;
-    authority_info.is_writable();
+    authority_info.is_writable()?;
     let boost = boost_info
         .as_account_mut::<Boost>(&ore_boost_api::ID)?
         .assert_mut(|b| b.mint == *mint_info.key)?;
-    let boost_v3 = boost_v3_info
+    boost_v3_info
+        .is_signer()?
         .as_account::<ore_boost_api_v3::state::Boost>(&ore_boost_api_v3::ID)?
         .assert(|b| b.mint == boost.mint)?;
-    let boost_deposits = boost_deposits_info
+    boost_deposits_info
         .is_writable()?
         .as_associated_token_account(boost_info.key, &boost.mint)?;
-    let boost_deposits_v3 = boost_deposits_v3_info
+    boost_deposits_v3_info
         .is_writable()?
         .as_associated_token_account(boost_v3_info.key, &boost.mint)?;
-    let boost_rewards = boost_rewards_info
+    boost_rewards_info
         .is_writable()?
         .as_associated_token_account(boost_info.key, &ore_api::consts::MINT_ADDRESS)?;
-    let boost_rewards_v3 = boost_rewards_v3_info
+    boost_rewards_v3_info
         .is_writable()?
         .as_associated_token_account(boost_v3_info.key, &ore_api::consts::MINT_ADDRESS)?;
     mint_info.as_mint()?;
@@ -39,7 +40,7 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
         .as_account_mut::<Stake>(&ore_boost_api::ID)?
         .assert_mut(|s| s.authority == *authority_info.key)?
         .assert_mut(|s| s.boost == *boost_info.key)?;
-    let stake_v3 = stake_v3_info
+    stake_v3_info
         .as_account::<ore_boost_api_v3::state::Stake>(&ore_boost_api_v3::ID)?
         .assert(|s| s.authority == stake.authority)?
         .assert(|s| s.boost == *signer_info.key)?
