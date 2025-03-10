@@ -16,6 +16,7 @@ const-crypto.workspace = true
 fixed.workspace = true
 num_enum.workspace = true
 ore-api.workspace = true
+ore-boost-api-v1.workspace = true
 solana-program.workspace = true
 spl-token.workspace = true
 spl-associated-token-account.workspace = true

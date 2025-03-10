@@ -1,10 +1,22 @@
+use ore_api::state::Proof;
 use ore_boost_api::prelude::*;
 use steel::*;
 
 #[tokio::test]
 async fn test_accumulate_rewards() {
     // Amount to reward each round
-    let reward_amount = 100;
+    #[allow(deprecated)]
+    let mut proof = Proof {
+        authority: Pubkey::default(),
+        balance: 0,
+        challenge: [0; 32],
+        last_hash: [0; 32],
+        last_hash_at: 0,
+        last_stake_at: 0,
+        miner: Pubkey::default(),
+        total_hashes: 0,
+        total_rewards: 0,
+    };
 
     // Create a boost with initial state
     let mut boost = Boost {
@@ -13,64 +25,82 @@ async fn test_accumulate_rewards() {
         multiplier: 1,
         rewards_factor: Numeric::ZERO,
         total_deposits: 0, // Start at 100
-        total_stakers: 0,
+        total_stakers: 3,
     };
 
-    // Create a stake account with 100 balance
+    // Create three different stake accounts.
     let mut stake1 = Stake {
         authority: Pubkey::default(),
-        balance: 100,
+        balance: 0,
         boost: Pubkey::default(),
         last_claim_at: 0,
         last_deposit_at: 0,
         last_rewards_factor: boost.rewards_factor,
         rewards: 0,
     };
-    boost.total_deposits += 100;
-
-    // Add 100 rewards to boost
-    boost.rewards_factor += Numeric::from_fraction(reward_amount, boost.total_deposits); // 600 rewards total
-
-    // Create a second stake account with a 150 balance
     let mut stake2 = Stake {
         authority: Pubkey::default(),
-        balance: 150,
+        balance: 0,
         boost: Pubkey::default(),
         last_claim_at: 0,
         last_deposit_at: 0,
         last_rewards_factor: boost.rewards_factor,
         rewards: 0,
     };
-    boost.total_deposits += 150;
-
-    // Add 100 rewards to boost
-    boost.rewards_factor += Numeric::from_fraction(reward_amount, boost.total_deposits);
-
-    // Create a third stake account with a 50 balance
     let mut stake3 = Stake {
         authority: Pubkey::default(),
-        balance: 50,
+        balance: 0,
         boost: Pubkey::default(),
         last_claim_at: 0,
         last_deposit_at: 0,
         last_rewards_factor: boost.rewards_factor,
         rewards: 0,
     };
+
+    // Stake account 1 deposits 100
+    stake1.accumulate_rewards(&mut boost, &mut proof);
+    proof.balance = 0;
+    stake1.balance += 100;
+    boost.total_deposits += 100;
+
+    // Assume 100 rewards are earned
+    proof.balance += 100;
+
+    // Stake account 2 deposits 150
+    stake2.accumulate_rewards(&mut boost, &mut proof);
+    proof.balance = 0;
+    stake2.balance += 150;
+    boost.total_deposits += 150;
+
+    // Assume 100 rewards are earned.
+    proof.balance += 100;
+
+    // Stake account 3 deposits 50
+    stake3.accumulate_rewards(&mut boost, &mut proof);
+    proof.balance = 0;
+    stake3.balance += 50;
     boost.total_deposits += 50;
 
-    // Add 100 rewards to boost
-    boost.rewards_factor += Numeric::from_fraction(reward_amount, boost.total_deposits);
+    // Assume 100 rewards are earned.
+    proof.balance += 100;
 
-    // Accumulate rewards for each stake
-    stake1.accumulate_rewards(&boost);
-    stake2.accumulate_rewards(&boost);
-    stake3.accumulate_rewards(&boost);
+    // Assume stake 1 claims rewards.
+    stake1.accumulate_rewards(&mut boost, &mut proof);
+    proof.balance = 0;
+
+    // Assume stake 2 claims rewards.
+    stake2.accumulate_rewards(&mut boost, &mut proof);
+    proof.balance = 0;
+
+    // Assume stake 3 claims rewards.
+    stake3.accumulate_rewards(&mut boost, &mut proof);
+    proof.balance = 0;
 
     // Verify rewards are distributed proportionally
     assert_eq!(stake1.rewards, 173); // (1.0 of 100) + (0.40 of 100) + (0.33 of 100) = 173
     assert_eq!(stake2.rewards, 109); //                (0.60 of 100) + (0.50 of 100) = 109
     assert_eq!(stake3.rewards, 16); //                                 (0.16 of 100) = 16
 
-    // Total rewards should equal original amount
+    // Total rewards earned should be less than or equal to original amount
     assert!(stake1.rewards + stake2.rewards + stake3.rewards <= 300);
 }
