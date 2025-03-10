@@ -89,7 +89,13 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
 
     // Migrate deposits and rewards assets.
     invoke_signed(
-        &ore_boost_api_v1::sdk::migrate(*signer_info.key, *authority_info.key, boost.mint),
+        &ore_boost_api_v1::sdk::migrate(
+            *signer_info.key,
+            *authority_info.key,
+            boost.mint,
+            *boost_info.key,
+            *stake_info.key,
+        ),
         &[
             signer_info.clone(),
             authority_info.clone(),
