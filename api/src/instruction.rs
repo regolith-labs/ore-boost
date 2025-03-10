@@ -20,6 +20,9 @@ pub enum BoostInstruction {
     New = 103,
     UpdateAdmin = 104,
     UpdateBoost = 105,
+
+    // Migration
+    Migrate = 200,
 }
 
 impl BoostInstruction {
@@ -94,6 +97,10 @@ pub struct Withdraw {
     pub amount: [u8; 8],
 }
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct Migrate {}
+
 instruction!(BoostInstruction, Activate);
 instruction!(BoostInstruction, Claim);
 instruction!(BoostInstruction, Deactivate);
@@ -107,3 +114,4 @@ instruction!(BoostInstruction, Rotate);
 instruction!(BoostInstruction, UpdateAdmin);
 instruction!(BoostInstruction, UpdateBoost);
 instruction!(BoostInstruction, Withdraw);
+instruction!(BoostInstruction, Migrate);
