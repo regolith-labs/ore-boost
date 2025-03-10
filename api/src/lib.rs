@@ -15,4 +15,4 @@ pub mod prelude {
 use steel::*;
 
 // TODO New program id
-declare_id!("BoosTyJFPPtrqJTdi49nnztoEWDJXfDRhyb2fha6PPy");
+declare_id!("BooST9jdDtrg3THn5fo2D4XAtKtciBRi7H2muxVK4JS");
