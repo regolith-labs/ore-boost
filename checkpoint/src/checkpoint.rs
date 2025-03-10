@@ -51,14 +51,14 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
     // derive address
     let (boost_pda, _) = ore_boost_api::state::boost_pda(*mint);
     let (checkpoint_pda, _) = ore_boost_api::state::checkpoint_pda(boost_pda);
-    // get accounts
+    // accounts
     let mut total_stakers = 0;
     let _boost = client.rpc.get_boost(&boost_pda).await?;
     let mut checkpoint = client.rpc.get_checkpoint(&checkpoint_pda).await?;
-    // sync lookup tables
+    let mut ts: i64 = 0;
+    // lookup tables
     let mut stake_accounts = client.rpc.get_boost_stake_accounts(&boost_pda).await?;
-    let mut lookup_tables =
-        lookup_tables::sync(client, &boost_pda, stake_accounts.as_slice()).await?;
+    let mut lookup_tables = vec![];
     // start checkpoint loop
     let mut attempt = 0;
     loop {
@@ -106,11 +106,8 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
         // fetch checkpoint
         match client.rpc.get_checkpoint(&checkpoint_pda).await {
             Ok(cp) => {
-                // always update checkpoint regardless of new timestamp
-                // because the current-id may have moved
-                checkpoint = cp;
                 // if new checkpoint, sync lookup tables
-                if cp.ts.ne(&checkpoint.ts) {
+                if cp.ts.ne(&ts) {
                     // reset attempts
                     // new timestamp implies successful checkpoint
                     attempt = 0;
@@ -127,6 +124,10 @@ pub async fn run(client: &Client, mint: &Pubkey) -> Result<()> {
                         }
                     }
                 }
+                // always update checkpoint regardless of new timestamp
+                // because the current-id may have moved
+                checkpoint = cp;
+                ts = cp.ts;
             }
             Err(err) => {
                 log::error!("{:?} -- {:?}", boost_pda, err);
