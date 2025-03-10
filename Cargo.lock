@@ -2839,13 +2839,33 @@ dependencies = [
 [[package]]
 name = "ore-boost-api"
 version = "1.4.0"
-source = "git+https://github.com/regolith-labs/ore-boost.git?rev=03dedc7#03dedc792c5aabc12c7dfe7ea44c24fb4acc07d3"
+source = "git+https://github.com/regolith-labs/ore-boost.git?branch=hardhat/boost-v3#218d43f591f2d4a86e31d715674fda6031f51f31"
+dependencies = [
+ "array-const-fn-init",
+ "bytemuck",
+ "const-crypto",
+ "fixed",
+ "num_enum",
+ "ore-api",
+ "solana-program",
+ "spl-associated-token-account 6.0.0",
+ "spl-token 4.0.2",
+ "static_assertions",
+ "steel",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "ore-boost-api"
+version = "1.4.0"
+source = "git+https://github.com/regolith-labs/ore-boost.git?rev=2e90807#2e90807fbbff23263a6164914879cd58dc0952b1"
 dependencies = [
  "array-const-fn-init",
  "bytemuck",
  "const-crypto",
  "num_enum",
  "ore-api",
+ "ore-boost-api 1.4.0 (git+https://github.com/regolith-labs/ore-boost.git?branch=hardhat/boost-v3)",
  "solana-program",
  "spl-associated-token-account 6.0.0",
  "spl-token 4.0.2",
@@ -2862,7 +2882,7 @@ dependencies = [
  "bytemuck",
  "ore-api",
  "ore-boost-api 1.4.0",
- "ore-boost-api 1.4.0 (git+https://github.com/regolith-labs/ore-boost.git?rev=03dedc7)",
+ "ore-boost-api 1.4.0 (git+https://github.com/regolith-labs/ore-boost.git?rev=2e90807)",
  "rand 0.8.5",
  "solana-program",
  "solana-program-test",
