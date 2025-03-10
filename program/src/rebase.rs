@@ -1,6 +1,6 @@
 use ore_api::state::Proof;
 use ore_boost_api::{
-    consts::{BOOST, CHECKPOINT_INTERVAL},
+    consts::BOOST,
     state::{Boost, Checkpoint, Stake},
 };
 use steel::*;
@@ -26,7 +26,7 @@ pub fn process_rebase(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
     let checkpoint = checkpoint_info
         .as_account_mut::<Checkpoint>(&ore_boost_api::ID)?
         .assert_mut(|c| c.boost == *boost_info.key)?
-        .assert_mut(|c| clock.unix_timestamp > c.ts + CHECKPOINT_INTERVAL)?;
+        .assert_mut(|c| clock.unix_timestamp > c.ts)?;
     ore_program.is_program(&ore_api::ID)?;
     token_program.is_program(&spl_token::ID)?;
 

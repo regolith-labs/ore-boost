@@ -273,37 +273,41 @@ pub fn withdraw(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
 }
 
 // Build migrate instruction.
-pub fn migrate(signer: Pubkey, authority: Pubkey, mint: Pubkey) -> Instruction {
+pub fn migrate(
+    signer: Pubkey,
+    authority: Pubkey,
+    mint: Pubkey,
+    boost_v3_address: Pubkey,
+    stake_v3_address: Pubkey,
+) -> Instruction {
     let boost_pda = boost_pda(mint);
-    let boost_v3_pda = ore_boost_api_v3::state::boost_pda(mint);
     let boost_deposits_address =
         spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
     let boost_deposits_v3_address =
-        spl_associated_token_account::get_associated_token_address(&boost_v3_pda.0, &mint);
+        spl_associated_token_account::get_associated_token_address(&boost_v3_address, &mint);
     let boost_rewards_address = spl_associated_token_account::get_associated_token_address(
         &boost_pda.0,
         &ore_api::consts::MINT_ADDRESS,
     );
     let boost_rewards_v3_address = spl_associated_token_account::get_associated_token_address(
-        &boost_v3_pda.0,
+        &boost_v3_address,
         &ore_api::consts::MINT_ADDRESS,
     );
     let stake_pda = stake_pda(authority, boost_pda.0);
-    let stake_v3_pda = ore_boost_api_v3::state::stake_pda(authority, boost_v3_pda.0);
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(authority, false),
             AccountMeta::new(boost_pda.0, false),
-            AccountMeta::new_readonly(boost_v3_pda.0, true),
+            AccountMeta::new_readonly(boost_v3_address, true),
             AccountMeta::new(boost_deposits_address, false),
             AccountMeta::new(boost_deposits_v3_address, false),
             AccountMeta::new(boost_rewards_address, false),
             AccountMeta::new(boost_rewards_v3_address, false),
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new(stake_pda.0, false),
-            AccountMeta::new_readonly(stake_v3_pda.0, false),
+            AccountMeta::new_readonly(stake_v3_address, false),
             AccountMeta::new_readonly(solana_program::system_program::ID, false),
             AccountMeta::new_readonly(spl_token::ID, false),
         ],
