@@ -1,12 +1,13 @@
-use ore_api::{consts::{TREASURY_ADDRESS, TREASURY_TOKENS_ADDRESS}, state::proof_pda};
+use ore_api::{
+    consts::{TREASURY_ADDRESS, TREASURY_TOKENS_ADDRESS},
+    state::proof_pda,
+};
 use steel::*;
 
 use crate::{
     instruction::*,
     state::{boost_pda, checkpoint_pda, config_pda, directory_pda, reservation_pda, stake_pda},
 };
-
-
 
 // Build activate instruction.
 pub fn activate(signer: Pubkey, mint: Pubkey) -> Instruction {
@@ -27,7 +28,10 @@ pub fn activate(signer: Pubkey, mint: Pubkey) -> Instruction {
 // Build claim instruction.
 pub fn claim(signer: Pubkey, beneficiary: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     let boost_pda = boost_pda(mint);
-    let boost_rewards_address = spl_associated_token_account::get_associated_token_address(&boost_pda.0, &ore_api::consts::MINT_ADDRESS);
+    let boost_rewards_address = spl_associated_token_account::get_associated_token_address(
+        &boost_pda.0,
+        &ore_api::consts::MINT_ADDRESS,
+    );
     let stake_pda = stake_pda(signer, boost_pda.0);
     Instruction {
         program_id: crate::ID,
@@ -99,8 +103,7 @@ pub fn initialize(signer: Pubkey) -> Instruction {
             AccountMeta::new(directory_pda.0, false),
             AccountMeta::new_readonly(system_program::ID, false),
         ],
-        data: Initialize {}
-        .to_bytes(),
+        data: Initialize {}.to_bytes(),
     }
 }
 
@@ -109,8 +112,10 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> In
     let boost_pda = boost_pda(mint);
     let boost_deposits_address =
         spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
-    let boost_rewards_address =
-        spl_associated_token_account::get_associated_token_address(&boost_pda.0, &ore_api::consts::MINT_ADDRESS);
+    let boost_rewards_address = spl_associated_token_account::get_associated_token_address(
+        &boost_pda.0,
+        &ore_api::consts::MINT_ADDRESS,
+    );
     let checkpoint_pda = checkpoint_pda(boost_pda.0);
     let config_pda = config_pda();
     let proof_pda = proof_pda(boost_pda.0);
@@ -155,15 +160,17 @@ pub fn open(signer: Pubkey, payer: Pubkey, mint: Pubkey) -> Instruction {
             AccountMeta::new(stake_pda.0, false),
             AccountMeta::new_readonly(system_program::ID, false),
         ],
-        data: Open {}
-        .to_bytes(),
+        data: Open {}.to_bytes(),
     }
 }
 
 // Build rebase instruction.
 pub fn rebase(signer: Pubkey, mint: Pubkey, stake: Pubkey) -> Instruction {
     let boost_pda = boost_pda(mint);
-    let boost_rewards = spl_associated_token_account::get_associated_token_address(&boost_pda.0, &ore_api::consts::MINT_ADDRESS);
+    let boost_rewards = spl_associated_token_account::get_associated_token_address(
+        &boost_pda.0,
+        &ore_api::consts::MINT_ADDRESS,
+    );
     let checkpoint_pda = checkpoint_pda(boost_pda.0);
     Instruction {
         program_id: crate::ID,
@@ -262,5 +269,44 @@ pub fn withdraw(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
             amount: amount.to_le_bytes(),
         }
         .to_bytes(),
+    }
+}
+
+// Build migrate instruction.
+pub fn migrate(signer: Pubkey, authority: Pubkey, mint: Pubkey) -> Instruction {
+    let boost_pda = boost_pda(mint);
+    let boost_v3_pda = ore_boost_api_v3::state::boost_pda(mint);
+    let boost_deposits_address =
+        spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
+    let boost_deposits_v3_address =
+        spl_associated_token_account::get_associated_token_address(&boost_v3_pda.0, &mint);
+    let boost_rewards_address = spl_associated_token_account::get_associated_token_address(
+        &boost_pda.0,
+        &ore_api::consts::MINT_ADDRESS,
+    );
+    let boost_rewards_v3_address = spl_associated_token_account::get_associated_token_address(
+        &boost_v3_pda.0,
+        &ore_api::consts::MINT_ADDRESS,
+    );
+    let stake_pda = stake_pda(authority, boost_pda.0);
+    let stake_v3_pda = ore_boost_api_v3::state::stake_pda(authority, boost_v3_pda.0);
+    Instruction {
+        program_id: crate::ID,
+        accounts: vec![
+            AccountMeta::new(signer, true),
+            AccountMeta::new(authority, false),
+            AccountMeta::new(boost_pda.0, false),
+            AccountMeta::new_readonly(boost_v3_pda.0, false),
+            AccountMeta::new(boost_deposits_address, false),
+            AccountMeta::new(boost_deposits_v3_address, false),
+            AccountMeta::new(boost_rewards_address, false),
+            AccountMeta::new(boost_rewards_v3_address, false),
+            AccountMeta::new_readonly(mint, false),
+            AccountMeta::new(stake_pda.0, false),
+            AccountMeta::new_readonly(stake_v3_pda.0, false),
+            AccountMeta::new_readonly(solana_program::system_program::ID, false),
+            AccountMeta::new_readonly(spl_token::ID, false),
+        ],
+        data: Migrate {}.to_bytes(),
     }
 }
