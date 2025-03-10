@@ -28,7 +28,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     boost_rewards_info.is_writable()?.is_empty()?;
     let config = config_info
         .as_account_mut::<Config>(&ore_boost_api::ID)?
-        .assert_mut(|c| c.authority == *signer_info.key)?;
+        .assert_mut(|c| c.admin == *signer_info.key)?;
     mint_info.as_mint()?;
     ore_mint_info
         .has_address(&ore_api::consts::MINT_ADDRESS)?

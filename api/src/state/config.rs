@@ -7,7 +7,7 @@ use super::BoostAccount;
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Config {
     /// The admin authority with permission to set multiplers.
-    pub authority: Pubkey,
+    pub admin: Pubkey,
 
     /// The list of all boosts available for activation.
     pub boosts: [Pubkey; 256],

@@ -12,28 +12,25 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
 
     // Load accounts.
     let clock = Clock::get()?;
-    let [signer_info, boost_info, boost_deposits_info, boost_proof_info, boost_rewards_info, mint_info, sender_info, stake_info, treasury_info, treasury_tokens_info, ore_program, token_program] =
+    let [signer_info, boost_info, boost_deposits_info, boost_proof_info, boost_rewards_info, sender_info, stake_info, treasury_info, treasury_tokens_info, ore_program, token_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
-    let boost = boost_info
-        .as_account_mut::<Boost>(&ore_boost_api::ID)?
-        .assert_mut(|b| b.mint == *mint_info.key)?;
+    let boost = boost_info.as_account_mut::<Boost>(&ore_boost_api::ID)?;
     boost_deposits_info
         .is_writable()?
-        .as_associated_token_account(boost_info.key, mint_info.key)?;
+        .as_associated_token_account(boost_info.key, &boost.mint)?;
     let proof = boost_proof_info
         .as_account::<Proof>(&ore_api::ID)?
         .assert(|p| p.authority == *boost_info.key)?;
     boost_rewards_info
         .is_writable()?
         .as_associated_token_account(boost_info.key, &ore_api::consts::MINT_ADDRESS)?;
-    mint_info.as_mint()?;
     let sender = sender_info
         .is_writable()?
-        .as_associated_token_account(signer_info.key, mint_info.key)?;
+        .as_associated_token_account(signer_info.key, &boost.mint)?;
     let stake = stake_info
         .as_account_mut::<Stake>(&ore_boost_api::ID)?
         .assert_mut(|s| s.authority == *signer_info.key)?

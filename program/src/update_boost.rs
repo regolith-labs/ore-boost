@@ -19,7 +19,7 @@ pub fn process_update_boost(accounts: &[AccountInfo<'_>], data: &[u8]) -> Progra
     let boost = boost_info.as_account_mut::<Boost>(&ore_boost_api::ID)?;
     config_info
         .as_account::<Config>(&ore_boost_api::ID)?
-        .assert(|c| c.authority == *signer_info.key)?;
+        .assert(|c| c.admin == *signer_info.key)?;
 
     // Update the boost multiplier.
     boost.multiplier = multiplier;
