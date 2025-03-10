@@ -296,7 +296,7 @@ pub fn migrate(signer: Pubkey, authority: Pubkey, mint: Pubkey) -> Instruction {
             AccountMeta::new(signer, true),
             AccountMeta::new(authority, false),
             AccountMeta::new(boost_pda.0, false),
-            AccountMeta::new_readonly(boost_v3_pda.0, false),
+            AccountMeta::new_readonly(boost_v3_pda.0, true),
             AccountMeta::new(boost_deposits_address, false),
             AccountMeta::new(boost_deposits_v3_address, false),
             AccountMeta::new(boost_rewards_address, false),
