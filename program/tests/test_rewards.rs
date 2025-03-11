@@ -26,6 +26,7 @@ async fn test_accumulate_rewards() {
         rewards_factor: Numeric::ZERO,
         total_deposits: 0, // Start at 100
         total_stakers: 3,
+        withdraw_fee: 0,
     };
 
     // Create three different stake accounts.
