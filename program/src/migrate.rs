@@ -19,46 +19,32 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
     config_info
         .as_account_mut::<Config>(&ore_boost_api::ID)?
         .assert_mut(|c| c.admin == *signer_info.key)?; // Migration can only be called by the admin
-    log("A".to_string());
     payer_info.is_signer()?;
-    log("B".to_string());
     let boost = boost_info
         .as_account_mut::<Boost>(&ore_boost_api::ID)?
         .assert_mut(|b| b.mint == *mint_info.key)?;
-    log("C".to_string());
     let boost_v1 = boost_v1_info
         .as_account::<ore_boost_api_v1::state::Boost>(&ore_boost_api_v1::ID)? // TODO Parsing
         .assert(|b| b.mint == *mint_info.key)?;
-    log("D".to_string());
     boost_deposits_info.as_associated_token_account(&boost_info.key, mint_info.key)?;
-    log("E".to_string());
     let boost_deposits_v1 =
         boost_deposits_v1_info.as_associated_token_account(&boost_v1_info.key, mint_info.key)?;
-    log("F".to_string());
     boost_rewards_info
         .as_associated_token_account(&boost_info.key, &ore_api::consts::MINT_ADDRESS)?;
-    log("G".to_string());
     let boost_rewards_v1 = boost_rewards_v1_info
         .as_associated_token_account(&boost_v1_info.key, &ore_api::consts::MINT_ADDRESS)?;
-    log("H".to_string());
     mint_info.as_mint()?;
-    log("I".to_string());
     stake_info.is_writable()?.has_seeds(
         &[STAKE, authority_info.key.as_ref(), boost_info.key.as_ref()],
         &ore_boost_api::ID,
     )?;
-    log("J".to_string());
     let stake_v1 = stake_v1_info
         .as_account::<ore_boost_api_v1::state::Stake>(&ore_boost_api_v1::ID)?
         .assert(|s| s.authority == *authority_info.key)?
         .assert(|s| s.boost == *boost_v1_info.key)?; // TODO Parsing
-    log("K".to_string());
     ore_boost_v1_program.is_program(&ore_boost_api_v1::ID)?;
-    log("L".to_string());
     system_program.is_program(&system_program::ID)?;
-    log("M".to_string());
     token_program.is_program(&spl_token::ID)?;
-    log("N".to_string());
 
     // Exit early if stake account is processed out of order.
     if stake_v1.id != boost.total_stakers {
