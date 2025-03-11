@@ -1,8 +1,8 @@
 mod args;
 mod boost;
+mod deactivate;
 mod initialize;
 mod new;
-mod deactivate;
 mod update_boost;
 
 use std::sync::Arc;
@@ -11,7 +11,12 @@ use args::*;
 use clap::{command, Parser, Subcommand};
 use solana_client::{client_error::Result as ClientResult, nonblocking::rpc_client::RpcClient};
 use solana_sdk::{
-    commitment_config::CommitmentConfig, compute_budget::ComputeBudgetInstruction, instruction::Instruction, signature::{read_keypair_file, Keypair, Signature}, signer::Signer, transaction::Transaction
+    commitment_config::CommitmentConfig,
+    compute_budget::ComputeBudgetInstruction,
+    instruction::Instruction,
+    signature::{read_keypair_file, Keypair, Signature},
+    signer::Signer,
+    transaction::Transaction,
 };
 
 struct Cli {
@@ -68,8 +73,8 @@ enum Commands {
     #[command(about = "Deactivate a boost")]
     Deactivate(DeactivateArgs),
 
-    #[command(about = "Fetch the directory")]
-    Directory(DirectoryArgs),
+    #[command(about = "Fetch the config")]
+    Config(ConfigArgs),
 }
 
 #[tokio::main]
@@ -111,8 +116,8 @@ async fn main() {
         Commands::Deactivate(args) => {
             cli.deactivate(args).await.unwrap();
         }
-        Commands::Directory(_) => {
-            cli.directory().await.unwrap();
+        Commands::Config(_) => {
+            cli.config().await.unwrap();
         }
     };
 }
@@ -137,7 +142,10 @@ impl Cli {
         let client = self.rpc_client.clone();
         let compute_budget_ix = ComputeBudgetInstruction::set_compute_unit_limit(1_000_000);
         let compute_price_ix = ComputeBudgetInstruction::set_compute_unit_price(100_000);
-        let mut tx = Transaction::new_with_payer(&[compute_budget_ix, compute_price_ix, ix], Some(&signer.pubkey()));
+        let mut tx = Transaction::new_with_payer(
+            &[compute_budget_ix, compute_price_ix, ix],
+            Some(&signer.pubkey()),
+        );
         let blockhash = client.get_latest_blockhash().await?;
         tx.sign(&[&signer], blockhash);
         client.send_transaction(&tx).await
