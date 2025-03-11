@@ -20,6 +20,8 @@ impl Cli {
         println!("Mint: {:?}", mint);
         println!("Multiplier: {:?}", boost.multiplier);
         println!("Total deposits: {:?}", boost.total_deposits);
+        println!("Total stakers: {:?}", boost.total_stakers);
+        println!("Rewards factor: {:?}", boost.rewards_factor);
         Ok(())
     }
 }

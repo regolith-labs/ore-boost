@@ -2,14 +2,14 @@ use ore_boost_api::{
     consts::{BOOST, STAKE},
     state::{Boost, Config, Stake},
 };
-use solana_program::system_program;
+use solana_program::{program::invoke, system_program};
 use steel::*;
 
 /// Open creates a new stake account.
 pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
     // Load accounts.
     let clock = Clock::get()?;
-    let [signer_info, authority_info, config_info, payer_info, boost_info, boost_v1_info, boost_deposits_info, boost_deposits_v1_info, boost_rewards_info, boost_rewards_v1_info, mint_info, stake_info, stake_v1_info, system_program, token_program] =
+    let [signer_info, authority_info, config_info, payer_info, boost_info, boost_v1_info, boost_deposits_info, boost_deposits_v1_info, boost_rewards_info, boost_rewards_v1_info, mint_info, stake_info, stake_v1_info, ore_boost_v1_program, system_program, token_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -34,18 +34,23 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
     let boost_rewards_v1 = boost_rewards_v1_info
         .as_associated_token_account(&boost_v1_info.key, &ore_api::consts::MINT_ADDRESS)?;
     mint_info.as_mint()?;
-    stake_info.is_empty()?.is_writable()?.has_seeds(
-        &[STAKE, signer_info.key.as_ref(), boost_info.key.as_ref()],
+    stake_info.is_writable()?.has_seeds(
+        &[STAKE, authority_info.key.as_ref(), boost_info.key.as_ref()],
         &ore_boost_api::ID,
     )?;
     let stake_v1 = stake_v1_info
         .as_account::<ore_boost_api_v1::state::Stake>(&ore_boost_api_v1::ID)?
-        .assert(|s| s.authority == *authority_info.key)?; // TODO Parsing
+        .assert(|s| s.authority == *authority_info.key)?
+        .assert(|s| s.boost == *boost_v1_info.key)?; // TODO Parsing
+    ore_boost_v1_program.is_program(&ore_boost_api_v1::ID)?;
     system_program.is_program(&system_program::ID)?;
     token_program.is_program(&spl_token::ID)?;
 
     // Exit early if stake account is processed out of order.
-    if stake_v1.id != boost_v1.total_stakers {
+    if stake_v1.id != boost.total_stakers {
+        return Ok(());
+    }
+    if !stake_info.data_is_empty() {
         return Ok(());
     }
 
@@ -86,9 +91,11 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
     // Get pre transfer balances
     let pre_boost_deposits_balance = boost_deposits_v1.amount();
     let pre_boost_rewards_balance = boost_rewards_v1.amount();
+    let pre_stake_balance = stake_v1.balance;
+    let pre_stake_rewards = stake_v1.rewards;
 
     // Migrate deposits and rewards assets.
-    invoke_signed(
+    invoke(
         &ore_boost_api_v1::sdk::migrate(
             *signer_info.key,
             *authority_info.key,
@@ -110,9 +117,8 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
             stake_info.clone(),
             system_program.clone(),
             token_program.clone(),
+            ore_boost_v1_program.clone(),
         ],
-        &ore_boost_api::ID,
-        &[BOOST, boost.mint.as_ref()],
     )?;
 
     // Assert stake v1 balance and rewards are 0
@@ -126,13 +132,19 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
         boost_deposits_v1_info.as_associated_token_account(&boost_v1_info.key, &boost.mint)?;
     let boost_rewards_v1 = boost_rewards_v1_info
         .as_associated_token_account(&boost_v1_info.key, &ore_api::consts::MINT_ADDRESS)?;
+    log(format!(
+        "{} {} {}",
+        boost_deposits_v1.amount(),
+        pre_boost_deposits_balance,
+        pre_stake_balance
+    ));
     assert_eq!(
         boost_deposits_v1.amount(),
-        pre_boost_deposits_balance - stake_v1.balance
+        pre_boost_deposits_balance - pre_stake_balance
     );
     assert_eq!(
         boost_rewards_v1.amount(),
-        pre_boost_rewards_balance - stake_v1.rewards
+        pre_boost_rewards_balance - pre_stake_rewards
     );
 
     Ok(())

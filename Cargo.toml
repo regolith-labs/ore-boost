@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["api", "migrate", "program"]
+members = ["api", "cli", "migrate", "program"]
 
 [workspace.package]
 version = "1.4.0"
@@ -25,7 +25,7 @@ fixed = "=1.28"
 num_enum = "0.7.2"
 ore-api = "3.1"
 ore-boost-api = { path = "api" }
-ore-boost-api-v1 = { git = "https://github.com/regolith-labs/ore-boost.git", rev = "d6d8d14", package = "ore-boost-api" }
+ore-boost-api-v1 = { git = "https://github.com/regolith-labs/ore-boost.git", rev = "06690d6", package = "ore-boost-api" }
 solana-cli-config = "=2.1"
 solana-client = "=2.1"
 solana-program = "=2.1"

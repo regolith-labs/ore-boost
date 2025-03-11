@@ -14,8 +14,8 @@ pub fn activate(signer: Pubkey, mint: Pubkey) -> Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
-            AccountMeta::new(boost_pda.0, false),
-            AccountMeta::new_readonly(config_pda.0, false),
+            AccountMeta::new_readonly(boost_pda.0, false),
+            AccountMeta::new(config_pda.0, false),
         ],
         data: Activate {}.to_bytes(),
     }
@@ -54,8 +54,8 @@ pub fn deactivate(signer: Pubkey, mint: Pubkey) -> Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
-            AccountMeta::new(boost_pda.0, false),
-            AccountMeta::new_readonly(config_pda.0, false),
+            AccountMeta::new_readonly(boost_pda.0, false),
+            AccountMeta::new(config_pda.0, false),
         ],
         data: Deactivate {}.to_bytes(),
     }
@@ -118,7 +118,7 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, multiplier: u64) -> In
             AccountMeta::new(boost_pda.0, false),
             AccountMeta::new(boost_deposits_address, false),
             AccountMeta::new(boost_rewards_address, false),
-            AccountMeta::new_readonly(config_pda.0, false),
+            AccountMeta::new(config_pda.0, false),
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new_readonly(ore_api::consts::MINT_ADDRESS, false),
             AccountMeta::new(proof_pda.0, false),
@@ -161,7 +161,7 @@ pub fn rotate(signer: Pubkey) -> Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
-            AccountMeta::new_readonly(config_pda.0, false),
+            AccountMeta::new(config_pda.0, false),
         ],
         data: Rotate {}.to_bytes(),
     }
@@ -232,13 +232,16 @@ pub fn migrate(signer: Pubkey, authority: Pubkey, mint: Pubkey) -> Instruction {
         &ore_api::consts::MINT_ADDRESS,
     );
     let stake_pda = stake_pda(authority, boost_pda.0);
-    let stake_v1_pda = ore_boost_api_v1::state::stake_pda(authority, boost_pda.0);
+    let stake_v1_pda = ore_boost_api_v1::state::stake_pda(authority, boost_v1_pda.0);
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(authority, false),
+            AccountMeta::new(config_pda().0, false),
+            AccountMeta::new(signer, true),
             AccountMeta::new(boost_pda.0, false),
+            AccountMeta::new(boost_v1_pda.0, false),
             AccountMeta::new(boost_deposits_address, false),
             AccountMeta::new(boost_deposits_v1_address, false),
             AccountMeta::new(boost_rewards_address, false),
@@ -246,6 +249,7 @@ pub fn migrate(signer: Pubkey, authority: Pubkey, mint: Pubkey) -> Instruction {
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new(stake_pda.0, false),
             AccountMeta::new(stake_v1_pda.0, false),
+            AccountMeta::new_readonly(ore_boost_api_v1::ID, false),
             AccountMeta::new_readonly(system_program::ID, false),
             AccountMeta::new_readonly(spl_token::ID, false),
         ],
