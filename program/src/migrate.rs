@@ -41,7 +41,7 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
     stake_v3_info
         .as_account::<ore_boost_api_v3::state::Stake>(&ore_boost_api_v3::ID)?
         .assert(|s| s.authority == stake.authority)?
-        .assert(|s| s.boost == *signer_info.key)?
+        .assert(|s| s.boost == *boost_v3_info.key)?
         .assert(|s| s.balance == stake.balance)?
         .assert(|s| s.rewards == stake.rewards)?;
     system_program.is_program(&system_program::ID)?;
