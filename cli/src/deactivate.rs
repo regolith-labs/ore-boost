@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use ore_boost_api::state::Directory;
+use ore_boost_api::state::Config;
 use solana_client::client_error::Result as ClientResult;
 use solana_sdk::signer::Signer;
 use steel::{AccountDeserialize, Pubkey};
@@ -17,10 +17,13 @@ impl Cli {
         Ok(())
     }
 
-    pub async fn directory(&self) -> ClientResult<()> {
-        let account = self.rpc_client.get_account_data(&ore_boost_api::state::directory_pda().0).await?;
-        let directory = Directory::try_from_bytes(&account).unwrap();
-        println!("directory: {:?}", directory);
+    pub async fn config(&self) -> ClientResult<()> {
+        let account: Vec<u8> = self
+            .rpc_client
+            .get_account_data(&ore_boost_api::state::config_pda().0)
+            .await?;
+        let config = Config::try_from_bytes(&account).unwrap();
+        println!("config: {:?}", config);
         Ok(())
     }
 }
