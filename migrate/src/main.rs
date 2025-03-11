@@ -4,7 +4,7 @@ mod error;
 use std::{sync::Arc, time::Duration};
 
 use ore_boost_api::state::Boost;
-use solana_sdk::{signature::Keypair, signer::Signer, stake};
+use solana_sdk::signer::Signer;
 use tokio::time::sleep;
 
 use crate::client::{AsyncClient, Client};
@@ -20,31 +20,50 @@ async fn main() -> anyhow::Result<()> {
         let boost_address = ore_boost_api::state::boost_pda(boost_v1.mint).0;
         let boost_v1_address = ore_boost_api_v1::state::boost_pda(boost_v1.mint).0;
         let boost = client.rpc.get_boost(&boost_address).await?;
+
+        // Migrate
         let mut stake_accounts = client
             .rpc
             .get_boost_v1_stake_accounts(&boost_v1_address)
             .await?;
         stake_accounts.sort_by_key(|(_, stake)| stake.id);
         for stake_v1 in stake_accounts {
-            // let res = migrate_stake_account(client.clone(), boost_v1, stake_v1.1).await;
             let res = migrate_stake_account(client.clone(), boost, boost_v1, stake_v1.1).await;
             match res {
                 Ok(_) => println!("Success"),
                 Err(e) => println!("Error: {:?}", e),
             }
         }
-        // println!("Boost: {:?}", boost);
-        // println!("Stake accounts: {:?}", stake_accounts);
+
+        // Refresh stake balances. Check they are nulled.
+        sleep(Duration::from_secs(5)).await;
+        let mut stake_accounts = client
+            .rpc
+            .get_boost_v1_stake_accounts(&boost_v1_address)
+            .await?;
+        stake_accounts.sort_by_key(|(_, stake)| stake.id);
+        for stake_v1 in stake_accounts {
+            check_balances(boost_v1, stake_v1.1).await?;
+        }
+
+        // Assert boost
+        sleep(Duration::from_secs(5)).await;
+        let boost = client.rpc.get_boost(&boost_address).await?;
+        assert_eq!(boost.total_stakers, boost_v1.total_stakers);
     }
-    // let boosts = client.get_boosts().await?;
+    Ok(())
+}
 
-    // Run migration.
-    // TODO Fetch all v1 and v3 boosts.
-    // TODO For each boost, fetch all stake accounts.
-    // TODO For each stake account, submit a migrate instruction.
-
-    // Verify migration.
-    // TODO
+async fn check_balances(
+    boost_v1: ore_boost_api_v1::state::Boost,
+    stake_v1: ore_boost_api_v1::state::Stake,
+) -> anyhow::Result<()> {
+    println!(
+        "Stake v1: ({}/{}) {} {}",
+        stake_v1.id, boost_v1.total_stakers, stake_v1.balance, stake_v1.rewards
+    );
+    assert!(stake_v1.balance == 0);
+    assert!(stake_v1.rewards == 0);
     Ok(())
 }
 
@@ -82,9 +101,8 @@ async fn migrate_stake_account(
         Err(e) => println!("    FAIL: {}", e),
     }
 
-    sleep(Duration::from_secs(1)).await;
-
     // TODO Log post migration state (new and old stake accounts)
+    sleep(Duration::from_secs(2)).await;
     let stake = client.rpc.get_stake(&stake_address).await?;
     let stake_v1 = client.rpc.get_stake_v1(&stake_v1_address).await?;
     println!("    Post balance (v1): {}", stake_v1.balance);

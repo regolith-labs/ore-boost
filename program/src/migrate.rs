@@ -2,7 +2,7 @@ use ore_boost_api::{
     consts::{BOOST, STAKE},
     state::{Boost, Config, Stake},
 };
-use solana_program::system_program;
+use solana_program::{program::invoke, system_program};
 use steel::*;
 
 /// Open creates a new stake account.
@@ -91,9 +91,11 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
     // Get pre transfer balances
     let pre_boost_deposits_balance = boost_deposits_v1.amount();
     let pre_boost_rewards_balance = boost_rewards_v1.amount();
+    let pre_stake_balance = stake_v1.balance;
+    let pre_stake_rewards = stake_v1.rewards;
 
     // Migrate deposits and rewards assets.
-    invoke_signed(
+    invoke(
         &ore_boost_api_v1::sdk::migrate(
             *signer_info.key,
             *authority_info.key,
@@ -115,9 +117,8 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
             stake_info.clone(),
             system_program.clone(),
             token_program.clone(),
+            ore_boost_v1_program.clone(),
         ],
-        &ore_boost_api_v1::ID,
-        &[BOOST, boost.mint.as_ref()],
     )?;
 
     // Assert stake v1 balance and rewards are 0
@@ -131,13 +132,19 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
         boost_deposits_v1_info.as_associated_token_account(&boost_v1_info.key, &boost.mint)?;
     let boost_rewards_v1 = boost_rewards_v1_info
         .as_associated_token_account(&boost_v1_info.key, &ore_api::consts::MINT_ADDRESS)?;
+    log(format!(
+        "{} {} {}",
+        boost_deposits_v1.amount(),
+        pre_boost_deposits_balance,
+        pre_stake_balance
+    ));
     assert_eq!(
         boost_deposits_v1.amount(),
-        pre_boost_deposits_balance - stake_v1.balance
+        pre_boost_deposits_balance - pre_stake_balance
     );
     assert_eq!(
         boost_rewards_v1.amount(),
-        pre_boost_rewards_balance - stake_v1.rewards
+        pre_boost_rewards_balance - pre_stake_rewards
     );
 
     Ok(())
