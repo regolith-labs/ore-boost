@@ -2,7 +2,7 @@ use const_crypto::ed25519;
 use solana_program::{pubkey, pubkey::Pubkey};
 
 /// The authority allowed to initialize the program.
-pub const INITIALIZER_ADDRESS: Pubkey = pubkey!("HBUh9g46wk2X89CvaNN15UmsznP59rh6od1h8JwYAopk");
+pub const INITIALIZER_ADDRESS: Pubkey = pubkey!("EqbHxJd7UJDjDnZtbbgjo4egidbNgvSjttn1NHmF4aos");
 
 /// The denominator of boost multipliers for percentage calculations.
 pub const BOOST_DENOMINATOR: u64 = 1000;
