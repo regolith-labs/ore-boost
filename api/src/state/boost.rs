@@ -2,7 +2,7 @@ use steel::*;
 
 use super::BoostAccount;
 
-/// Boost tracks the rewards multiplier and total stake balances of an incentive.
+/// Boost tracks the priority, deposits, and rewards of a staking incentive.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, Pod, Zeroable)]
 pub struct Boost {
@@ -12,17 +12,20 @@ pub struct Boost {
     /// The mint address of the token associated with this boost.
     pub mint: Pubkey,
 
-    /// The rewards multiplier associated with this boost.
+    /// The rewards multiplier (priority) associated with this boost.
     pub multiplier: u64,
 
-    /// The cumulative rewards currently collected by this boost.
+    /// The cumulative rewards collected by this boost, divided by the total deposits at the time of collection.
     pub rewards_factor: Numeric,
 
-    // The total amount of stake deposited in this boost.
+    /// The total amount of stake deposited in this boost.
     pub total_deposits: u64,
 
     /// The number of stakers in this boost.
     pub total_stakers: u64,
+
+    /// A protocol fee charged for withdrawing from this boost (in basis points).
+    pub withdraw_fee: u64,
 }
 
 account!(BoostAccount, Boost);

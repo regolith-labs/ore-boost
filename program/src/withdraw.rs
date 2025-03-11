@@ -60,6 +60,8 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
         &[BOOST, boost.mint.as_ref()],
     )?;
 
+    // TODO Implement withdraw fee.
+
     // Withdraw deposits to beneficiary.
     stake.balance -= amount;
     boost.total_deposits -= amount;

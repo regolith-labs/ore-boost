@@ -59,6 +59,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     boost.rewards_factor = Numeric::ZERO;
     boost.total_deposits = 0;
     boost.total_stakers = 0;
+    boost.withdraw_fee = 0;
 
     // Open a proof account for this boost.
     invoke_signed(
