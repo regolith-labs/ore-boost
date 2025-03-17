@@ -16,17 +16,23 @@ pub struct Stake {
     /// The boost this stake account is associated with.
     pub boost: Pubkey,
 
-    /// The timestamp of the last time stake was claimed.
+    /// The timestamp of the last time rewards were claimed from this account.
     pub last_claim_at: i64,
 
     /// The timestamp of the last time stake was added to this account.
     pub last_deposit_at: i64,
 
-    /// The cumulative rewards on the boost account last time rewards were updated on this stake account.
+    /// The timestamp of the last time stake was withdrawn from this account.
+    pub last_withdraw_at: i64,
+
+    /// The boost rewards factor last time rewards were updated on this stake account.
     pub last_rewards_factor: Numeric,
 
     /// The amount of rewards claimable by this staker.
     pub rewards: u64,
+
+    /// A buffer for future config variables.
+    pub _buffer: [u8; 1024],
 }
 
 impl Stake {

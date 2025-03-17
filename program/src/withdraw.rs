@@ -8,11 +8,14 @@ use steel::*;
 
 /// Withdraw unstakes tokens from a stake account.
 pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
+    panic!("Program is in migration mode");
+
     // Parse args.
     let args = Withdraw::try_from_bytes(data)?;
     let amount = u64::from_le_bytes(args.amount);
 
     // Load accounts.
+    let clock = Clock::get()?;
     let [signer_info, beneficiary_info, boost_info, boost_deposits_info, boost_proof_info, boost_rewards_info, mint_info, stake_info, treasury_info, treasury_tokens_info, ore_program, token_program] =
         accounts
     else {
@@ -29,7 +32,7 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     boost_deposits_info
         .is_writable()?
         .as_associated_token_account(boost_info.key, mint_info.key)?;
-    let proof = boost_proof_info
+    let boost_proof = boost_proof_info
         .as_account::<Proof>(&ore_api::ID)?
         .assert(|p| p.authority == *boost_info.key)?;
     boost_rewards_info
@@ -44,9 +47,13 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     token_program.is_program(&spl_token::ID)?;
 
     // Accumulate personal stake rewards.
-    stake.accumulate_rewards(boost, &proof);
+    stake.accumulate_rewards(boost, &boost_proof);
     invoke_signed(
-        &ore_api::sdk::claim(*boost_info.key, *boost_rewards_info.key, proof.balance),
+        &ore_api::sdk::claim(
+            *boost_info.key,
+            *boost_rewards_info.key,
+            boost_proof.balance,
+        ),
         &[
             boost_info.clone(),
             boost_rewards_info.clone(),
@@ -63,7 +70,9 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     // TODO Implement withdraw fee.
 
     // Withdraw deposits to beneficiary.
+    let amount = amount.min(stake.balance);
     stake.balance -= amount;
+    stake.last_withdraw_at = clock.unix_timestamp;
     boost.total_deposits -= amount;
     transfer_signed(
         boost_info,
