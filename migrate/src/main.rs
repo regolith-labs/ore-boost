@@ -50,6 +50,8 @@ async fn main() -> anyhow::Result<()> {
         sleep(Duration::from_secs(5)).await;
         let boost = client.rpc.get_boost(&boost_address).await?;
         assert_eq!(boost.total_stakers, boost_v1.total_stakers);
+        println!("Boost: {:?}", boost);
+        println!("Boost v1: {:?}", boost_v1);
     }
     Ok(())
 }
@@ -102,7 +104,7 @@ async fn migrate_stake_account(
     }
 
     // TODO Log post migration state (new and old stake accounts)
-    sleep(Duration::from_secs(2)).await;
+    sleep(Duration::from_secs(1)).await;
     let stake = client.rpc.get_stake(&stake_address).await?;
     let stake_v1 = client.rpc.get_stake_v1(&stake_v1_address).await?;
     println!("    Post balance (v1): {}", stake_v1.balance);
