@@ -1,5 +1,5 @@
 use ore_boost_api::{
-    consts::{BOOST, STAKE},
+    consts::STAKE,
     state::{Boost, Config, Stake},
 };
 use solana_program::{program::invoke, system_program};
