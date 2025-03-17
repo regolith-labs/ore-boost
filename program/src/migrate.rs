@@ -1,6 +1,5 @@
-use ore_api::consts::INITIALIZER_ADDRESS;
 use ore_boost_api::{
-    consts::BOOST,
+    consts::{BOOST, INITIALIZER_ADDRESS},
     state::{Boost, Stake},
 };
 use solana_program::system_program;
@@ -20,7 +19,6 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
         .as_account_mut::<Boost>(&ore_boost_api::ID)?
         .assert_mut(|b| b.mint == *mint_info.key)?;
     boost_v3_info
-        .is_signer()?
         .as_account::<ore_boost_api_v3::state::Boost>(&ore_boost_api_v3::ID)?
         .assert(|b| b.mint == boost.mint)?;
     boost_deposits_info
@@ -43,9 +41,9 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
     stake_v3_info
         .as_account::<ore_boost_api_v3::state::Stake>(&ore_boost_api_v3::ID)?
         .assert(|s| s.authority == stake.authority)?
-        .assert(|s| s.boost == *signer_info.key)?
+        .assert(|s| s.boost == *boost_v3_info.key)?
         .assert(|s| s.balance == stake.balance)?
-        .assert(|s| s.rewards == stake.rewards)?;
+        .assert(|s| s.rewards == 0)?;
     system_program.is_program(&system_program::ID)?;
     token_program.is_program(&spl_token::ID)?;
 

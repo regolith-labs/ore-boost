@@ -300,7 +300,7 @@ pub fn migrate(
             AccountMeta::new(signer, true),
             AccountMeta::new(authority, false),
             AccountMeta::new(boost_pda.0, false),
-            AccountMeta::new_readonly(boost_v3_address, true),
+            AccountMeta::new_readonly(boost_v3_address, false),
             AccountMeta::new(boost_deposits_address, false),
             AccountMeta::new(boost_deposits_v3_address, false),
             AccountMeta::new(boost_rewards_address, false),
