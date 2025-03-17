@@ -1,12 +1,13 @@
 use ore_api::state::Proof;
 use ore_boost_api::consts::BOOST;
+use ore_boost_api::error::BoostError;
 use ore_boost_api::instruction::Claim;
 use ore_boost_api::state::{Boost, Stake};
 use steel::*;
 
 /// Claim distributes rewards to a staker.
 pub fn process_claim(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
-    panic!("Program is in withdraw-only mode");
+    panic!("Program is in migration mode");
 
     // Parse args.
     let args = Claim::try_from_bytes(data)?;
@@ -60,6 +61,7 @@ pub fn process_claim(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult
     )?;
 
     // Transfer tokens from boost to beneficiary.
+    let amount = amount.min(stake.rewards);
     stake.last_claim_at = clock.unix_timestamp;
     stake.rewards -= amount;
     transfer_signed(

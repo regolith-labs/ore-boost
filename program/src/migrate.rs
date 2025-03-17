@@ -51,7 +51,7 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
         return Ok(());
     }
     if !stake_info.data_is_empty() {
-        return Ok(());
+        panic!("Stake account is not empty");
     }
 
     // Initialize the stake account.
@@ -68,8 +68,10 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
     stake.boost = *boost_info.key;
     stake.last_claim_at = clock.unix_timestamp;
     stake.last_deposit_at = clock.unix_timestamp;
+    stake.last_withdraw_at = clock.unix_timestamp;
     stake.last_rewards_factor = Numeric::ZERO;
     stake.rewards = 0;
+    stake._buffer = [0; 1024];
 
     // Accumulate raw rewards into boost rewards factor, to be divided by total deposits at end of migration.
     boost.rewards_factor += Numeric::from_u64(stake_v1.rewards);
@@ -132,20 +134,27 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
         boost_deposits_v1_info.as_associated_token_account(&boost_v1_info.key, &boost.mint)?;
     let boost_rewards_v1 = boost_rewards_v1_info
         .as_associated_token_account(&boost_v1_info.key, &ore_api::consts::MINT_ADDRESS)?;
-    log(format!(
-        "{} {} {}",
-        boost_deposits_v1.amount(),
-        pre_boost_deposits_balance,
-        pre_stake_balance
-    ));
-    assert_eq!(
-        boost_deposits_v1.amount(),
-        pre_boost_deposits_balance - pre_stake_balance
-    );
-    assert_eq!(
-        boost_rewards_v1.amount(),
-        pre_boost_rewards_balance - pre_stake_rewards
-    );
+    if boost.mint == ore_api::consts::MINT_ADDRESS {
+        // For idle-ore boost, the deposits and rewards accounts are the same ata.
+        assert_eq!(
+            boost_deposits_v1.amount(),
+            pre_boost_deposits_balance - (pre_stake_balance + pre_stake_rewards)
+        );
+        assert_eq!(
+            boost_rewards_v1.amount(),
+            pre_boost_rewards_balance - (pre_stake_balance + pre_stake_rewards)
+        );
+    } else {
+        // For other boosts, the deposits and rewards accounts are different.
+        assert_eq!(
+            boost_deposits_v1.amount(),
+            pre_boost_deposits_balance - pre_stake_balance
+        );
+        assert_eq!(
+            boost_rewards_v1.amount(),
+            pre_boost_rewards_balance - pre_stake_rewards
+        );
+    }
 
     Ok(())
 }

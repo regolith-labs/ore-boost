@@ -26,6 +26,9 @@ pub struct Boost {
 
     /// A protocol fee charged for withdrawing from this boost (in basis points).
     pub withdraw_fee: u64,
+
+    /// A buffer for future config variables.
+    pub _buffer: [u8; 1024],
 }
 
 account!(BoostAccount, Boost);

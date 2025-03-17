@@ -27,6 +27,7 @@ async fn test_accumulate_rewards() {
         total_deposits: 0, // Start at 100
         total_stakers: 3,
         withdraw_fee: 0,
+        _buffer: [0; 1024],
     };
 
     // Create three different stake accounts.
@@ -36,8 +37,10 @@ async fn test_accumulate_rewards() {
         boost: Pubkey::default(),
         last_claim_at: 0,
         last_deposit_at: 0,
+        last_withdraw_at: 0,
         last_rewards_factor: boost.rewards_factor,
         rewards: 0,
+        _buffer: [0; 1024],
     };
     let mut stake2 = Stake {
         authority: Pubkey::default(),
@@ -45,8 +48,10 @@ async fn test_accumulate_rewards() {
         boost: Pubkey::default(),
         last_claim_at: 0,
         last_deposit_at: 0,
+        last_withdraw_at: 0,
         last_rewards_factor: boost.rewards_factor,
         rewards: 0,
+        _buffer: [0; 1024],
     };
     let mut stake3 = Stake {
         authority: Pubkey::default(),
@@ -54,8 +59,10 @@ async fn test_accumulate_rewards() {
         boost: Pubkey::default(),
         last_claim_at: 0,
         last_deposit_at: 0,
+        last_withdraw_at: 0,
         last_rewards_factor: boost.rewards_factor,
         rewards: 0,
+        _buffer: [0; 1024],
     };
 
     // Stake account 1 deposits 100

@@ -3,6 +3,8 @@ use steel::*;
 
 /// Close closes a stake account.
 pub fn process_close(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
+    panic!("Program is in migration mode");
+
     // Load accounts.
     let [signer_info, boost_info, stake_info, system_program] = accounts else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -13,12 +15,12 @@ pub fn process_close(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResul
         .is_writable()?
         .as_account::<Stake>(&ore_boost_api::ID)?
         .assert_err(
-            |p| p.authority == *signer_info.key,
+            |s| s.authority == *signer_info.key,
             ProgramError::MissingRequiredSignature,
         )?
-        .assert(|p| p.boost == *boost_info.key)?
-        .assert(|p| p.balance == 0)?
-        .assert(|p| p.rewards == 0)?;
+        .assert(|s| s.boost == *boost_info.key)?
+        .assert(|s| s.balance == 0)?
+        .assert(|s| s.rewards == 0)?;
     system_program.is_program(&system_program::ID)?;
 
     // Update boost total stakers

@@ -7,7 +7,7 @@ use steel::*;
 
 /// Open creates a new stake account.
 pub fn process_open(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
-    panic!("Program is in withdraw-only mode");
+    panic!("Program is in migration mode");
 
     // Load accounts.
     let [signer_info, payer_info, boost_info, mint_info, stake_info, system_program] = accounts
@@ -41,8 +41,10 @@ pub fn process_open(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult
     stake.boost = *boost_info.key;
     stake.last_claim_at = clock.unix_timestamp;
     stake.last_deposit_at = clock.unix_timestamp;
+    stake.last_withdraw_at = clock.unix_timestamp;
     stake.last_rewards_factor = boost.rewards_factor;
     stake.rewards = 0;
+    stake._buffer = [0; 1024];
 
     // Increment the total number of stakers.
     boost.total_stakers += 1;
