@@ -69,8 +69,8 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
 
     // Decrement amounts.
     boost.total_deposits -= stake.balance;
-    stake.rewards = 0;
-    stake.balance = 0;
+    stake.balance -= stake.balance;
+    stake.rewards -= stake.rewards;
 
     Ok(())
 }
