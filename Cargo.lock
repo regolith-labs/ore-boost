@@ -2797,7 +2797,7 @@ dependencies = [
 
 [[package]]
 name = "migrate"
-version = "1.4.0"
+version = "3.0.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2807,7 +2807,7 @@ dependencies = [
  "helius",
  "log",
  "ore-boost-api 1.4.0",
- "ore-boost-api 1.4.0 (git+https://github.com/regolith-labs/ore-boost.git?rev=06690d6)",
+ "ore-boost-api 3.0.0",
  "rand 0.9.0",
  "reqwest 0.12.12",
  "serde",
@@ -3278,25 +3278,6 @@ dependencies = [
 [[package]]
 name = "ore-boost-api"
 version = "1.4.0"
-dependencies = [
- "array-const-fn-init",
- "bytemuck",
- "const-crypto",
- "fixed",
- "num_enum",
- "ore-api 3.2.0-boostv3",
- "ore-boost-api 1.4.0 (git+https://github.com/regolith-labs/ore-boost.git?rev=06690d6)",
- "solana-program",
- "spl-associated-token-account 6.0.0",
- "spl-token 4.0.2",
- "static_assertions",
- "steel 4.0.0",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "ore-boost-api"
-version = "1.4.0"
 source = "git+https://github.com/regolith-labs/ore-boost.git?rev=06690d6#06690d6d5abec8db33bc09e800f8972d06397009"
 dependencies = [
  "array-const-fn-init",
@@ -3313,14 +3294,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "ore-boost-api"
+version = "3.0.0"
+dependencies = [
+ "array-const-fn-init",
+ "bytemuck",
+ "const-crypto",
+ "fixed",
+ "num_enum",
+ "ore-api 3.2.0-boostv3",
+ "ore-boost-api 1.4.0",
+ "solana-program",
+ "spl-associated-token-account 6.0.0",
+ "spl-token 4.0.2",
+ "static_assertions",
+ "steel 4.0.0",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "ore-boost-program"
-version = "1.4.0"
+version = "3.0.0"
 dependencies = [
  "base64 0.21.7",
  "bytemuck",
  "ore-api 3.2.0-boostv3",
  "ore-boost-api 1.4.0",
- "ore-boost-api 1.4.0 (git+https://github.com/regolith-labs/ore-boost.git?rev=06690d6)",
+ "ore-boost-api 3.0.0",
  "rand 0.8.5",
  "solana-program",
  "solana-program-test",
@@ -3333,12 +3333,12 @@ dependencies = [
 
 [[package]]
 name = "ore-boosts-cli"
-version = "1.4.0"
+version = "3.0.0"
 dependencies = [
  "clap 4.5.32",
  "futures",
  "log",
- "ore-boost-api 1.4.0",
+ "ore-boost-api 3.0.0",
  "solana-cli-config",
  "solana-client",
  "solana-program",
