@@ -1,14 +1,11 @@
 use ore_api::state::Proof;
 use ore_boost_api::consts::BOOST;
-use ore_boost_api::error::BoostError;
 use ore_boost_api::instruction::Claim;
 use ore_boost_api::state::{Boost, Stake};
 use steel::*;
 
 /// Claim distributes rewards to a staker.
 pub fn process_claim(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
-    panic!("Program is in migration mode");
-
     // Parse args.
     let args = Claim::try_from_bytes(data)?;
     let amount = u64::from_le_bytes(args.amount);

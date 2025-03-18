@@ -7,8 +7,6 @@ use steel::*;
 
 /// Open creates a new stake account.
 pub fn process_open(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
-    panic!("Program is in migration mode");
-
     // Load accounts.
     let [signer_info, payer_info, boost_info, mint_info, stake_info, system_program] = accounts
     else {

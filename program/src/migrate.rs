@@ -9,6 +9,8 @@ use steel::*;
 
 /// Open creates a new stake account.
 pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult {
+    panic!("Migration is complete");
+
     // Load accounts.
     let clock = Clock::get()?;
     let [signer_info, authority_info, config_info, payer_info, boost_info, boost_v1_info, boost_deposits_info, boost_deposits_v1_info, boost_rewards_info, boost_rewards_v1_info, mint_info, stake_info, stake_v1_info, ore_boost_v1_program, system_program, token_program] =
