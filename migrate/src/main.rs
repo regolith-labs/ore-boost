@@ -1,10 +1,11 @@
 mod client;
 mod error;
 
-use std::{sync::Arc, time::Duration};
+use std::{str::FromStr, sync::Arc, time::Duration};
 
 use ore_boost_api::state::Boost;
 use solana_sdk::signer::Signer;
+use steel::Pubkey;
 use tokio::time::sleep;
 
 use crate::client::{AsyncClient, Client};
@@ -17,12 +18,23 @@ async fn main() -> anyhow::Result<()> {
     // Get pre migration numbers.
     let boosts_v1 = client.rpc.get_boosts_v1().await?;
     for boost_v1 in boosts_v1 {
+        // Only do ORE-HNT
+        if boost_v1
+            .mint
+            .ne(&Pubkey::from_str("7G3dfZkSk1HpDGnyL37LMBbPEgT4Ca6vZmZPUyi2syWt").unwrap())
+        {
+            println!("Skipping boost: {}", boost_v1.mint);
+            continue;
+        }
+
         let boost_address = ore_boost_api::state::boost_pda(boost_v1.mint).0;
         let boost_v1_address = ore_boost_api_v1::state::boost_pda(boost_v1.mint).0;
         let boost = client.rpc.get_boost(&boost_address).await?;
 
         println!("Boost: {:?}", boost);
         println!("Boost v1: {:?}", boost_v1);
+
+        println!("Rewards factor: {}", boost.rewards_factor.to_u64());
 
         // Migrate
         let mut stake_accounts = client
@@ -36,8 +48,6 @@ async fn main() -> anyhow::Result<()> {
                 Ok(_) => println!("Success"),
                 Err(e) => println!("Error: {:?}", e),
             }
-
-            panic!("Migrated 1 stake account. Stopping.");
         }
 
         // Refresh stake balances. Check they are nulled.
@@ -57,6 +67,8 @@ async fn main() -> anyhow::Result<()> {
         assert_eq!(boost.total_stakers, boost_v1.total_stakers);
         println!("Boost: {:?}", boost);
         println!("Boost v1: {:?}", boost_v1);
+
+        panic!("Migrated 1 boost. Stopping.");
     }
     Ok(())
 }
@@ -109,13 +121,13 @@ async fn migrate_stake_account(
     }
 
     // TODO Log post migration state (new and old stake accounts)
-    sleep(Duration::from_secs(1)).await;
-    let stake = client.rpc.get_stake(&stake_address).await?;
-    let stake_v1 = client.rpc.get_stake_v1(&stake_v1_address).await?;
-    println!("    Post balance (v1): {}", stake_v1.balance);
-    println!("    Post rewards (v1): {}", stake_v1.rewards);
-    println!("    Post balance: {}", stake.balance);
-    println!("    Post rewards: {}", stake.rewards);
+    sleep(Duration::from_secs(5)).await;
+    // let stake = client.rpc.get_stake(&stake_address).await?;
+    // let stake_v1 = client.rpc.get_stake_v1(&stake_v1_address).await?;
+    // println!("    Post balance (v1): {}", stake_v1.balance);
+    // println!("    Post rewards (v1): {}", stake_v1.rewards);
+    // println!("    Post balance: {}", stake.balance);
+    // println!("    Post rewards: {}", stake.rewards);
 
     Ok(())
 }
