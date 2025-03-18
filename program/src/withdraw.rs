@@ -8,8 +8,6 @@ use steel::*;
 
 /// Withdraw unstakes tokens from a stake account.
 pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
-    panic!("Program is in migration mode");
-
     // Parse args.
     let args = Withdraw::try_from_bytes(data)?;
     let amount = u64::from_le_bytes(args.amount);
