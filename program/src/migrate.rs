@@ -1,8 +1,10 @@
+use std::str::FromStr;
+
 use ore_boost_api::{
     consts::STAKE,
     state::{Boost, Config, Stake},
 };
-use solana_program::{program::invoke, system_program};
+use solana_program::{log::sol_log, program::invoke, system_program};
 use steel::*;
 
 /// Open creates a new stake account.
@@ -46,6 +48,17 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
     system_program.is_program(&system_program::ID)?;
     token_program.is_program(&spl_token::ID)?;
 
+    // Final pass update of stake last rewards factor.
+    if boost.total_stakers == boost_v1.total_stakers {
+        let stake = stake_info.as_account_mut::<Stake>(&ore_boost_api::ID)?;
+        stake.last_rewards_factor = boost.rewards_factor;
+        sol_log(&format!(
+            "Updated rewards factor: {:?}",
+            stake.last_rewards_factor
+        ));
+        return Ok(());
+    }
+
     // Exit early if stake account is processed out of order.
     if stake_v1.id != boost.total_stakers {
         return Ok(());
@@ -70,7 +83,7 @@ pub fn process_migrate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRes
     stake.last_deposit_at = clock.unix_timestamp;
     stake.last_withdraw_at = clock.unix_timestamp;
     stake.last_rewards_factor = Numeric::ZERO;
-    stake.rewards = 0;
+    stake.rewards = stake_v1.rewards;
     stake._buffer = [0; 1024];
 
     // Accumulate raw rewards into boost rewards factor, to be divided by total deposits at end of migration.
