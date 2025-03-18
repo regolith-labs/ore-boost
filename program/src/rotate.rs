@@ -10,9 +10,12 @@ pub fn process_rotate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResu
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
-    let config = config_info
-        .as_account_mut::<Config>(&ore_boost_api::ID)?
-        .assert_mut(|c| clock.unix_timestamp >= c.ts + ROTATION_DURATION)?;
+    let config = config_info.as_account_mut::<Config>(&ore_boost_api::ID)?;
+
+    // Silent error
+    if clock.unix_timestamp < config.ts + ROTATION_DURATION {
+        return Ok(());
+    }
 
     // Sample random number
     let noise = &config.noise[..8];
