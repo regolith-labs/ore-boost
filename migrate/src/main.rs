@@ -21,6 +21,9 @@ async fn main() -> anyhow::Result<()> {
         let boost_v1_address = ore_boost_api_v1::state::boost_pda(boost_v1.mint).0;
         let boost = client.rpc.get_boost(&boost_address).await?;
 
+        println!("Boost: {:?}", boost);
+        println!("Boost v1: {:?}", boost_v1);
+
         // Migrate
         let mut stake_accounts = client
             .rpc
