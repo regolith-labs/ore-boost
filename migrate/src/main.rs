@@ -5,7 +5,7 @@ use std::{str::FromStr, sync::Arc, time::Duration};
 
 use ore_boost_api::state::Boost;
 use solana_sdk::signer::Signer;
-use steel::Pubkey;
+use steel::{Numeric, Pubkey};
 use tokio::time::sleep;
 
 use crate::client::{AsyncClient, Client};
@@ -34,8 +34,6 @@ async fn main() -> anyhow::Result<()> {
         println!("Boost: {:?}", boost);
         println!("Boost v1: {:?}", boost_v1);
 
-        println!("Rewards factor: {}", boost.rewards_factor.to_u64());
-
         // Migrate
         let mut stake_accounts = client
             .rpc
@@ -49,6 +47,8 @@ async fn main() -> anyhow::Result<()> {
                 Err(e) => println!("Error: {:?}", e),
             }
         }
+
+        verify_rewards_factor_stake(client.clone(), boost_address).await?;
 
         // Refresh stake balances. Check they are nulled.
         sleep(Duration::from_secs(5)).await;
@@ -83,6 +83,47 @@ async fn check_balances(
     );
     assert!(stake_v1.balance == 0);
     assert!(stake_v1.rewards == 0);
+    Ok(())
+}
+
+async fn verify_rewards_factor(client: Arc<Client>, boost_address: Pubkey) -> anyhow::Result<()> {
+    let mut net_deposits = 0;
+    let mut net_rewards = 0;
+    let stake_accounts = client.rpc.get_boost_stake_accounts(&boost_address).await?;
+    for stake in stake_accounts {
+        net_deposits += stake.1.balance;
+        net_rewards += stake.1.rewards;
+    }
+    println!("Net deposits: {}", net_deposits);
+    println!("Net rewards: {}", net_rewards);
+
+    let expected_rewards_factor = Numeric::from_fraction(net_rewards, net_deposits);
+    let boost = client.rpc.get_boost(&boost_address).await?;
+    assert_eq!(boost.rewards_factor, expected_rewards_factor);
+    Ok(())
+}
+
+async fn verify_rewards_factor_stake(
+    client: Arc<Client>,
+    boost_address: Pubkey,
+) -> anyhow::Result<()> {
+    let boost = client.rpc.get_boost(&boost_address).await?;
+
+    let mut net_deposits = 0;
+    let mut net_rewards = 0;
+    let stake_accounts = client.rpc.get_boost_stake_accounts(&boost_address).await?;
+    for stake in stake_accounts {
+        println!("Stake: {:?}", stake.1.last_rewards_factor);
+        net_deposits += stake.1.balance;
+        net_rewards += stake.1.rewards;
+        assert!(stake.1.last_rewards_factor == boost.rewards_factor);
+    }
+    println!("Net deposits: {}", net_deposits);
+    println!("Net rewards: {}", net_rewards);
+
+    let expected_rewards_factor = Numeric::from_fraction(net_rewards, net_deposits);
+    assert_eq!(boost.rewards_factor, expected_rewards_factor);
+
     Ok(())
 }
 
