@@ -33,6 +33,8 @@ async fn main() -> anyhow::Result<()> {
                 Ok(_) => println!("Success"),
                 Err(e) => println!("Error: {:?}", e),
             }
+
+            panic!("Migrated 1 stake account. Stopping.");
         }
 
         // Refresh stake balances. Check they are nulled.
