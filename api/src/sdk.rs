@@ -23,20 +23,22 @@ pub fn activate(signer: Pubkey, mint: Pubkey) -> Instruction {
 
 // Build claim instruction.
 pub fn claim(signer: Pubkey, beneficiary: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
-    let boost_pda = boost_pda(mint);
+    let boost_address = boost_pda(mint).0;
+    let boost_proof_address = proof_pda(boost_address).0;
     let boost_rewards_address = spl_associated_token_account::get_associated_token_address(
-        &boost_pda.0,
+        &boost_address,
         &ore_api::consts::MINT_ADDRESS,
     );
-    let stake_pda = stake_pda(signer, boost_pda.0);
+    let stake_address = stake_pda(signer, boost_address).0;
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(beneficiary, false),
-            AccountMeta::new_readonly(boost_pda.0, false),
+            AccountMeta::new_readonly(boost_address, false),
+            AccountMeta::new(boost_proof_address, false),
             AccountMeta::new(boost_rewards_address, false),
-            AccountMeta::new(stake_pda.0, false),
+            AccountMeta::new(stake_address, false),
             AccountMeta::new_readonly(spl_token::ID, false),
         ],
         data: Claim {
@@ -63,20 +65,27 @@ pub fn deactivate(signer: Pubkey, mint: Pubkey) -> Instruction {
 
 // Build deposit instruction.
 pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
-    let boost_pda = boost_pda(mint);
+    let boost_address = boost_pda(mint).0;
+    let boost_proof_address = proof_pda(boost_address).0;
     let boost_deposits_address =
-        spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
+        spl_associated_token_account::get_associated_token_address(&boost_address, &mint);
+    let boost_rewards_address = spl_associated_token_account::get_associated_token_address(
+        &boost_address,
+        &ore_api::consts::MINT_ADDRESS,
+    );
     let sender_address = spl_associated_token_account::get_associated_token_address(&signer, &mint);
-    let stake_pda = stake_pda(signer, boost_pda.0);
+    let stake_address = stake_pda(signer, boost_address).0;
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
-            AccountMeta::new(boost_pda.0, false),
+            AccountMeta::new(boost_address, false),
             AccountMeta::new(boost_deposits_address, false),
+            AccountMeta::new(boost_proof_address, false),
+            AccountMeta::new(boost_rewards_address, false),
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new(sender_address, false),
-            AccountMeta::new(stake_pda.0, false),
+            AccountMeta::new(stake_address, false),
             AccountMeta::new_readonly(spl_token::ID, false),
         ],
         data: Deposit {
@@ -191,21 +200,28 @@ pub fn update_boost(
 
 // Build withdraw instruction.
 pub fn withdraw(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
-    let boost_pda = boost_pda(mint);
+    let boost_address = boost_pda(mint).0;
+    let boost_proof_address = proof_pda(boost_address).0;
     let boost_deposits_address =
-        spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
+        spl_associated_token_account::get_associated_token_address(&boost_address, &mint);
+    let boost_rewards_address = spl_associated_token_account::get_associated_token_address(
+        &boost_address,
+        &ore_api::consts::MINT_ADDRESS,
+    );
     let beneficiary_address =
         spl_associated_token_account::get_associated_token_address(&signer, &mint);
-    let stake_pda = stake_pda(signer, boost_pda.0);
+    let stake_address = stake_pda(signer, boost_address).0;
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(beneficiary_address, false),
-            AccountMeta::new(boost_pda.0, false),
+            AccountMeta::new(boost_address, false),
             AccountMeta::new(boost_deposits_address, false),
+            AccountMeta::new(boost_proof_address, false),
+            AccountMeta::new(boost_rewards_address, false),
             AccountMeta::new_readonly(mint, false),
-            AccountMeta::new(stake_pda.0, false),
+            AccountMeta::new(stake_address, false),
             AccountMeta::new_readonly(spl_token::ID, false),
         ],
         data: Withdraw {

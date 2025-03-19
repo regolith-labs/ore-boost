@@ -1,5 +1,5 @@
 use ore_boost_api::{
-    consts::STAKE,
+    consts::{STAKE, TESTER_ADDRESS},
     state::{Boost, Stake},
 };
 use solana_program::system_program;
@@ -12,7 +12,7 @@ pub fn process_open(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramResult
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-    signer_info.is_signer()?;
+    signer_info.is_signer()?.has_address(&TESTER_ADDRESS)?;
     payer_info.is_signer()?;
     let boost = boost_info
         .as_account_mut::<Boost>(&ore_boost_api::ID)?
