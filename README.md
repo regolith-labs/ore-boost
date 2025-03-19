@@ -10,7 +10,7 @@
 - [`Instruction`](api/src/instruction.rs) – Declared instructions and arguments.
 
 ## Instructions
-User
+#### User
 - [`Claim`](program/src/claim.rs) – Allows a staker to claim their rewards.
 - [`Close`](program/src/close.rs) – Closes a stake account.
 - [`Deposit`](program/src/deposit.rs) – Deposits tokens into a stake account.
@@ -18,7 +18,7 @@ User
 - [`Rotate`](program/src/rotate.rs) – Rotates the reservation to a randomly selected boost according to their unclaimed ORE weight.
 - [`Withdraw`](program/src/withdraw.rs) – Withdraws tokens from a stake account.
 
-Admin  
+#### Admin  
 - [`Activate`](program/src/activate.rs) – Activate adds a boost to the directory.
 - [`Deactivate`](program/src/deactivate.rs) – Removes a boost from the directory.
 - [`Initialize`](program/src/initialize.rs) – Initializes the program and creates the global accounts.
