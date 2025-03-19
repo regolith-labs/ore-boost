@@ -3008,7 +3008,6 @@ dependencies = [
  "fixed",
  "num_enum",
  "ore-api",
- "ore-boost-api 1.5.0-boostv3",
  "solana-program",
  "spl-associated-token-account 6.0.0",
  "spl-token 4.0.2",
