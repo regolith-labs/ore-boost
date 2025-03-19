@@ -39,6 +39,9 @@ pub fn claim(signer: Pubkey, beneficiary: Pubkey, mint: Pubkey, amount: u64) -> 
             AccountMeta::new(boost_proof_address, false),
             AccountMeta::new(boost_rewards_address, false),
             AccountMeta::new(stake_address, false),
+            AccountMeta::new(ore_api::consts::TREASURY_ADDRESS, false),
+            AccountMeta::new(ore_api::consts::TREASURY_TOKENS_ADDRESS, false),
+            AccountMeta::new_readonly(ore_api::ID, false),
             AccountMeta::new_readonly(spl_token::ID, false),
         ],
         data: Claim {
@@ -86,6 +89,9 @@ pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new(sender_address, false),
             AccountMeta::new(stake_address, false),
+            AccountMeta::new(ore_api::consts::TREASURY_ADDRESS, false),
+            AccountMeta::new(ore_api::consts::TREASURY_TOKENS_ADDRESS, false),
+            AccountMeta::new_readonly(ore_api::ID, false),
             AccountMeta::new_readonly(spl_token::ID, false),
         ],
         data: Deposit {
@@ -222,6 +228,9 @@ pub fn withdraw(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
             AccountMeta::new(boost_rewards_address, false),
             AccountMeta::new_readonly(mint, false),
             AccountMeta::new(stake_address, false),
+            AccountMeta::new(ore_api::consts::TREASURY_ADDRESS, false),
+            AccountMeta::new(ore_api::consts::TREASURY_TOKENS_ADDRESS, false),
+            AccountMeta::new_readonly(ore_api::ID, false),
             AccountMeta::new_readonly(spl_token::ID, false),
         ],
         data: Withdraw {
