@@ -4,7 +4,6 @@ mod close;
 mod deactivate;
 mod deposit;
 mod initialize;
-mod migrate;
 mod new;
 mod open;
 mod rotate;
@@ -18,7 +17,6 @@ use close::*;
 use deactivate::*;
 use deposit::*;
 use initialize::*;
-use migrate::*;
 use new::*;
 use open::*;
 use rotate::*;
@@ -52,9 +50,6 @@ pub fn process_instruction(
         BoostInstruction::New => process_new(accounts, data)?,
         BoostInstruction::UpdateAdmin => process_update_admin(accounts, data)?,
         BoostInstruction::UpdateBoost => process_update_boost(accounts, data)?,
-
-        // Migration
-        BoostInstruction::Migrate => process_migrate(accounts, data)?,
     }
 
     Ok(())
