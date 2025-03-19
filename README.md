@@ -1,6 +1,6 @@
 # ORE Boost
 
-**ORE Boost is a staking program for earning multipliers on ORE mining rewards.** 
+**ORE Boost is a liquidity mining program for earning yield on staked assets.**
 
 
 ## API
