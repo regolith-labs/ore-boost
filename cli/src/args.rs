@@ -32,4 +32,4 @@ pub struct DeactivateArgs {
 }
 
 #[derive(Parser, Debug)]
-pub struct DirectoryArgs {}
+pub struct ConfigArgs {}

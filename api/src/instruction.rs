@@ -6,12 +6,11 @@ use steel::*;
 pub enum BoostInstruction {
     // User
     Claim = 0,
-    Deposit = 1,
-    Open = 2,
-    Rebase = 3,
-    Register = 4,
-    Rotate = 5,
-    Withdraw = 6,
+    Close = 1,
+    Deposit = 2,
+    Open = 3,
+    Rotate = 4,
+    Withdraw = 5,
     
     // Admin
     Activate = 100,
@@ -40,6 +39,10 @@ pub struct Claim {
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct Close {}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct Deactivate {}
 
 #[repr(C)]
@@ -62,14 +65,6 @@ pub struct New {
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct Open {}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Rebase {}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Register {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -96,13 +91,12 @@ pub struct Withdraw {
 
 instruction!(BoostInstruction, Activate);
 instruction!(BoostInstruction, Claim);
+instruction!(BoostInstruction, Close);
 instruction!(BoostInstruction, Deactivate);
 instruction!(BoostInstruction, Deposit);
 instruction!(BoostInstruction, Initialize);
 instruction!(BoostInstruction, New);
 instruction!(BoostInstruction, Open);
-instruction!(BoostInstruction, Rebase);
-instruction!(BoostInstruction, Register);
 instruction!(BoostInstruction, Rotate);
 instruction!(BoostInstruction, UpdateAdmin);
 instruction!(BoostInstruction, UpdateBoost);

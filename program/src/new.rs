@@ -1,7 +1,7 @@
 use ore_boost_api::{
-    consts::{BOOST, CHECKPOINT},
+    consts::BOOST,
     instruction::New,
-    state::{Boost, Checkpoint, Config, Directory},
+    state::{Boost, Config},
 };
 use solana_program::system_program;
 use steel::*;
@@ -14,7 +14,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     let multiplier = u64::from_le_bytes(args.multiplier);
 
     // Load accounts.
-    let [signer_info, boost_info, boost_deposits_info, boost_rewards_info, checkpoint_info, config_info, directory_info, mint_info, ore_mint_info, proof_info, ore_program, system_program, token_program, associated_token_program, slot_hashes] =
+    let [signer_info, boost_info, boost_deposits_info, boost_rewards_info, config_info, mint_info, ore_mint_info, proof_info, ore_program, system_program, token_program, associated_token_program, slot_hashes] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -26,18 +26,13 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
         .has_seeds(&[BOOST, mint_info.key.as_ref()], &ore_boost_api::ID)?;
     boost_deposits_info.is_writable()?.is_empty()?;
     boost_rewards_info.is_writable()?.is_empty()?;
-    checkpoint_info
-        .is_writable()?
-        .is_empty()?
-        .has_seeds(&[CHECKPOINT, boost_info.key.as_ref()], &ore_boost_api::ID)?;
-    config_info
-        .as_account::<Config>(&ore_boost_api::ID)?
-        .assert(|c| c.authority == *signer_info.key)?;
-    let directory = directory_info
-        .as_account_mut::<Directory>(&ore_boost_api::ID)?
-        .assert_mut(|d| d.len < 256)?;
+    let config = config_info
+        .as_account_mut::<Config>(&ore_boost_api::ID)?
+        .assert_mut(|c| c.admin == *signer_info.key)?;
     mint_info.as_mint()?;
-    ore_mint_info.has_address(&ore_api::consts::MINT_ADDRESS)?.as_mint()?;
+    ore_mint_info
+        .has_address(&ore_api::consts::MINT_ADDRESS)?
+        .as_mint()?;
     proof_info.is_writable()?.is_empty()?;
     ore_program.is_program(&ore_api::ID)?;
     system_program.is_program(&system_program::ID)?;
@@ -46,8 +41,8 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     slot_hashes.is_sysvar(&sysvar::slot_hashes::ID)?;
 
     // Add boost to directory.
-    directory.boosts[directory.len as usize] = *boost_info.key;
-    directory.len += 1;
+    config.boosts[config.len as usize] = *boost_info.key;
+    config.len += 1;
 
     // Initialize the boost account.
     create_program_account::<Boost>(
@@ -61,30 +56,15 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     boost.expires_at = expires_at;
     boost.mint = *mint_info.key;
     boost.multiplier = multiplier;
+    boost.rewards_factor = Numeric::ZERO;
     boost.total_deposits = 0;
-
-    // Initialize checkpoint account.
-    create_program_account::<Checkpoint>(
-        checkpoint_info,
-        system_program,
-        signer_info,
-        &ore_boost_api::ID,
-        &[CHECKPOINT, boost_info.key.as_ref()],
-    )?;
-    let checkpoint = checkpoint_info.as_account_mut::<Checkpoint>(&ore_boost_api::ID)?;
-    checkpoint.boost = *boost_info.key;
-    checkpoint.current_id = 0;
-    checkpoint.total_pending_deposits = 0;
-    checkpoint.total_rewards = 0;
-    checkpoint.total_stakers = 0;
-    checkpoint.ts = 0;
+    boost.total_stakers = 0;
+    boost.withdraw_fee = 0;
+    boost._buffer = [0; 1024];
 
     // Open a proof account for this boost.
     invoke_signed(
-        &ore_api::sdk::open(
-            *boost_info.key, 
-            *boost_info.key, 
-            *signer_info.key), 
+        &ore_api::sdk::open(*boost_info.key, *boost_info.key, *signer_info.key),
         &[
             boost_info.clone(),
             boost_info.clone(),
@@ -93,9 +73,9 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
             system_program.clone(),
             slot_hashes.clone(),
             ore_program.clone(),
-        ], 
-        &ore_boost_api::ID, 
-        &[BOOST, mint_info.key.as_ref()]
+        ],
+        &ore_boost_api::ID,
+        &[BOOST, mint_info.key.as_ref()],
     )?;
 
     // Create token account to hold staked tokens.
@@ -110,7 +90,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     )?;
 
     // Create token account to accumulate staking rewards.
-    // 
+    //
     // Note: The same token account is reused for both deposits and rewards if the mint is the ORE token.
     // This is because you cannot create two associated token accounts for the same mint.
     if mint_info.key != ore_mint_info.key {

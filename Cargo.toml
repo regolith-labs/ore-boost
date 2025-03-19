@@ -1,9 +1,9 @@
 [workspace]
 resolver = "2"
-members = ["api", "checkpoint", "program"]
+members = ["api", "cli", "program"]
 
 [workspace.package]
-version = "1.4.0"
+version = "3.0.0"
 edition = "2021"
 license = "Apache-2.0"
 homepage = "https://ore.supply"
@@ -21,18 +21,28 @@ clap = { version = "4.4.12", features = ["derive"] }
 const-crypto = "0.1.0"
 log = "0.4"
 futures = "0.3"
+fixed = "=1.28"
 num_enum = "0.7.2"
-ore-api = "3.1"
+ore-api = "3.2.0-boostv3"
 ore-boost-api = { path = "api" }
-solana-cli-config = "^2.1"
-solana-client = "^2.1"
-solana-program = "^2.1"
-solana-rpc-client = "^2.1"
-solana-sdk = "^2.1"
-solana-transaction-status = "^2.1"
+ore-boost-api-v1 = { version = "1.5.0-boostv3", package = "ore-boost-api" }
+solana-cli-config = "=2.1"
+solana-client = "=2.1"
+solana-program = "=2.1"
+solana-rpc-client = "=2.1"
+solana-sdk = "=2.1"
+solana-transaction-status = "=2.1"
 spl-token = { version = "^4", features = ["no-entrypoint"] }
 spl-associated-token-account = { version = "^6", features = ["no-entrypoint"] }
 static_assertions = "1.1.0"
-steel = { features = ["spl"], version = "3.0" }
+steel = { version = "4.0", features = ["spl"] }
 thiserror = "1.0.57"
 tokio = "1.35"
+
+[patch.crates-io]
+
+[profile.release]
+overflow-checks = true
+
+[profile.dev]
+overflow-checks = true
