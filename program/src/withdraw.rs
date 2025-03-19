@@ -1,6 +1,6 @@
 use ore_api::state::Proof;
 use ore_boost_api::{
-    consts::BOOST,
+    consts::{BOOST, TESTER_ADDRESS},
     instruction::Withdraw,
     state::{Boost, Stake},
 };
@@ -19,7 +19,7 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-    signer_info.is_signer()?;
+    signer_info.is_signer()?.has_address(&TESTER_ADDRESS)?;
     beneficiary_info
         .is_writable()?
         .as_token_account()?
