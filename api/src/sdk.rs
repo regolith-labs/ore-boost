@@ -35,7 +35,7 @@ pub fn claim(signer: Pubkey, beneficiary: Pubkey, mint: Pubkey, amount: u64) -> 
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(beneficiary, false),
-            AccountMeta::new_readonly(boost_address, false),
+            AccountMeta::new(boost_address, false),
             AccountMeta::new(boost_proof_address, false),
             AccountMeta::new(boost_rewards_address, false),
             AccountMeta::new(stake_address, false),
