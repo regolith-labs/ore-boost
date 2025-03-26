@@ -177,6 +177,7 @@ pub fn rotate(signer: Pubkey) -> Instruction {
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(config_pda.0, false),
+            AccountMeta::new_readonly(sysvar::slot_hashes::ID, false),
         ],
         data: Rotate {}.to_bytes(),
     }
