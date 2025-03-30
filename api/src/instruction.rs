@@ -59,7 +59,7 @@ pub struct Initialize {}
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct New {
     pub expires_at: [u8; 8],
-    pub multiplier: [u8; 8],
+    pub bps: [u8; 8],
 }
 
 #[repr(C)]
@@ -80,7 +80,7 @@ pub struct UpdateAdmin {
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct UpdateBoost {
     pub expires_at: [u8; 8],
-    pub multiplier: [u8; 8],
+    pub bps: [u8; 8],
 }
 
 #[repr(C)]

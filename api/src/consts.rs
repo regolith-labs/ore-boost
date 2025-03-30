@@ -15,8 +15,5 @@ pub const STAKE: &[u8] = b"stake";
 /// Denominator for basis point calculations.
 pub const DENOMINATOR_BPS: u64 = 10_000;
 
-/// The denominator of boost multipliers for percentage calculations.
-pub const DENOMINATOR_MULTIPLIER: u64 = 1_000;
-
 /// The duration of a boost rotation in seconds.
 pub const ROTATION_DURATION: i64 = 90;

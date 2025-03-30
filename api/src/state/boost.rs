@@ -12,8 +12,8 @@ pub struct Boost {
     /// The mint address of the token associated with this boost.
     pub mint: Pubkey,
 
-    /// The rewards multiplier (priority) associated with this boost.
-    pub multiplier: u64,
+    /// The take rate in basis points (1/100th of a percent).
+    pub bps: u64,
 
     /// The cumulative rewards collected by this boost, divided by the total deposits at the time of collection.
     pub rewards_factor: Numeric,

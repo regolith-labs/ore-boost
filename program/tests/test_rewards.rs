@@ -22,7 +22,7 @@ async fn test_accumulate_rewards() {
     let mut boost = Boost {
         expires_at: 0,
         mint: Pubkey::default(),
-        multiplier: 1,
+        bps: 1,
         rewards_factor: Numeric::ZERO,
         total_deposits: 0, // Start at 100
         total_stakers: 3,

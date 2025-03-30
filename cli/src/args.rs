@@ -17,8 +17,8 @@ pub struct UpdateBoostArgs {
     #[arg(long, short, value_name = "UNIX_TIME")]
     pub expires_at: Option<i64>,
 
-    #[arg(long, short, value_name = "MULTIPLIER")]
-    pub multiplier: Option<u64>,
+    #[arg(long, short, value_name = "BPS")]
+    pub bps: Option<u64>,
 }
 
 #[derive(Parser, Debug)]

@@ -18,7 +18,7 @@ impl Cli {
         println!("Address: {:?}", boost_address);
         println!("Expires at: {:?}", boost.expires_at);
         println!("Mint: {:?}", mint);
-        println!("Multiplier: {:?}", boost.multiplier);
+        println!("Bps: {:?}", boost.bps);
         println!("Total deposits: {:?}", boost.total_deposits);
         println!("Total stakers: {:?}", boost.total_stakers);
         println!("Rewards factor: {:?}", boost.rewards_factor);

@@ -8,7 +8,7 @@ use steel::*;
 pub fn process_update_boost(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     // Parse args.
     let args = UpdateBoost::try_from_bytes(data)?;
-    let multiplier = u64::from_le_bytes(args.multiplier);
+    let bps = u64::from_le_bytes(args.bps);
     let expires_at = i64::from_le_bytes(args.expires_at);
 
     // Load accounts.
@@ -22,7 +22,7 @@ pub fn process_update_boost(accounts: &[AccountInfo<'_>], data: &[u8]) -> Progra
         .assert(|c| c.admin == *signer_info.key)?;
 
     // Update the boost multiplier.
-    boost.multiplier = multiplier;
+    boost.bps = bps;
     boost.expires_at = expires_at;
 
     Ok(())
