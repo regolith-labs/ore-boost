@@ -39,42 +39,60 @@ impl Stake {
     /// Claim rewards.
     pub fn claim(
         &mut self,
+        amount: u64,
         boost: &mut Boost,
         clock: &Clock,
         config: &mut Config,
         proof: &Proof,
-        amount: u64,
-    ) {
+    ) -> u64 {
         self.collect_rewards(boost, config, &proof);
         let amount = amount.min(self.rewards);
         self.last_claim_at = clock.unix_timestamp;
         self.rewards -= amount;
+        amount
     }
 
     /// Deposit into the boost.
     pub fn deposit(
         &mut self,
+        amount: u64,
         boost: &mut Boost,
         clock: &Clock,
         config: &mut Config,
         proof: &Proof,
-        amount: u64,
-    ) {
-        // Collect rewards.
+        sender: &TokenAccount,
+    ) -> u64 {
         self.collect_rewards(boost, config, &proof);
-
-        // Update stake balances.
+        let amount = amount.min(sender.amount());
         boost.total_deposits += amount;
         self.balance += amount;
         self.last_deposit_at = clock.unix_timestamp;
+        amount
+    }
+
+    /// Withdraw from the boost.
+    pub fn withdraw(
+        &mut self,
+        amount: u64,
+        boost: &mut Boost,
+        clock: &Clock,
+        config: &mut Config,
+        proof: &Proof,
+    ) -> u64 {
+        self.collect_rewards(boost, config, &proof);
+        let amount = amount.min(self.balance);
+        self.balance -= amount;
+        self.last_withdraw_at = clock.unix_timestamp;
+        boost.total_deposits -= amount;
+        amount
     }
 
     // Collect staking rewards.
     pub fn collect_rewards(&mut self, boost: &mut Boost, config: &mut Config, proof: &Proof) {
-        // Collect global rewards into the boost.
+        // Update the boost rewards factor.
         boost.collect_rewards(config, proof);
 
-        // Collect boost rewards into the stake.
+        // Accumulate stake-weighted boost rewards into the stake account.
         if boost.rewards_factor > self.last_rewards_factor {
             let accumulated_rewards = boost.rewards_factor - self.last_rewards_factor;
             if accumulated_rewards < Numeric::ZERO {
@@ -83,6 +101,8 @@ impl Stake {
             let personal_rewards = accumulated_rewards * Numeric::from_u64(self.balance);
             self.rewards += personal_rewards.to_u64();
         }
+
+        // Update this stake account's last seen rewards factor.
         self.last_rewards_factor = boost.rewards_factor;
     }
 }

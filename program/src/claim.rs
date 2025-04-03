@@ -38,9 +38,9 @@ pub fn process_claim(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult
     token_program.is_program(&spl_token::ID)?;
 
     // Claim rewards.
-    stake.claim(boost, &clock, config, &proof, amount);
+    let amount = stake.claim(amount, boost, &clock, config, &proof);
 
-    // Update stake rewards.
+    // Claim aggregate boost rewards.
     invoke_signed(
         &ore_api::sdk::claim(*config_info.key, *rewards_info.key, proof.balance),
         &[

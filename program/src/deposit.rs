@@ -41,10 +41,9 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
     token_program.is_program(&spl_token::ID)?;
 
     // Deposit into the boost.
-    let amount = amount.min(sender.amount());
-    stake.deposit(boost, &clock, config, &proof, amount);
+    let amount = stake.deposit(amount, boost, &clock, config, &proof, &sender);
 
-    // Accumulate stake rewards.
+    // Claim aggregate boost rewards.
     invoke_signed(
         &ore_api::sdk::claim(*config_info.key, *rewards_info.key, proof.balance),
         &[

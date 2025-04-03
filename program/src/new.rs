@@ -60,7 +60,6 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     boost.total_deposits = 0;
     boost.total_stakers = 0;
     boost.withdraw_fee = 0;
-    boost._buffer = [0; 1024];
 
     // Open a proof account for this boost.
     invoke_signed(

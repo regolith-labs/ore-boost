@@ -45,10 +45,14 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     ore_program.is_program(&ore_api::ID)?;
     token_program.is_program(&spl_token::ID)?;
 
-    // Accumulate personal stake rewards.
-    stake.collect_rewards(boost, config, &proof);
+    // TODO Implement withdraw fee.
+
+    // Withdraw stake.
+    let amount = stake.withdraw(amount, boost, &clock, config, &proof);
+
+    // Claim aggregate boost rewards.
     invoke_signed(
-        &ore_api::sdk::claim(*boost_info.key, *rewards_info.key, proof.balance),
+        &ore_api::sdk::claim(*config_info.key, *rewards_info.key, proof.balance),
         &[
             config_info.clone(),
             rewards_info.clone(),
@@ -62,13 +66,7 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
         &[CONFIG],
     )?;
 
-    // TODO Implement withdraw fee.
-
     // Withdraw deposits to beneficiary.
-    let amount = amount.min(stake.balance);
-    stake.balance -= amount;
-    stake.last_withdraw_at = clock.unix_timestamp;
-    boost.total_deposits -= amount;
     transfer_signed(
         boost_info,
         deposits_info,
