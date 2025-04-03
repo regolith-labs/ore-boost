@@ -116,7 +116,7 @@ pub fn initialize(signer: Pubkey) -> Instruction {
 }
 
 // Build new instruction.
-pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, bps: u64) -> Instruction {
+pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, weight: u64) -> Instruction {
     let boost_pda = boost_pda(mint);
     let boost_deposits_address =
         spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
@@ -145,7 +145,7 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, bps: u64) -> Instructi
         ],
         data: New {
             expires_at: expires_at.to_le_bytes(),
-            bps: bps.to_le_bytes(),
+            weight: weight.to_le_bytes(),
         }
         .to_bytes(),
     }
@@ -169,21 +169,8 @@ pub fn open(signer: Pubkey, payer: Pubkey, mint: Pubkey) -> Instruction {
     }
 }
 
-// Build rotate instruction.
-pub fn rotate(signer: Pubkey) -> Instruction {
-    let config_pda = config_pda();
-    Instruction {
-        program_id: crate::ID,
-        accounts: vec![
-            AccountMeta::new(signer, true),
-            AccountMeta::new(config_pda.0, false),
-        ],
-        data: Rotate {}.to_bytes(),
-    }
-}
-
 // Build update_boost instruction.
-pub fn update_boost(signer: Pubkey, boost: Pubkey, expires_at: i64, bps: u64) -> Instruction {
+pub fn update_boost(signer: Pubkey, boost: Pubkey, expires_at: i64, weight: u64) -> Instruction {
     Instruction {
         program_id: crate::ID,
         accounts: vec![
@@ -193,7 +180,7 @@ pub fn update_boost(signer: Pubkey, boost: Pubkey, expires_at: i64, bps: u64) ->
         ],
         data: UpdateBoost {
             expires_at: expires_at.to_le_bytes(),
-            bps: bps.to_le_bytes(),
+            weight: weight.to_le_bytes(),
         }
         .to_bytes(),
     }

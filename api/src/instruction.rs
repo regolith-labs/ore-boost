@@ -9,7 +9,6 @@ pub enum BoostInstruction {
     Close = 1,
     Deposit = 2,
     Open = 3,
-    Rotate = 4,
     Withdraw = 5,
     
     // Admin
@@ -59,16 +58,12 @@ pub struct Initialize {}
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct New {
     pub expires_at: [u8; 8],
-    pub bps: [u8; 8],
+    pub weight: [u8; 8],
 }
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct Open {}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Rotate {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -80,7 +75,7 @@ pub struct UpdateAdmin {
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct UpdateBoost {
     pub expires_at: [u8; 8],
-    pub bps: [u8; 8],
+    pub weight: [u8; 8],
 }
 
 #[repr(C)]
@@ -97,7 +92,6 @@ instruction!(BoostInstruction, Deposit);
 instruction!(BoostInstruction, Initialize);
 instruction!(BoostInstruction, New);
 instruction!(BoostInstruction, Open);
-instruction!(BoostInstruction, Rotate);
 instruction!(BoostInstruction, UpdateAdmin);
 instruction!(BoostInstruction, UpdateBoost);
 instruction!(BoostInstruction, Withdraw);

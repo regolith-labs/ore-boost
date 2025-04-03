@@ -11,7 +11,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     // Parse args.
     let args = New::try_from_bytes(data)?;
     let expires_at = i64::from_le_bytes(args.expires_at);
-    let bps = u64::from_le_bytes(args.bps);
+    let weight = u64::from_le_bytes(args.weight);
 
     // Load accounts.
     let [signer_info, boost_info, boost_deposits_info, boost_rewards_info, config_info, mint_info, ore_mint_info, proof_info, ore_program, system_program, token_program, associated_token_program, slot_hashes] =
@@ -55,7 +55,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     let boost = boost_info.as_account_mut::<Boost>(&ore_boost_api::ID)?;
     boost.expires_at = expires_at;
     boost.mint = *mint_info.key;
-    boost.bps = bps;
+    boost.weight = weight;
     boost.rewards_factor = Numeric::ZERO;
     boost.total_deposits = 0;
     boost.total_stakers = 0;

@@ -6,7 +6,6 @@ mod deposit;
 mod initialize;
 mod new;
 mod open;
-mod rotate;
 mod update_admin;
 mod update_boost;
 mod withdraw;
@@ -19,7 +18,6 @@ use deposit::*;
 use initialize::*;
 use new::*;
 use open::*;
-use rotate::*;
 use update_admin::*;
 use update_boost::*;
 use withdraw::*;
@@ -40,7 +38,6 @@ pub fn process_instruction(
         BoostInstruction::Close => process_close(accounts, data)?,
         BoostInstruction::Deposit => process_deposit(accounts, data)?,
         BoostInstruction::Open => process_open(accounts, data)?,
-        BoostInstruction::Rotate => process_rotate(accounts, data)?,
         BoostInstruction::Withdraw => process_withdraw(accounts, data)?,
 
         // Admin

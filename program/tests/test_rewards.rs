@@ -19,96 +19,192 @@ async fn test_accumulate_rewards() {
     };
 
     // Create a boost with initial state
-    let mut boost = Boost {
+    let mut config = Config {
+        admin: Pubkey::default(),
+        boosts: [Pubkey::default(); 256],
+        len: 2,
+        staker_take_rate: 5000,
+        total_weight: 3,
+        global_rewards_factor: Numeric::ZERO,
+        _buffer: [0; 1024],
+    };
+
+    // Create a boost with initial state
+    let mut boost_a = Boost {
         expires_at: 0,
         mint: Pubkey::default(),
-        bps: 1,
+        weight: 1,
         rewards_factor: Numeric::ZERO,
+        last_global_rewards_factor: Numeric::ZERO,
+        total_deposits: 0, // Start at 100
+        total_stakers: 3,
+        withdraw_fee: 0,
+        _buffer: [0; 1024],
+    };
+    let mut boost_b = Boost {
+        expires_at: 0,
+        mint: Pubkey::default(),
+        weight: 2,
+        rewards_factor: Numeric::ZERO,
+        last_global_rewards_factor: Numeric::ZERO,
         total_deposits: 0, // Start at 100
         total_stakers: 3,
         withdraw_fee: 0,
         _buffer: [0; 1024],
     };
 
-    // Create three different stake accounts.
-    let mut stake1 = Stake {
+    // Create five different stake accounts.
+    let mut stake_1a = Stake {
         authority: Pubkey::default(),
         balance: 0,
         boost: Pubkey::default(),
         last_claim_at: 0,
         last_deposit_at: 0,
         last_withdraw_at: 0,
-        last_rewards_factor: boost.rewards_factor,
+        last_rewards_factor: boost_a.rewards_factor,
         rewards: 0,
         _buffer: [0; 1024],
     };
-    let mut stake2 = Stake {
+    let mut stake_2a = Stake {
         authority: Pubkey::default(),
         balance: 0,
         boost: Pubkey::default(),
         last_claim_at: 0,
         last_deposit_at: 0,
         last_withdraw_at: 0,
-        last_rewards_factor: boost.rewards_factor,
+        last_rewards_factor: boost_a.rewards_factor,
         rewards: 0,
         _buffer: [0; 1024],
     };
-    let mut stake3 = Stake {
+    let mut stake_3a = Stake {
         authority: Pubkey::default(),
         balance: 0,
         boost: Pubkey::default(),
         last_claim_at: 0,
         last_deposit_at: 0,
         last_withdraw_at: 0,
-        last_rewards_factor: boost.rewards_factor,
+        last_rewards_factor: boost_a.rewards_factor,
+        rewards: 0,
+        _buffer: [0; 1024],
+    };
+    let mut stake_1b = Stake {
+        authority: Pubkey::default(),
+        balance: 0,
+        boost: Pubkey::default(),
+        last_claim_at: 0,
+        last_deposit_at: 0,
+        last_withdraw_at: 0,
+        last_rewards_factor: boost_b.rewards_factor,
+        rewards: 0,
+        _buffer: [0; 1024],
+    };
+    let mut stake_2b = Stake {
+        authority: Pubkey::default(),
+        balance: 0,
+        boost: Pubkey::default(),
+        last_claim_at: 0,
+        last_deposit_at: 0,
+        last_withdraw_at: 0,
+        last_rewards_factor: boost_b.rewards_factor,
         rewards: 0,
         _buffer: [0; 1024],
     };
 
-    // Stake account 1 deposits 100
-    stake1.accumulate_rewards(&mut boost, &mut proof);
-    proof.balance = 0;
-    stake1.balance += 100;
-    boost.total_deposits += 100;
+    // Stake account 1a deposits 100
+    let clock = Clock {
+        slot: 0,
+        epoch_start_timestamp: 0,
+        epoch: 0,
+        leader_schedule_epoch: 0,
+        unix_timestamp: 0,
+    };
 
-    // Assume 100 rewards are earned
+    // Tx 1: Deposit 100
+    stake_1a.deposit(&mut boost_a, &clock, &mut config, &mut proof, 100);
+    proof.balance = 0; // Simulate claim
+
+    // Tx 2: Deposit 100
+    stake_1b.deposit(&mut boost_b, &clock, &mut config, &mut proof, 100);
+    proof.balance = 0; // Simulate claim
+
+    // Simulate 100 rewards are earned
     proof.balance += 100;
 
-    // Stake account 2 deposits 150
-    stake2.accumulate_rewards(&mut boost, &mut proof);
-    proof.balance = 0;
-    stake2.balance += 150;
-    boost.total_deposits += 150;
+    // Tx 3: Deposit 150
+    stake_2a.deposit(&mut boost_a, &clock, &mut config, &mut proof, 150);
+    proof.balance = 0; // Simulate claim
 
-    // Assume 100 rewards are earned.
+    // Tx 4: Deposit 150
+    stake_2b.deposit(&mut boost_b, &clock, &mut config, &mut proof, 150);
+    proof.balance = 0; // Simulate claim
+
+    // Simulate 100 rewards are earned.
     proof.balance += 100;
 
-    // Stake account 3 deposits 50
-    stake3.accumulate_rewards(&mut boost, &mut proof);
-    proof.balance = 0;
-    stake3.balance += 50;
-    boost.total_deposits += 50;
+    // Tx 5: Deposit 50
+    stake_3a.deposit(&mut boost_a, &clock, &mut config, &mut proof, 50);
+    proof.balance = 0; // Simulate claim
 
-    // Assume 100 rewards are earned.
+    // Simulate 100 rewards are earned.
     proof.balance += 100;
 
-    // Assume stake 1 claims rewards.
-    stake1.accumulate_rewards(&mut boost, &mut proof);
-    proof.balance = 0;
+    // Tx 6: Claim rewards.
+    stake_1a.claim(&mut boost_a, &clock, &mut config, &mut proof, 0);
+    proof.balance = 0; // Simulate claim
 
-    // Assume stake 2 claims rewards.
-    stake2.accumulate_rewards(&mut boost, &mut proof);
-    proof.balance = 0;
+    // Tx 7: Claim rewards.
+    stake_2a.claim(&mut boost_a, &clock, &mut config, &mut proof, 0);
+    proof.balance = 0; // Simulate claim
 
-    // Assume stake 3 claims rewards.
-    stake3.accumulate_rewards(&mut boost, &mut proof);
-    proof.balance = 0;
+    // Tx 8: Claim rewards.
+    stake_3a.claim(&mut boost_a, &clock, &mut config, &mut proof, 0);
+    proof.balance = 0; // Simulate claim
 
-    // Verify rewards are distributed proportionally
-    assert_eq!(stake1.rewards, 173); // (1.0 of 100) + (0.40 of 100) + (0.33 of 100) = 173
-    assert_eq!(stake2.rewards, 109); //                (0.60 of 100) + (0.50 of 100) = 109
-    assert_eq!(stake3.rewards, 16); //                                 (0.16 of 100) = 16
+    // Tx 9: Claim rewards.
+    stake_1b.claim(&mut boost_b, &clock, &mut config, &mut proof, 0);
+    proof.balance = 0; // Simulate claim
+
+    // Tx 10: Claim rewards.
+    stake_2b.claim(&mut boost_b, &clock, &mut config, &mut proof, 0);
+    proof.balance = 0; // Simulate claim
+
+    // Verify global rewards factor.
+    // Other transactions not included in expected result since they have numerator 0 (proof balance is 0).
+    let expected_global_rewards_factor = Numeric::from_fraction(100, 3) // Tx 3
+        + Numeric::from_fraction(100, 3) // Tx 5
+        + Numeric::from_fraction(100, 3); // Tx 6
+    assert_eq!(config.global_rewards_factor, expected_global_rewards_factor);
+    assert!(
+        (config.global_rewards_factor * Numeric::from_u64(config.total_weight)).to_u64() <= 300
+    );
+
+    // Verify boost rewards factors.
+    let a = Numeric::from_fraction(1, 3) * Numeric::from_u64(100) / Numeric::from_u64(100);
+    let b = Numeric::from_fraction(1, 3) * Numeric::from_u64(100) / Numeric::from_u64(250);
+    let c = Numeric::from_fraction(1, 3) * Numeric::from_u64(100) / Numeric::from_u64(300);
+    let d = a + b + c;
+    assert_eq!(boost_a.rewards_factor, d);
+    let a = Numeric::from_fraction(2, 3) * Numeric::from_u64(100) / Numeric::from_u64(100);
+    let b = Numeric::from_fraction(2, 3) * Numeric::from_u64(100) / Numeric::from_u64(250);
+    let c = Numeric::from_fraction(2, 3) * Numeric::from_u64(100) / Numeric::from_u64(250);
+    let d = a + b + c;
+    assert_eq!(boost_b.rewards_factor, d);
+
+    // Verify stake rewards.
+    assert_eq!(stake_1a.rewards, 57); // (100/100 * 33.333) + (100/250 * 33.333) + (100/300 * 33.333)
+    assert_eq!(stake_2a.rewards, 36); // (000/100 * 33.333) + (150/250 * 33.333) + (150/300 * 33.333)
+    assert_eq!(stake_3a.rewards, 5); // (000/100 * 33.333) + (000/250 * 33.333) + (050/300 * 33.333)
+
+    assert_eq!(stake_1b.rewards, 119); // (100/100 * 66.666) + (100/250 * 66.666) + (100/250 * 66.666)
+    assert_eq!(stake_2b.rewards, 79); // (000/100 * 66.666) + (150/250 * 66.666) + (150/250 * 66.666)
 
     // Total rewards earned should be less than or equal to original amount
-    assert!(stake1.rewards + stake2.rewards + stake3.rewards <= 300);
+    assert!(
+        stake_1a.rewards
+            + stake_2a.rewards
+            + stake_3a.rewards
+            + stake_1b.rewards
+            + stake_2b.rewards
+            <= 300
+    );
 }

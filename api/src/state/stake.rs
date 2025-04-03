@@ -1,7 +1,7 @@
 use ore_api::state::Proof;
 use steel::*;
 
-use super::{Boost, BoostAccount};
+use super::{Boost, BoostAccount, Config};
 
 /// Stake tracks the deposits and rewards of a staker.
 #[repr(C)]
@@ -36,11 +36,45 @@ pub struct Stake {
 }
 
 impl Stake {
-    // Accumulate staking rewards.
-    pub fn accumulate_rewards(&mut self, boost: &mut Boost, proof: &Proof) {
-        if boost.total_deposits > 0 {
-            boost.rewards_factor += Numeric::from_fraction(proof.balance, boost.total_deposits);
-        }
+    /// Claim rewards.
+    pub fn claim(
+        &mut self,
+        boost: &mut Boost,
+        clock: &Clock,
+        config: &mut Config,
+        proof: &Proof,
+        amount: u64,
+    ) {
+        self.collect_rewards(boost, config, &proof);
+        let amount = amount.min(self.rewards);
+        self.last_claim_at = clock.unix_timestamp;
+        self.rewards -= amount;
+    }
+
+    /// Deposit into the boost.
+    pub fn deposit(
+        &mut self,
+        boost: &mut Boost,
+        clock: &Clock,
+        config: &mut Config,
+        proof: &Proof,
+        amount: u64,
+    ) {
+        // Collect rewards.
+        self.collect_rewards(boost, config, &proof);
+
+        // Update stake balances.
+        boost.total_deposits += amount;
+        self.balance += amount;
+        self.last_deposit_at = clock.unix_timestamp;
+    }
+
+    // Collect staking rewards.
+    pub fn collect_rewards(&mut self, boost: &mut Boost, config: &mut Config, proof: &Proof) {
+        // Collect global rewards into the boost.
+        boost.collect_rewards(config, proof);
+
+        // Collect boost rewards into the stake.
         if boost.rewards_factor > self.last_rewards_factor {
             let accumulated_rewards = boost.rewards_factor - self.last_rewards_factor;
             if accumulated_rewards < Numeric::ZERO {
