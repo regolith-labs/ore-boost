@@ -14,7 +14,7 @@ async fn test_rewards_accounting() {
         challenge: [0; 32],
         last_hash: [0; 32],
         last_hash_at: 0,
-        last_stake_at: 0,
+        last_claim_at: 0,
         miner: Pubkey::default(),
         total_hashes: 0,
         total_rewards: 0,
