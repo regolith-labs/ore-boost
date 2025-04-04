@@ -36,7 +36,7 @@ pub fn process_initialize(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Program
         config.boosts = [Pubkey::default(); 256];
         config.len = 0;
         config.rewards_factor = Numeric::ZERO;
-        config.staker_take_rate = 5_000;
+        config.take_rate = 5_000;
         config.total_weight = 0;
     }
 

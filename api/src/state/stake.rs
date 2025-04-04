@@ -64,9 +64,9 @@ impl Stake {
     ) -> u64 {
         self.collect_rewards(boost, config, &proof);
         let amount = amount.min(sender.amount());
-        boost.total_deposits += amount;
         self.balance += amount;
         self.last_deposit_at = clock.unix_timestamp;
+        boost.total_deposits += amount;
         amount
     }
 
@@ -88,7 +88,7 @@ impl Stake {
     }
 
     // Collect staking rewards.
-    pub fn collect_rewards(&mut self, boost: &mut Boost, config: &mut Config, proof: &Proof) {
+    fn collect_rewards(&mut self, boost: &mut Boost, config: &mut Config, proof: &Proof) {
         // Update the boost rewards factor.
         boost.collect_rewards(config, proof);
 

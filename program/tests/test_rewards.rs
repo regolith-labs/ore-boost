@@ -25,7 +25,7 @@ async fn test_rewards_accounting() {
         admin: Pubkey::default(),
         boosts: [Pubkey::default(); 256],
         len: 2,
-        staker_take_rate: 5000,
+        take_rate: 5_000,
         total_weight: 3,
         rewards_factor: Numeric::ZERO,
     };
