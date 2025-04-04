@@ -21,7 +21,7 @@ impl Cli {
             signer.pubkey(),
             boost_address,
             args.expires_at.unwrap_or(boost.expires_at),
-            args.bps.unwrap_or(boost.bps),
+            args.weight.unwrap_or(boost.weight),
         );
         let sig = self.send_and_confirm(ix).await?;
         println!("sig: {}", sig);

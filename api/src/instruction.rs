@@ -9,7 +9,6 @@ pub enum BoostInstruction {
     Close = 1,
     Deposit = 2,
     Open = 3,
-    Rotate = 4,
     Withdraw = 5,
     
     // Admin
@@ -19,6 +18,10 @@ pub enum BoostInstruction {
     New = 103,
     UpdateAdmin = 104,
     UpdateBoost = 105,
+
+    // Migration
+    MigrateConfig = 200,
+    MigrateBoost = 201,
 }
 
 impl BoostInstruction {
@@ -59,16 +62,12 @@ pub struct Initialize {}
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct New {
     pub expires_at: [u8; 8],
-    pub bps: [u8; 8],
+    pub weight: [u8; 8],
 }
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct Open {}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug, Pod, Zeroable)]
-pub struct Rotate {}
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
@@ -80,7 +79,7 @@ pub struct UpdateAdmin {
 #[derive(Clone, Copy, Debug, Pod, Zeroable)]
 pub struct UpdateBoost {
     pub expires_at: [u8; 8],
-    pub bps: [u8; 8],
+    pub weight: [u8; 8],
 }
 
 #[repr(C)]
@@ -88,6 +87,14 @@ pub struct UpdateBoost {
 pub struct Withdraw {
     pub amount: [u8; 8],
 }
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct MigrateConfig {}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Pod, Zeroable)]
+pub struct MigrateBoost {}
 
 instruction!(BoostInstruction, Activate);
 instruction!(BoostInstruction, Claim);
@@ -97,7 +104,8 @@ instruction!(BoostInstruction, Deposit);
 instruction!(BoostInstruction, Initialize);
 instruction!(BoostInstruction, New);
 instruction!(BoostInstruction, Open);
-instruction!(BoostInstruction, Rotate);
 instruction!(BoostInstruction, UpdateAdmin);
 instruction!(BoostInstruction, UpdateBoost);
 instruction!(BoostInstruction, Withdraw);
+instruction!(BoostInstruction, MigrateConfig);
+instruction!(BoostInstruction, MigrateBoost);
