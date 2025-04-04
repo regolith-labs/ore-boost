@@ -2822,7 +2822,7 @@ dependencies = [
 
 [[package]]
 name = "migrate"
-version = "3.0.1"
+version = "4.0.0-alpha"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3287,7 +3287,7 @@ dependencies = [
 
 [[package]]
 name = "ore-boost-api"
-version = "3.0.1"
+version = "4.0.0-alpha"
 dependencies = [
  "array-const-fn-init",
  "bytemuck",
@@ -3305,7 +3305,7 @@ dependencies = [
 
 [[package]]
 name = "ore-boost-program"
-version = "3.0.1"
+version = "4.0.0-alpha"
 dependencies = [
  "base64 0.21.7",
  "bytemuck",
@@ -3323,7 +3323,7 @@ dependencies = [
 
 [[package]]
 name = "ore-boosts-cli"
-version = "3.0.1"
+version = "4.0.0-alpha"
 dependencies = [
  "clap 4.5.32",
  "futures",
