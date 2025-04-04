@@ -19,7 +19,6 @@ helius = "0.2.4"
 log.workspace = true
 ore-api.workspace = true
 ore-boost-api = { path = "../api" }
-ore-boost-api-v3 = { package = "ore-boost-api", version = "3.0.1" }
 rand = "0.9.0"
 reqwest = "0.12.12"
 serde = { version = "1.0.217", features = ["derive"] }

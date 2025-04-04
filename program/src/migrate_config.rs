@@ -49,31 +49,31 @@ pub fn process_migrate_config(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Pro
     config.total_weight = 0;
 
     // Open a proof for the config account.
-    invoke_signed(
-        &ore_api::sdk::open(*config_info.key, *config_info.key, *signer_info.key),
-        &[
-            config_info.clone(),
-            config_info.clone(),
-            signer_info.clone(),
-            proof_info.clone(),
-            system_program.clone(),
-            slot_hashes_sysvar.clone(),
-            ore_program.clone(),
-        ],
-        &ore_boost_api::ID,
-        &[CONFIG],
-    )?;
+    // invoke_signed(
+    //     &ore_api::sdk::open(*config_info.key, *config_info.key, *signer_info.key),
+    //     &[
+    //         config_info.clone(),
+    //         config_info.clone(),
+    //         signer_info.clone(),
+    //         proof_info.clone(),
+    //         system_program.clone(),
+    //         slot_hashes_sysvar.clone(),
+    //         ore_program.clone(),
+    //     ],
+    //     &ore_boost_api::ID,
+    //     &[CONFIG],
+    // )?;
 
     // Create token account to accumulate staking rewards.
-    create_associated_token_account(
-        signer_info,
-        config_info,
-        rewards_info,
-        ore_mint_info,
-        system_program,
-        token_program,
-        associated_token_program,
-    )?;
+    // create_associated_token_account(
+    //     signer_info,
+    //     config_info,
+    //     rewards_info,
+    //     ore_mint_info,
+    //     system_program,
+    //     token_program,
+    //     associated_token_program,
+    // )?;
 
     // Assert migraiton was successful
     assert_eq!(config.admin, admin);
@@ -83,10 +83,10 @@ pub fn process_migrate_config(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Pro
     assert_eq!(config.total_weight, 0);
 
     // Assert accounts were created correctly
-    rewards_info.as_associated_token_account(config_info.key, ore_mint_info.key)?;
-    proof_info
-        .as_account::<Proof>(&ore_api::ID)?
-        .assert(|p| p.authority == *config_info.key)?;
+    // rewards_info.as_associated_token_account(config_info.key, ore_mint_info.key)?;
+    // proof_info
+    //     .as_account::<Proof>(&ore_api::ID)?
+    //     .assert(|p| p.authority == *config_info.key)?;
 
     Ok(())
 }

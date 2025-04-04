@@ -73,17 +73,14 @@ impl Client {
 #[async_trait]
 pub trait AsyncClient {
     // fn get_async_client(&self) -> Result<Arc<RpcClient>>;
+    async fn get_config(&self) -> Result<ore_api::state::Config>;
+    async fn get_config_old(&self) -> Result<ore_boost_api::state::OldConfig>;
     async fn get_boost(&self, boost: &Pubkey) -> Result<Boost>;
     async fn get_boosts(&self) -> Result<Vec<Boost>>;
     async fn get_boost_stake_accounts(&self, boost: &Pubkey) -> Result<Vec<(Pubkey, Stake)>>;
-    async fn get_boosts_v3(&self) -> Result<Vec<ore_boost_api_v3::state::Boost>>;
-    async fn get_boost_v3_stake_accounts(
-        &self,
-        boost: &Pubkey,
-    ) -> Result<Vec<(Pubkey, ore_boost_api_v3::state::Stake)>>;
+    async fn get_boosts_old(&self) -> Result<Vec<ore_boost_api::state::OldBoost>>;
     async fn get_proof(&self, address: &Pubkey) -> Result<Proof>;
     async fn get_stake(&self, stake: &Pubkey) -> Result<ore_boost_api::state::Stake>;
-    async fn get_stake_v3(&self, stake: &Pubkey) -> Result<ore_boost_api_v3::state::Stake>;
     async fn get_clock(&self) -> Result<Clock>;
     async fn get_lookup_table(&self, lut: &Pubkey) -> Result<AddressLookupTableAccount>;
     async fn get_lookup_tables(&self, luts: &[Pubkey]) -> Result<Vec<AddressLookupTableAccount>>;
@@ -91,6 +88,18 @@ pub trait AsyncClient {
 
 #[async_trait]
 impl AsyncClient for solana_client::nonblocking::rpc_client::RpcClient {
+    async fn get_config(&self) -> Result<ore_api::state::Config> {
+        let config_address = ore_boost_api::state::config_pda().0;
+        let data = self.get_account_data(&config_address).await?;
+        let config = ore_api::state::Config::try_from_bytes(data.as_slice())?;
+        Ok(*config)
+    }
+    async fn get_config_old(&self) -> Result<ore_boost_api::state::OldConfig> {
+        let config_address = ore_boost_api::state::config_pda().0;
+        let data = self.get_account_data(&config_address).await?;
+        let config = ore_boost_api::state::OldConfig::try_from_bytes(data.as_slice())?;
+        Ok(*config)
+    }
     async fn get_boost(&self, boost: &Pubkey) -> Result<Boost> {
         let data = self.get_account_data(boost).await?;
         let boost = Boost::try_from_bytes(data.as_slice())?;
@@ -109,40 +118,19 @@ impl AsyncClient for solana_client::nonblocking::rpc_client::RpcClient {
             .collect();
         Ok(accounts)
     }
-    async fn get_boosts_v3(&self) -> Result<Vec<ore_boost_api_v3::state::Boost>> {
-        let accounts = get_program_accounts::<ore_boost_api_v3::state::Boost>(
+    async fn get_boosts_old(&self) -> Result<Vec<ore_boost_api::state::OldBoost>> {
+        let accounts = get_program_accounts::<ore_boost_api::state::OldBoost>(
             self,
-            &ore_boost_api_v3::ID,
+            &ore_boost_api::ID,
             vec![],
         )
         .await?;
         let accounts = accounts.into_iter().map(|(_, boost)| boost).collect();
         Ok(accounts)
     }
-    async fn get_boost_v3_stake_accounts(
-        &self,
-        boost: &Pubkey,
-    ) -> Result<Vec<(Pubkey, ore_boost_api_v3::state::Stake)>> {
-        let accounts = get_program_accounts::<ore_boost_api_v3::state::Stake>(
-            self,
-            &ore_boost_api_v3::ID,
-            vec![],
-        )
-        .await?;
-        let accounts = accounts
-            .into_iter()
-            .filter(|(_, stake)| stake.boost.eq(boost))
-            .collect();
-        Ok(accounts)
-    }
     async fn get_stake(&self, stake: &Pubkey) -> Result<ore_boost_api::state::Stake> {
         let data = self.get_account_data(stake).await?;
         let stake = ore_boost_api::state::Stake::try_from_bytes(data.as_slice())?;
-        Ok(*stake)
-    }
-    async fn get_stake_v3(&self, stake: &Pubkey) -> Result<ore_boost_api_v3::state::Stake> {
-        let data = self.get_account_data(stake).await?;
-        let stake = ore_boost_api_v3::state::Stake::try_from_bytes(data.as_slice())?;
         Ok(*stake)
     }
     async fn get_proof(&self, address: &Pubkey) -> Result<Proof> {
