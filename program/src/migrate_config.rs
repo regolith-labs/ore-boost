@@ -1,6 +1,6 @@
 use ore_api::state::Proof;
 use ore_boost_api::{consts::CONFIG, state::*};
-use solana_program::{log::sol_log, pubkey};
+use solana_program::pubkey;
 use steel::*;
 use sysvar::rent::Rent;
 

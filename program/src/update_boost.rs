@@ -29,10 +29,12 @@ pub fn process_update_boost(accounts: &[AccountInfo<'_>], data: &[u8]) -> Progra
     boost.expires_at = expires_at;
 
     // Update the total weight.
-    if weight > old_weight {
-        config.total_weight += weight - old_weight;
-    } else {
-        config.total_weight -= old_weight - weight;
+    if config.boosts.contains(boost_info.key) {
+        if weight > old_weight {
+            config.total_weight += weight - old_weight;
+        } else {
+            config.total_weight -= old_weight - weight;
+        }
     }
 
     Ok(())

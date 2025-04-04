@@ -181,7 +181,7 @@ pub fn update_boost(signer: Pubkey, boost: Pubkey, expires_at: i64, weight: u64)
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(boost, false),
-            AccountMeta::new_readonly(config_pda().0, false),
+            AccountMeta::new(config_pda().0, false),
         ],
         data: UpdateBoost {
             expires_at: expires_at.to_le_bytes(),
@@ -254,8 +254,8 @@ pub fn migrate_config(signer: Pubkey) -> Instruction {
     }
 }
 
-pub fn migrate_boost(signer: Pubkey, boost: Pubkey) -> Instruction {
-    let boost_address = boost_pda(boost).0;
+pub fn migrate_boost(signer: Pubkey, mint: Pubkey) -> Instruction {
+    let boost_address = boost_pda(mint).0;
     let boost_proof_address = proof_pda(boost_address).0;
     let boost_rewards_address = spl_associated_token_account::get_associated_token_address(
         &boost_address,
@@ -273,11 +273,14 @@ pub fn migrate_boost(signer: Pubkey, boost: Pubkey) -> Instruction {
             AccountMeta::new(boost_address, false),
             AccountMeta::new(boost_proof_address, false),
             AccountMeta::new(boost_rewards_address, false),
-            AccountMeta::new(config_address, false),
+            AccountMeta::new_readonly(config_address, false),
             AccountMeta::new_readonly(ore_api::consts::MINT_ADDRESS, false),
             AccountMeta::new(rewards_address, false),
+            AccountMeta::new(ore_api::consts::TREASURY_ADDRESS, false),
+            AccountMeta::new(ore_api::consts::TREASURY_TOKENS_ADDRESS, false),
             AccountMeta::new_readonly(system_program::ID, false),
             AccountMeta::new_readonly(spl_token::ID, false),
+            AccountMeta::new_readonly(ore_api::ID, false),
         ],
         data: MigrateBoost {}.to_bytes(),
     }
