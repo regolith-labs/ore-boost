@@ -73,7 +73,7 @@ impl Client {
 #[async_trait]
 pub trait AsyncClient {
     // fn get_async_client(&self) -> Result<Arc<RpcClient>>;
-    async fn get_config(&self) -> Result<ore_api::state::Config>;
+    async fn get_config(&self) -> Result<ore_boost_api::state::Config>;
     async fn get_config_old(&self) -> Result<ore_boost_api::state::OldConfig>;
     async fn get_boost(&self, boost: &Pubkey) -> Result<Boost>;
     async fn get_boosts(&self) -> Result<Vec<Boost>>;
@@ -88,10 +88,10 @@ pub trait AsyncClient {
 
 #[async_trait]
 impl AsyncClient for solana_client::nonblocking::rpc_client::RpcClient {
-    async fn get_config(&self) -> Result<ore_api::state::Config> {
+    async fn get_config(&self) -> Result<ore_boost_api::state::Config> {
         let config_address = ore_boost_api::state::config_pda().0;
         let data = self.get_account_data(&config_address).await?;
-        let config = ore_api::state::Config::try_from_bytes(data.as_slice())?;
+        let config = ore_boost_api::state::Config::try_from_bytes(data.as_slice())?;
         Ok(*config)
     }
     async fn get_config_old(&self) -> Result<ore_boost_api::state::OldConfig> {

@@ -1,30 +1,30 @@
-mod activate;
-mod claim;
-mod close;
-mod deactivate;
-mod deposit;
-mod initialize;
+// mod activate;
+// mod claim;
+// mod close;
+// mod deactivate;
+// mod deposit;
+// mod initialize;
 mod migrate_boost;
 mod migrate_config;
-mod new;
-mod open;
-mod update_admin;
+// mod new;
+// mod open;
+// mod update_admin;
 mod update_boost;
-mod withdraw;
+// mod withdraw;
 
-use activate::*;
-use claim::*;
-use close::*;
-use deactivate::*;
-use deposit::*;
-use initialize::*;
+// use activate::*;
+// use claim::*;
+// use close::*;
+// use deactivate::*;
+// use deposit::*;
+// use initialize::*;
 use migrate_boost::*;
 use migrate_config::*;
-use new::*;
-use open::*;
-use update_admin::*;
+// use new::*;
+// use open::*;
+// use update_admin::*;
 use update_boost::*;
-use withdraw::*;
+// use withdraw::*;
 
 use ore_boost_api::instruction::*;
 use steel::*;
@@ -56,7 +56,7 @@ pub fn process_instruction(
         BoostInstruction::MigrateConfig => process_migrate_config(accounts, data)?,
         BoostInstruction::MigrateBoost => process_migrate_boost(accounts, data)?,
 
-        _ => panic!("Disabled for migration"),
+        _ => return Err(ProgramError::InvalidInstructionData),
     }
 
     Ok(())

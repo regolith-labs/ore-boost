@@ -17,10 +17,12 @@ async fn main() -> anyhow::Result<()> {
     let client = client::Client::new()?;
     let client = std::sync::Arc::new(client);
 
-    let old_config = client.rpc.get_config_old().await?;
-    println!("Old config: {:?}", old_config);
+    // let old_config = client.rpc.get_config_old().await?;
+    // println!("Old config: {:?}", old_config);
 
-    migrate_config(&client).await?;
+    // migrate_config(&client).await?;
+
+    // sleep(Duration::from_secs(10)).await;
 
     let config = client.rpc.get_config().await?;
     println!("Config: {:?}", config);
