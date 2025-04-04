@@ -1,0 +1,35 @@
+[package]
+name = "migrate"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+repository.workspace = true
+readme.workspace = true
+keywords.workspace = true
+
+[dependencies]
+anyhow = "1.0.95"
+async-trait = "0.1.86"
+bincode.workspace = true
+env_logger = "0.11.6"
+futures.workspace = true
+helius = "0.2.4"
+log.workspace = true
+ore-api.workspace = true
+ore-boost-api = { path = "../api" }
+ore-boost-api-v3 = { package = "ore-boost-api", version = "3.0.1" }
+rand = "0.9.0"
+reqwest = "0.12.12"
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.138"
+solana-account-decoder = "2.1.12"
+solana-client.workspace = true
+solana-sdk.workspace = true
+spl-token.workspace = true
+spl-associated-token-account.workspace = true
+steel.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["full"] }
+url = "2.5.4"
