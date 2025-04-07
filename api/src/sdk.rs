@@ -174,14 +174,28 @@ pub fn open(signer: Pubkey, payer: Pubkey, mint: Pubkey) -> Instruction {
     }
 }
 
+// let [signer_info, boost_info, config_info, proof_info, rewards_info, treasury_info, treasury_tokens_info, ore_program, token_program] =
+
 // Build update_boost instruction.
 pub fn update_boost(signer: Pubkey, boost: Pubkey, expires_at: i64, weight: u64) -> Instruction {
+    let config_address = config_pda().0;
+    let proof_address = proof_pda(boost).0;
+    let rewards_address = spl_associated_token_account::get_associated_token_address(
+        &config_address,
+        &ore_api::consts::MINT_ADDRESS,
+    );
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(boost, false),
-            AccountMeta::new(config_pda().0, false),
+            AccountMeta::new(config_address, false),
+            AccountMeta::new(proof_address, false),
+            AccountMeta::new(rewards_address, false),
+            AccountMeta::new(ore_api::consts::TREASURY_ADDRESS, false),
+            AccountMeta::new(ore_api::consts::TREASURY_TOKENS_ADDRESS, false),
+            AccountMeta::new_readonly(ore_api::ID, false),
+            AccountMeta::new_readonly(spl_token::ID, false),
         ],
         data: UpdateBoost {
             expires_at: expires_at.to_le_bytes(),
