@@ -1,4 +1,6 @@
+use ore_api::state::Proof;
 use ore_boost_api::{
+    consts::CONFIG,
     instruction::UpdateBoost,
     state::{Boost, Config},
 };
@@ -12,7 +14,9 @@ pub fn process_update_boost(accounts: &[AccountInfo<'_>], data: &[u8]) -> Progra
     let expires_at = i64::from_le_bytes(args.expires_at);
 
     // Load accounts.
-    let [signer_info, boost_info, config_info] = accounts else {
+    let [signer_info, boost_info, config_info, proof_info, rewards_info, treasury_info, treasury_tokens_info, ore_program, token_program] =
+        accounts
+    else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
@@ -20,8 +24,35 @@ pub fn process_update_boost(accounts: &[AccountInfo<'_>], data: &[u8]) -> Progra
     let config = config_info
         .as_account_mut::<Config>(&ore_boost_api::ID)?
         .assert_mut(|c| c.admin == *signer_info.key)?;
+    let proof = proof_info
+        .as_account::<Proof>(&ore_api::ID)?
+        .assert(|c| c.authority == *config_info.key)?;
+    rewards_info
+        .is_writable()?
+        .as_associated_token_account(config_info.key, &ore_api::consts::MINT_ADDRESS)?;
+    treasury_info.has_address(&ore_api::consts::TREASURY_ADDRESS)?;
+    treasury_tokens_info.has_address(&ore_api::consts::TREASURY_TOKENS_ADDRESS)?;
+    ore_program.is_program(&ore_api::ID)?;
+    token_program.is_program(&spl_token::ID)?;
 
-    // TODO Handle global rewards factor.
+    // Collect rewards
+    boost.collect_rewards(config, &proof);
+
+    // Claim aggregate boost rewards.
+    invoke_signed(
+        &ore_api::sdk::claim(*config_info.key, *rewards_info.key, proof.balance),
+        &[
+            config_info.clone(),
+            rewards_info.clone(),
+            proof_info.clone(),
+            treasury_info.clone(),
+            treasury_tokens_info.clone(),
+            token_program.clone(),
+            ore_program.clone(),
+        ],
+        &ore_boost_api::ID,
+        &[CONFIG],
+    )?;
 
     // Update the boost multiplier.
     let old_weight = boost.weight;

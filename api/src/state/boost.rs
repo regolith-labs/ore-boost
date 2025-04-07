@@ -34,7 +34,7 @@ pub struct Boost {
 
 impl Boost {
     /// Collect weighted rewards from the global rewards pool.
-    pub(crate) fn collect_rewards(&mut self, config: &mut Config, proof: &Proof) {
+    pub fn collect_rewards(&mut self, config: &mut Config, proof: &Proof) {
         // Increment the global rewards factor
         if config.total_weight > 0 {
             config.rewards_factor += Numeric::from_fraction(proof.balance, config.total_weight);
