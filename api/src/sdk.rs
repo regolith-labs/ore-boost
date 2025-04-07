@@ -24,9 +24,10 @@ pub fn activate(signer: Pubkey, mint: Pubkey) -> Instruction {
 // Build claim instruction.
 pub fn claim(signer: Pubkey, beneficiary: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     let boost_address = boost_pda(mint).0;
-    let boost_proof_address = proof_pda(boost_address).0;
-    let boost_rewards_address = spl_associated_token_account::get_associated_token_address(
-        &boost_address,
+    let config_address = config_pda().0;
+    let proof_address = proof_pda(config_address).0;
+    let rewards_address = spl_associated_token_account::get_associated_token_address(
+        &config_address,
         &ore_api::consts::MINT_ADDRESS,
     );
     let stake_address = stake_pda(signer, boost_address).0;
@@ -36,8 +37,9 @@ pub fn claim(signer: Pubkey, beneficiary: Pubkey, mint: Pubkey, amount: u64) -> 
             AccountMeta::new(signer, true),
             AccountMeta::new(beneficiary, false),
             AccountMeta::new(boost_address, false),
-            AccountMeta::new(boost_proof_address, false),
-            AccountMeta::new(boost_rewards_address, false),
+            AccountMeta::new(config_address, false),
+            AccountMeta::new(proof_address, false),
+            AccountMeta::new(rewards_address, false),
             AccountMeta::new(stake_address, false),
             AccountMeta::new_readonly(ore_api::consts::TREASURY_ADDRESS, false),
             AccountMeta::new(ore_api::consts::TREASURY_TOKENS_ADDRESS, false),
@@ -69,11 +71,13 @@ pub fn deactivate(signer: Pubkey, mint: Pubkey) -> Instruction {
 // Build deposit instruction.
 pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     let boost_address = boost_pda(mint).0;
-    let boost_proof_address = proof_pda(boost_address).0;
-    let boost_deposits_address =
+    let config_address = config_pda().0;
+    let deposits_address =
         spl_associated_token_account::get_associated_token_address(&boost_address, &mint);
-    let boost_rewards_address = spl_associated_token_account::get_associated_token_address(
-        &boost_address,
+
+    let proof_address = proof_pda(config_address).0;
+    let rewards_address = spl_associated_token_account::get_associated_token_address(
+        &config_address,
         &ore_api::consts::MINT_ADDRESS,
     );
     let sender_address = spl_associated_token_account::get_associated_token_address(&signer, &mint);
@@ -83,10 +87,11 @@ pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(boost_address, false),
-            AccountMeta::new(boost_deposits_address, false),
-            AccountMeta::new(boost_proof_address, false),
-            AccountMeta::new(boost_rewards_address, false),
+            AccountMeta::new(config_address, false),
+            AccountMeta::new(deposits_address, false),
             AccountMeta::new_readonly(mint, false),
+            AccountMeta::new(proof_address, false),
+            AccountMeta::new(rewards_address, false),
             AccountMeta::new(sender_address, false),
             AccountMeta::new(stake_address, false),
             AccountMeta::new_readonly(ore_api::consts::TREASURY_ADDRESS, false),
@@ -116,7 +121,7 @@ pub fn initialize(signer: Pubkey) -> Instruction {
 }
 
 // Build new instruction.
-pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, bps: u64) -> Instruction {
+pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, weight: u64) -> Instruction {
     let boost_pda = boost_pda(mint);
     let boost_deposits_address =
         spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
@@ -145,7 +150,7 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, bps: u64) -> Instructi
         ],
         data: New {
             expires_at: expires_at.to_le_bytes(),
-            bps: bps.to_le_bytes(),
+            weight: weight.to_le_bytes(),
         }
         .to_bytes(),
     }
@@ -169,31 +174,32 @@ pub fn open(signer: Pubkey, payer: Pubkey, mint: Pubkey) -> Instruction {
     }
 }
 
-// Build rotate instruction.
-pub fn rotate(signer: Pubkey) -> Instruction {
-    let config_pda = config_pda();
-    Instruction {
-        program_id: crate::ID,
-        accounts: vec![
-            AccountMeta::new(signer, true),
-            AccountMeta::new(config_pda.0, false),
-        ],
-        data: Rotate {}.to_bytes(),
-    }
-}
+// let [signer_info, boost_info, config_info, proof_info, rewards_info, treasury_info, treasury_tokens_info, ore_program, token_program] =
 
 // Build update_boost instruction.
-pub fn update_boost(signer: Pubkey, boost: Pubkey, expires_at: i64, bps: u64) -> Instruction {
+pub fn update_boost(signer: Pubkey, boost: Pubkey, expires_at: i64, weight: u64) -> Instruction {
+    let config_address = config_pda().0;
+    let proof_address = proof_pda(boost).0;
+    let rewards_address = spl_associated_token_account::get_associated_token_address(
+        &config_address,
+        &ore_api::consts::MINT_ADDRESS,
+    );
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(boost, false),
-            AccountMeta::new_readonly(config_pda().0, false),
+            AccountMeta::new(config_address, false),
+            AccountMeta::new(proof_address, false),
+            AccountMeta::new(rewards_address, false),
+            AccountMeta::new(ore_api::consts::TREASURY_ADDRESS, false),
+            AccountMeta::new(ore_api::consts::TREASURY_TOKENS_ADDRESS, false),
+            AccountMeta::new_readonly(ore_api::ID, false),
+            AccountMeta::new_readonly(spl_token::ID, false),
         ],
         data: UpdateBoost {
             expires_at: expires_at.to_le_bytes(),
-            bps: bps.to_le_bytes(),
+            weight: weight.to_le_bytes(),
         }
         .to_bytes(),
     }

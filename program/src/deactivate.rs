@@ -8,7 +8,9 @@ pub fn process_deactivate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Program
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
-    boost_info.as_account::<Boost>(&ore_boost_api::ID)?;
+    boost_info
+        .as_account::<Boost>(&ore_boost_api::ID)?
+        .assert_msg(|b| b.weight == 0, "Weight must be zero")?;
     let config = config_info
         .as_account_mut::<Config>(&ore_boost_api::ID)?
         .assert_mut(|c| c.admin == *signer_info.key)?;
