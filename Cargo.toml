@@ -24,7 +24,7 @@ log = "0.4"
 futures = "0.3"
 fixed = "=1.28"
 num_enum = "0.7.2"
-ore-api = "3.6.0-beta"
+ore-api = "3.6.0"
 ore-boost-api = { path = "api" }
 solana-cli-config = "=2.1"
 solana-client = "=2.1"

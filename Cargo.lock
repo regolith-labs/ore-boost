@@ -2961,9 +2961,9 @@ dependencies = [
 
 [[package]]
 name = "ore-api"
-version = "3.6.0-beta"
+version = "3.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eff73b3394583f3df7ce0f58e9ec66d890777c6cc6dd739de63f8ec826fd4baf"
+checksum = "90933d4deaa73a1c73201d8a1aed50ce88211718370ceb0408ead479cb77e227"
 dependencies = [
  "array-const-fn-init",
  "bytemuck",
