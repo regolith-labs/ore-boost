@@ -32,10 +32,3 @@ pub fn config_pda() -> (Pubkey, u8) {
 pub fn stake_pda(authority: Pubkey, boost: Pubkey) -> (Pubkey, u8) {
     Pubkey::find_program_address(&[STAKE, authority.as_ref(), boost.as_ref()], &crate::id())
 }
-
-#[repr(u8)]
-#[derive(Clone, Copy, Debug, Eq, PartialEq, IntoPrimitive, TryFromPrimitive)]
-pub enum OldBoostAccount {
-    OldBoost = 100,
-    OldConfig = 101,
-}

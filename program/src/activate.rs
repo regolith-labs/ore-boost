@@ -8,11 +8,11 @@ pub fn process_activate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRe
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
-    boost_info.as_account::<Boost>(&ore_boost_api::ID)?;
+    let boost = boost_info.as_account::<Boost>(&ore_boost_api::ID)?;
     let config = config_info
         .as_account_mut::<Config>(&ore_boost_api::ID)?
         .assert_mut(|c| c.admin == *signer_info.key)?
-        .assert_mut(|c| c.len < 256);
+        .assert_mut(|c| c.len < 256)?;
 
     // Check if boost is already in directory
     if config.boosts.contains(boost_info.key) {

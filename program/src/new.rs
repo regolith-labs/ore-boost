@@ -49,6 +49,7 @@ pub fn process_new(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     boost.expires_at = expires_at;
     boost.mint = *mint_info.key;
     boost.weight = weight;
+    boost.last_rewards_factor = config.rewards_factor;
     boost.rewards_factor = Numeric::ZERO;
     boost.total_deposits = 0;
     boost.total_stakers = 0;
