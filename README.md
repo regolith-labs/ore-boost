@@ -15,7 +15,6 @@
 - [`Close`](program/src/close.rs) – Closes a stake account.
 - [`Deposit`](program/src/deposit.rs) – Deposits tokens into a stake account.
 - [`Open`](program/src/open.rs) – Opens a new stake account.
-- [`Rotate`](program/src/rotate.rs) – Rotates the reservation to a randomly selected boost according to their unclaimed ORE weight.
 - [`Withdraw`](program/src/withdraw.rs) – Withdraws tokens from a stake account.
 
 #### Admin  
