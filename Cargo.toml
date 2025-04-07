@@ -3,7 +3,7 @@ resolver = "2"
 members = ["api", "cli", "program"]
 
 [workspace.package]
-version = "3.0.1"
+version = "4.0.0-beta"
 edition = "2021"
 license = "Apache-2.0"
 homepage = "https://ore.supply"
@@ -24,7 +24,7 @@ log = "0.4"
 futures = "0.3"
 fixed = "=1.28"
 num_enum = "0.7.2"
-ore-api = "3.2.0"
+ore-api = "3.6.0-beta"
 ore-boost-api = { path = "api" }
 solana-cli-config = "=2.1"
 solana-client = "=2.1"
