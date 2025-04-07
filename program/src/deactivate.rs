@@ -8,12 +8,12 @@ pub fn process_deactivate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Program
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
-    let boost = boost_info.as_account::<Boost>(&ore_boost_api::ID)?;
+    let boost = boost_info
+        .as_account::<Boost>(&ore_boost_api::ID)?
+        .assert_msg(|b| b.weight == 0, "Weight must be zero")?;
     let config = config_info
         .as_account_mut::<Config>(&ore_boost_api::ID)?
         .assert_mut(|c| c.admin == *signer_info.key)?;
-
-    panic!("TODO: Needs to claim boost yield");
 
     // Find and remove boost from directory
     for i in 0..(config.len as usize) {
