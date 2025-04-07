@@ -14,6 +14,8 @@ pub fn process_activate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRe
         .assert_mut(|c| c.admin == *signer_info.key)?
         .assert_mut(|c| c.len < 256)?;
 
+    panic!("TODO: Needs to claim boost yield");
+
     // Check if boost is already in directory
     if config.boosts.contains(boost_info.key) {
         return Ok(());
