@@ -8,7 +8,7 @@ pub fn process_activate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRe
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
-    let boost = boost_info
+    boost_info
         .as_account::<Boost>(&ore_boost_api::ID)?
         .assert_msg(|b| b.weight == 0, "Weight must be zero")?;
     let config = config_info
@@ -24,9 +24,6 @@ pub fn process_activate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> ProgramRe
     // Add boost to directory if not found
     config.boosts[config.len as usize] = *boost_info.key;
     config.len += 1;
-
-    // Update total weight
-    config.total_weight += boost.weight;
 
     Ok(())
 }

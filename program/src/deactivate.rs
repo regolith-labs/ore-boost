@@ -8,7 +8,7 @@ pub fn process_deactivate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Program
         return Err(ProgramError::NotEnoughAccountKeys);
     };
     signer_info.is_signer()?;
-    let boost = boost_info
+    boost_info
         .as_account::<Boost>(&ore_boost_api::ID)?
         .assert_msg(|b| b.weight == 0, "Weight must be zero")?;
     let config = config_info
@@ -22,7 +22,6 @@ pub fn process_deactivate(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Program
             config.boosts[i] = config.boosts[config.len as usize - 1];
             config.boosts[config.len as usize - 1] = Pubkey::default();
             config.len -= 1;
-            config.total_weight -= boost.weight;
             break;
         }
     }
