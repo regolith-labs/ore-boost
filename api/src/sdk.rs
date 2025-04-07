@@ -208,11 +208,12 @@ pub fn update_boost(signer: Pubkey, boost: Pubkey, expires_at: i64, weight: u64)
 // Build withdraw instruction.
 pub fn withdraw(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     let boost_address = boost_pda(mint).0;
-    let boost_proof_address = proof_pda(boost_address).0;
-    let boost_deposits_address =
+    let config_address = config_pda().0;
+    let deposits_address =
         spl_associated_token_account::get_associated_token_address(&boost_address, &mint);
-    let boost_rewards_address = spl_associated_token_account::get_associated_token_address(
-        &boost_address,
+    let proof_address = proof_pda(config_address).0;
+    let rewards_address = spl_associated_token_account::get_associated_token_address(
+        &config_address,
         &ore_api::consts::MINT_ADDRESS,
     );
     let beneficiary_address =
@@ -224,10 +225,11 @@ pub fn withdraw(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
             AccountMeta::new(signer, true),
             AccountMeta::new(beneficiary_address, false),
             AccountMeta::new(boost_address, false),
-            AccountMeta::new(boost_deposits_address, false),
-            AccountMeta::new(boost_proof_address, false),
-            AccountMeta::new(boost_rewards_address, false),
+            AccountMeta::new(config_address, false),
+            AccountMeta::new(deposits_address, false),
             AccountMeta::new_readonly(mint, false),
+            AccountMeta::new(proof_address, false),
+            AccountMeta::new(rewards_address, false),
             AccountMeta::new(stake_address, false),
             AccountMeta::new_readonly(ore_api::consts::TREASURY_ADDRESS, false),
             AccountMeta::new(ore_api::consts::TREASURY_TOKENS_ADDRESS, false),
