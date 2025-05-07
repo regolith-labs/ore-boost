@@ -41,7 +41,7 @@ impl Boost {
         }
 
         // Accumulate weighted rewards into the boost rewards factor
-        if config.rewards_factor > self.last_rewards_factor {
+        if config.rewards_factor > self.last_rewards_factor && self.total_deposits > 0 {
             let accumulated_rewards = config.rewards_factor - self.last_rewards_factor;
             if accumulated_rewards < Numeric::ZERO {
                 panic!("Accumulated rewards is negative");

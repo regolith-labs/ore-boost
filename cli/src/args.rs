@@ -1,6 +1,11 @@
 use clap::Parser;
 
 #[derive(Parser, Debug)]
+pub struct ActivateArgs {
+    pub mint: String,
+}
+
+#[derive(Parser, Debug)]
 pub struct InitializeArgs {}
 
 #[derive(Parser, Debug)]

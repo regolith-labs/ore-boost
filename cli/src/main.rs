@@ -64,6 +64,9 @@ enum Commands {
     #[command(about = "Update a boost")]
     UpdateBoost(UpdateBoostArgs),
 
+    #[command(about = "Activate a boost")]
+    Activate(ActivateArgs),
+
     #[command(about = "Create a new boost")]
     New(NewArgs),
 
@@ -106,6 +109,9 @@ async fn main() {
         }
         Commands::Initialize(_) => {
             cli.initialize().await.unwrap();
+        }
+        Commands::Activate(args) => {
+            cli.activate(args).await.unwrap();
         }
         Commands::New(args) => {
             cli.new_boost(args).await.unwrap();

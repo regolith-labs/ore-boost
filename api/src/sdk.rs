@@ -125,28 +125,18 @@ pub fn new(signer: Pubkey, mint: Pubkey, expires_at: i64, weight: u64) -> Instru
     let boost_pda = boost_pda(mint);
     let boost_deposits_address =
         spl_associated_token_account::get_associated_token_address(&boost_pda.0, &mint);
-    let boost_rewards_address = spl_associated_token_account::get_associated_token_address(
-        &boost_pda.0,
-        &ore_api::consts::MINT_ADDRESS,
-    );
     let config_pda = config_pda();
-    let proof_pda = proof_pda(boost_pda.0);
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(boost_pda.0, false),
-            AccountMeta::new(boost_deposits_address, false),
-            AccountMeta::new(boost_rewards_address, false),
             AccountMeta::new(config_pda.0, false),
+            AccountMeta::new(boost_deposits_address, false),
             AccountMeta::new_readonly(mint, false),
-            AccountMeta::new_readonly(ore_api::consts::MINT_ADDRESS, false),
-            AccountMeta::new(proof_pda.0, false),
-            AccountMeta::new_readonly(ore_api::ID, false),
             AccountMeta::new_readonly(system_program::ID, false),
             AccountMeta::new_readonly(spl_token::ID, false),
             AccountMeta::new_readonly(spl_associated_token_account::ID, false),
-            AccountMeta::new_readonly(sysvar::slot_hashes::ID, false),
         ],
         data: New {
             expires_at: expires_at.to_le_bytes(),
