@@ -32,6 +32,11 @@ pub struct GetBoostArgs {
 }
 
 #[derive(Parser, Debug)]
+pub struct UpdateTakeRateArgs {
+    pub take_rate: u64,
+}
+
+#[derive(Parser, Debug)]
 pub struct DeactivateArgs {
     pub mint: String,
 }

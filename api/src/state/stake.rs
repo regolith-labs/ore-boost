@@ -43,9 +43,9 @@ impl Stake {
         boost: &mut Boost,
         clock: &Clock,
         config: &mut Config,
-        proof: &Proof,
+        reserve: &TokenAccount,
     ) -> u64 {
-        self.collect_rewards(boost, config, &proof);
+        self.collect_rewards(boost, config, reserve);
         let amount = amount.min(self.rewards);
         self.last_claim_at = clock.unix_timestamp;
         self.rewards -= amount;
@@ -59,10 +59,10 @@ impl Stake {
         boost: &mut Boost,
         clock: &Clock,
         config: &mut Config,
-        proof: &Proof,
+        reserve: &TokenAccount,
         sender: &TokenAccount,
     ) -> u64 {
-        self.collect_rewards(boost, config, &proof);
+        self.collect_rewards(boost, config, reserve);
         let amount = amount.min(sender.amount());
         self.balance += amount;
         self.last_deposit_at = clock.unix_timestamp;
@@ -77,9 +77,9 @@ impl Stake {
         boost: &mut Boost,
         clock: &Clock,
         config: &mut Config,
-        proof: &Proof,
+        reserve: &TokenAccount,
     ) -> u64 {
-        self.collect_rewards(boost, config, &proof);
+        self.collect_rewards(boost, config, reserve);
         let amount = amount.min(self.balance);
         self.balance -= amount;
         self.last_withdraw_at = clock.unix_timestamp;
@@ -88,9 +88,9 @@ impl Stake {
     }
 
     // Collect staking rewards.
-    fn collect_rewards(&mut self, boost: &mut Boost, config: &mut Config, proof: &Proof) {
+    fn collect_rewards(&mut self, boost: &mut Boost, config: &mut Config, reserve: &TokenAccount) {
         // Update the boost rewards factor.
-        boost.collect_rewards(config, proof);
+        boost.collect_rewards(config, reserve);
 
         // Accumulate stake-weighted boost rewards into the stake account.
         if boost.rewards_factor > self.last_rewards_factor {
