@@ -1,5 +1,5 @@
 use ore_boost_api::{
-    consts::{CONFIG, RESERVE},
+    consts::RESERVE,
     instruction::UpdateBoost,
     state::{Boost, Config, Reserve},
 };
