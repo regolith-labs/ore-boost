@@ -1,4 +1,3 @@
-use ore_api::state::Proof;
 use steel::*;
 
 use super::{BoostAccount, Config};

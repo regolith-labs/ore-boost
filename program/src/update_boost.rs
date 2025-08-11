@@ -13,7 +13,7 @@ pub fn process_update_boost(accounts: &[AccountInfo<'_>], data: &[u8]) -> Progra
     let expires_at = i64::from_le_bytes(args.expires_at);
 
     // Load accounts.
-    let [signer_info, boost_info, config_info, config_tokens_info, reserve_info, reserve_tokens_info, treasury_info, treasury_tokens_info, token_program] =
+    let [signer_info, boost_info, config_info, config_tokens_info, reserve_info, reserve_tokens_info, token_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -30,8 +30,6 @@ pub fn process_update_boost(accounts: &[AccountInfo<'_>], data: &[u8]) -> Progra
     let reserve_tokens = reserve_tokens_info
         .is_writable()?
         .as_associated_token_account(reserve_info.key, &ore_api::consts::MINT_ADDRESS)?;
-    treasury_info.has_address(&ore_api::consts::TREASURY_ADDRESS)?;
-    treasury_tokens_info.has_address(&ore_api::consts::TREASURY_TOKENS_ADDRESS)?;
     token_program.is_program(&spl_token::ID)?;
 
     // Collect rewards

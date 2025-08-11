@@ -13,7 +13,7 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
 
     // Load accounts.
     let clock = Clock::get()?;
-    let [signer_info, beneficiary_info, boost_info, config_info, config_tokens_info, deposits_info, mint_info, reserve_info, reserve_tokens_info, stake_info, treasury_info, treasury_tokens_info, token_program] =
+    let [signer_info, beneficiary_info, boost_info, config_info, config_tokens_info, deposits_info, mint_info, reserve_info, reserve_tokens_info, stake_info, token_program] =
         accounts
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
@@ -42,8 +42,6 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
         .as_account_mut::<Stake>(&ore_boost_api::ID)?
         .assert_mut(|s| s.authority == *signer_info.key)?
         .assert_mut(|s| s.boost == *boost_info.key)?;
-    treasury_info.has_address(&ore_api::consts::TREASURY_ADDRESS)?;
-    treasury_tokens_info.has_address(&ore_api::consts::TREASURY_TOKENS_ADDRESS)?;
     token_program.is_program(&spl_token::ID)?;
 
     // TODO Implement withdraw fee.
