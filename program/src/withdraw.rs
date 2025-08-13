@@ -7,6 +7,8 @@ use steel::*;
 
 /// Withdraw unstakes tokens from a stake account.
 pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
+    panic!("Program is in migration mode");
+
     // Parse args.
     let args = Withdraw::try_from_bytes(data)?;
     let amount = u64::from_le_bytes(args.amount);
@@ -49,7 +51,7 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     // Withdraw stake.
     let amount = stake.withdraw(amount, boost, &clock, config, &reserve_tokens);
 
-    // Transfer from reserve to config.
+    // Transfer aggregate boost rewards from reserve to config.
     transfer_signed(
         reserve_info,
         reserve_tokens_info,

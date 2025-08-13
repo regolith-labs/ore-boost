@@ -5,6 +5,8 @@ use steel::*;
 
 /// Claim distributes rewards to a staker.
 pub fn process_claim(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
+    panic!("Program is in migration mode");
+
     // Parse args.
     let args = Claim::try_from_bytes(data)?;
     let amount = u64::from_le_bytes(args.amount);

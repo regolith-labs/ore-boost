@@ -2,7 +2,7 @@ use steel::*;
 
 use crate::{
     instruction::*,
-    state::{boost_pda, config_pda, stake_pda},
+    state::{boost_pda, config_pda, reserve_pda, stake_pda},
 };
 
 // Build activate instruction.
@@ -24,8 +24,13 @@ pub fn activate(signer: Pubkey, mint: Pubkey) -> Instruction {
 pub fn claim(signer: Pubkey, beneficiary: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     let boost_address = boost_pda(mint).0;
     let config_address = config_pda().0;
-    let rewards_address = spl_associated_token_account::get_associated_token_address(
+    let config_tokens_address = spl_associated_token_account::get_associated_token_address(
         &config_address,
+        &ore_api::consts::MINT_ADDRESS,
+    );
+    let reserve_address = reserve_pda().0;
+    let reserve_tokens_address = spl_associated_token_account::get_associated_token_address(
+        &reserve_address,
         &ore_api::consts::MINT_ADDRESS,
     );
     let stake_address = stake_pda(signer, boost_address).0;
@@ -36,7 +41,9 @@ pub fn claim(signer: Pubkey, beneficiary: Pubkey, mint: Pubkey, amount: u64) -> 
             AccountMeta::new(beneficiary, false),
             AccountMeta::new(boost_address, false),
             AccountMeta::new(config_address, false),
-            AccountMeta::new(rewards_address, false),
+            AccountMeta::new(config_tokens_address, false),
+            AccountMeta::new(reserve_address, false),
+            AccountMeta::new(reserve_tokens_address, false),
             AccountMeta::new(stake_address, false),
             AccountMeta::new_readonly(spl_token::ID, false),
         ],
@@ -66,10 +73,15 @@ pub fn deactivate(signer: Pubkey, mint: Pubkey) -> Instruction {
 pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     let boost_address = boost_pda(mint).0;
     let config_address = config_pda().0;
+    let config_tokens_address = spl_associated_token_account::get_associated_token_address(
+        &config_address,
+        &ore_api::consts::MINT_ADDRESS,
+    );
     let deposits_address =
         spl_associated_token_account::get_associated_token_address(&boost_address, &mint);
-    let rewards_address = spl_associated_token_account::get_associated_token_address(
-        &config_address,
+    let reserve_address = reserve_pda().0;
+    let reserve_tokens_address = spl_associated_token_account::get_associated_token_address(
+        &reserve_address,
         &ore_api::consts::MINT_ADDRESS,
     );
     let sender_address = spl_associated_token_account::get_associated_token_address(&signer, &mint);
@@ -80,9 +92,11 @@ pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
             AccountMeta::new(signer, true),
             AccountMeta::new(boost_address, false),
             AccountMeta::new(config_address, false),
+            AccountMeta::new(config_tokens_address, false),
             AccountMeta::new(deposits_address, false),
             AccountMeta::new_readonly(mint, false),
-            AccountMeta::new(rewards_address, false),
+            AccountMeta::new(reserve_address, false),
+            AccountMeta::new(reserve_tokens_address, false),
             AccountMeta::new(sender_address, false),
             AccountMeta::new(stake_address, false),
             AccountMeta::new_readonly(spl_token::ID, false),
@@ -155,8 +169,13 @@ pub fn open(signer: Pubkey, payer: Pubkey, mint: Pubkey) -> Instruction {
 // Build update_boost instruction.
 pub fn update_boost(signer: Pubkey, boost: Pubkey, expires_at: i64, weight: u64) -> Instruction {
     let config_address = config_pda().0;
-    let rewards_address = spl_associated_token_account::get_associated_token_address(
+    let config_tokens_address = spl_associated_token_account::get_associated_token_address(
         &config_address,
+        &ore_api::consts::MINT_ADDRESS,
+    );
+    let reserve_address = reserve_pda().0;
+    let reserve_tokens_address = spl_associated_token_account::get_associated_token_address(
+        &reserve_address,
         &ore_api::consts::MINT_ADDRESS,
     );
     Instruction {
@@ -165,7 +184,9 @@ pub fn update_boost(signer: Pubkey, boost: Pubkey, expires_at: i64, weight: u64)
             AccountMeta::new(signer, true),
             AccountMeta::new(boost, false),
             AccountMeta::new(config_address, false),
-            AccountMeta::new(rewards_address, false),
+            AccountMeta::new(config_tokens_address, false),
+            AccountMeta::new(reserve_address, false),
+            AccountMeta::new(reserve_tokens_address, false),
             AccountMeta::new_readonly(spl_token::ID, false),
         ],
         data: UpdateBoost {
@@ -182,8 +203,13 @@ pub fn withdraw(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
     let config_address = config_pda().0;
     let deposits_address =
         spl_associated_token_account::get_associated_token_address(&boost_address, &mint);
-    let rewards_address = spl_associated_token_account::get_associated_token_address(
+    let config_tokens_address = spl_associated_token_account::get_associated_token_address(
         &config_address,
+        &ore_api::consts::MINT_ADDRESS,
+    );
+    let reserve_address = reserve_pda().0;
+    let reserve_tokens_address = spl_associated_token_account::get_associated_token_address(
+        &reserve_address,
         &ore_api::consts::MINT_ADDRESS,
     );
     let beneficiary_address =
@@ -196,9 +222,11 @@ pub fn withdraw(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
             AccountMeta::new(beneficiary_address, false),
             AccountMeta::new(boost_address, false),
             AccountMeta::new(config_address, false),
+            AccountMeta::new(config_tokens_address, false),
             AccountMeta::new(deposits_address, false),
             AccountMeta::new_readonly(mint, false),
-            AccountMeta::new(rewards_address, false),
+            AccountMeta::new(reserve_address, false),
+            AccountMeta::new(reserve_tokens_address, false),
             AccountMeta::new(stake_address, false),
             AccountMeta::new_readonly(spl_token::ID, false),
         ],

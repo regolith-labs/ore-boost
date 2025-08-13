@@ -42,7 +42,20 @@ pub fn process_initialize(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Program
         config.total_weight = 0;
     }
 
-    // Initialize source account.
+    // Create token account to hold staking rewards for distribution.
+    if config_tokens_info.data_is_empty() {
+        create_associated_token_account(
+            signer_info,
+            config_info,
+            config_tokens_info,
+            ore_mint_info,
+            system_program,
+            token_program,
+            associated_token_program,
+        )?;
+    }
+
+    // Initialize reserve account.
     if reserve_info.data_is_empty() {
         create_program_account::<Reserve>(
             reserve_info,
@@ -53,43 +66,12 @@ pub fn process_initialize(accounts: &[AccountInfo<'_>], _data: &[u8]) -> Program
         )?;
     }
 
-    // Create token account to accumulate staking rewards.
+    // Create token account to receive staking rewards from ORE program.
     if reserve_tokens_info.data_is_empty() {
         create_associated_token_account(
             signer_info,
             reserve_info,
             reserve_tokens_info,
-            ore_mint_info,
-            system_program,
-            token_program,
-            associated_token_program,
-        )?;
-    }
-
-    // Open a proof for the config account.
-    // if proof_info.data_is_empty() {
-    //     invoke_signed(
-    //         &ore_api::sdk::open(*config_info.key, *config_info.key, *signer_info.key),
-    //         &[
-    //             config_info.clone(),
-    //             config_info.clone(),
-    //             signer_info.clone(),
-    //             proof_info.clone(),
-    //             system_program.clone(),
-    //             slot_hashes.clone(),
-    //             ore_program.clone(),
-    //         ],
-    //         &ore_boost_api::ID,
-    //         &[CONFIG],
-    //     )?;
-    // }
-
-    // Create token account to accumulate staking rewards.
-    if config_tokens_info.data_is_empty() {
-        create_associated_token_account(
-            signer_info,
-            config_info,
-            config_tokens_info,
             ore_mint_info,
             system_program,
             token_program,

@@ -35,7 +35,7 @@ pub fn process_update_boost(accounts: &[AccountInfo<'_>], data: &[u8]) -> Progra
     // Collect rewards
     boost.collect_rewards(config, &reserve_tokens);
 
-    // Transfer from reserve to config.
+    // Transfer aggregate boost rewards from reserve to config.
     transfer_signed(
         reserve_info,
         reserve_tokens_info,
