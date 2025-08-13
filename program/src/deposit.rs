@@ -1,8 +1,6 @@
 use ore_boost_api::prelude::*;
 use steel::*;
 
-use crate::claim::TESTER_ADDRESS;
-
 /// Deposit adds tokens to a stake account.
 pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     // panic!("Program is in migration mode");
@@ -18,7 +16,7 @@ pub fn process_deposit(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResu
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-    signer_info.is_signer()?.has_address(&TESTER_ADDRESS)?;
+    signer_info.is_signer()?;
     let boost = boost_info
         .as_account_mut::<Boost>(&ore_boost_api::ID)?
         .assert_mut(|b| b.mint == *mint_info.key)?;

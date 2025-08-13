@@ -5,8 +5,6 @@ use ore_boost_api::{
 };
 use steel::*;
 
-use crate::claim::TESTER_ADDRESS;
-
 /// Withdraw unstakes tokens from a stake account.
 pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
     // panic!("Program is in migration mode");
@@ -22,7 +20,7 @@ pub fn process_withdraw(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramRes
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-    signer_info.is_signer()?.has_address(&TESTER_ADDRESS)?;
+    signer_info.is_signer()?;
     beneficiary_info
         .is_writable()?
         .as_token_account()?
