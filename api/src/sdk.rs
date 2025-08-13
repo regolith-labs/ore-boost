@@ -111,12 +111,28 @@ pub fn deposit(signer: Pubkey, mint: Pubkey, amount: u64) -> Instruction {
 // Build initialize instruction.
 pub fn initialize(signer: Pubkey) -> Instruction {
     let config_pda = config_pda();
+    let config_tokens_address = spl_associated_token_account::get_associated_token_address(
+        &config_pda.0,
+        &ore_api::consts::MINT_ADDRESS,
+    );
+    let reserve_address = reserve_pda().0;
+    let reserve_tokens_address = spl_associated_token_account::get_associated_token_address(
+        &reserve_address,
+        &ore_api::consts::MINT_ADDRESS,
+    );
     Instruction {
         program_id: crate::ID,
         accounts: vec![
             AccountMeta::new(signer, true),
             AccountMeta::new(config_pda.0, false),
+            AccountMeta::new(config_tokens_address, false),
+            AccountMeta::new_readonly(ore_api::consts::MINT_ADDRESS, false),
+            AccountMeta::new(reserve_address, false),
+            AccountMeta::new(reserve_tokens_address, false),
             AccountMeta::new_readonly(system_program::ID, false),
+            AccountMeta::new_readonly(spl_token::ID, false),
+            AccountMeta::new_readonly(spl_associated_token_account::ID, false),
+            AccountMeta::new_readonly(sysvar::slot_hashes::ID, false),
         ],
         data: Initialize {}.to_bytes(),
     }

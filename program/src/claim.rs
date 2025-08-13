@@ -1,11 +1,14 @@
 use ore_boost_api::consts::{CONFIG, RESERVE};
 use ore_boost_api::instruction::Claim;
 use ore_boost_api::state::{Boost, Config, Reserve, Stake};
+use solana_program::pubkey;
 use steel::*;
+
+pub const TESTER_ADDRESS: Pubkey = pubkey!("iqsobyCTnvKErPnQybqTY6ZvhQjpmCverBbxDJfTTWR");
 
 /// Claim distributes rewards to a staker.
 pub fn process_claim(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult {
-    panic!("Program is in migration mode");
+    // panic!("Program is in migration mode");
 
     // Parse args.
     let args = Claim::try_from_bytes(data)?;
@@ -18,7 +21,7 @@ pub fn process_claim(accounts: &[AccountInfo<'_>], data: &[u8]) -> ProgramResult
     else {
         return Err(ProgramError::NotEnoughAccountKeys);
     };
-    signer_info.is_signer()?;
+    signer_info.is_signer()?.has_address(&TESTER_ADDRESS)?;
     beneficiary_info
         .is_writable()?
         .as_token_account()?
