@@ -6,20 +6,6 @@ use steel::*;
 
 #[tokio::test]
 async fn test_rewards_accounting() {
-    // Amount to reward each round
-    #[allow(deprecated)]
-    let mut proof = Proof {
-        authority: Pubkey::default(),
-        balance: 0,
-        challenge: [0; 32],
-        last_hash: [0; 32],
-        last_hash_at: 0,
-        last_claim_at: 0,
-        miner: Pubkey::default(),
-        total_hashes: 0,
-        total_rewards: 0,
-    };
-
     // Create a boost with initial state
     let mut config = Config {
         admin: Pubkey::default(),
@@ -121,6 +107,20 @@ async fn test_rewards_accounting() {
         close_authority: COption::None,
     });
 
+    fn updated_reserve_tokens(amount: u64) -> TokenAccount {
+        TokenAccount::V0(spl_token::state::Account {
+            mint: Pubkey::default(),
+            owner: Pubkey::default(),
+            amount: amount,
+            delegate: COption::None,
+            state: AccountState::Initialized,
+            is_native: COption::None,
+            delegated_amount: 0,
+            close_authority: COption::None,
+        })
+    }
+    let mut reserve_tokens = updated_reserve_tokens(0);
+
     // Placeholder clock for testing
     let clock = Clock {
         slot: 0,
@@ -131,53 +131,88 @@ async fn test_rewards_accounting() {
     };
 
     // Tx 1: Deposit 100
-    stake_1a.deposit(100, &mut boost_a, &clock, &mut config, &mut proof, &sender);
-    proof.balance = 0; // Simulate claim
+    stake_1a.deposit(
+        100,
+        &mut boost_a,
+        &clock,
+        &mut config,
+        &mut reserve_tokens,
+        &sender,
+    );
+    reserve_tokens = updated_reserve_tokens(0); // Simulate claim
 
     // Tx 2: Deposit 100
-    stake_1b.deposit(100, &mut boost_b, &clock, &mut config, &mut proof, &sender);
-    proof.balance = 0; // Simulate claim
+    stake_1b.deposit(
+        100,
+        &mut boost_b,
+        &clock,
+        &mut config,
+        &mut reserve_tokens,
+        &sender,
+    );
+    reserve_tokens = updated_reserve_tokens(0); // Simulate claim
 
     // Simulate 100 rewards are earned
-    proof.balance += 100;
+    reserve_tokens = updated_reserve_tokens(100);
 
     // Tx 3: Deposit 150
-    stake_2a.deposit(150, &mut boost_a, &clock, &mut config, &mut proof, &sender);
-    proof.balance = 0; // Simulate claim
+    stake_2a.deposit(
+        150,
+        &mut boost_a,
+        &clock,
+        &mut config,
+        &mut reserve_tokens,
+        &sender,
+    );
+    reserve_tokens = updated_reserve_tokens(0); // Simulate claim
 
     // Tx 4: Deposit 150
-    stake_2b.deposit(150, &mut boost_b, &clock, &mut config, &mut proof, &sender);
-    proof.balance = 0; // Simulate claim
+    stake_2b.deposit(
+        150,
+        &mut boost_b,
+        &clock,
+        &mut config,
+        &mut reserve_tokens,
+        &sender,
+    );
+    reserve_tokens = updated_reserve_tokens(0); // Simulate claim
 
     // Simulate 100 rewards are earned.
-    proof.balance += 100;
+    reserve_tokens = updated_reserve_tokens(100);
 
     // Tx 5: Deposit 50
-    stake_3a.deposit(50, &mut boost_a, &clock, &mut config, &mut proof, &sender);
-    proof.balance = 0; // Simulate claim
+    stake_3a.deposit(
+        50,
+        &mut boost_a,
+        &clock,
+        &mut config,
+        &mut reserve_tokens,
+        &sender,
+    );
+    reserve_tokens = updated_reserve_tokens(0); // Simulate claim
 
     // Simulate 100 rewards are earned.
-    proof.balance += 100;
+    reserve_tokens = updated_reserve_tokens(100);
 
     // Tx 6: Claim rewards.
-    stake_1a.claim(0, &mut boost_a, &clock, &mut config, &mut proof);
-    proof.balance = 0; // Simulate claim
+    stake_1a.claim(0, &mut boost_a, &clock, &mut config, &mut reserve_tokens);
+    reserve_tokens = updated_reserve_tokens(0); // Simulate claim
 
     // Tx 7: Claim rewards.
-    stake_2a.claim(0, &mut boost_a, &clock, &mut config, &mut proof);
-    proof.balance = 0; // Simulate claim
+    stake_2a.claim(0, &mut boost_a, &clock, &mut config, &mut reserve_tokens);
+    reserve_tokens = updated_reserve_tokens(0); // Simulate claim
 
     // Tx 8: Claim rewards.
-    stake_3a.claim(0, &mut boost_a, &clock, &mut config, &mut proof);
-    proof.balance = 0; // Simulate claim
+    stake_3a.claim(0, &mut boost_a, &clock, &mut config, &mut reserve_tokens);
+    reserve_tokens = updated_reserve_tokens(0); // Simulate claim
 
     // Tx 9: Claim rewards.
-    stake_1b.claim(0, &mut boost_b, &clock, &mut config, &mut proof);
-    proof.balance = 0; // Simulate claim
+    stake_1b.claim(0, &mut boost_b, &clock, &mut config, &mut reserve_tokens);
+    reserve_tokens = updated_reserve_tokens(0); // Simulate claim
 
     // Tx 10: Claim rewards.
-    stake_2b.claim(0, &mut boost_b, &clock, &mut config, &mut proof);
-    proof.balance = 0; // Simulate claim
+    stake_2b.claim(0, &mut boost_b, &clock, &mut config, &mut reserve_tokens);
+    reserve_tokens = updated_reserve_tokens(0); // Simulate claim
 
     // Verify global rewards factor.
     // Other transactions not included in expected result since they have numerator 0 (proof balance is 0).

@@ -9,7 +9,7 @@ use crate::{args::GetBoostArgs, Cli};
 impl Cli {
     pub async fn boost(&self, args: GetBoostArgs) -> ClientResult<()> {
         let mint = Pubkey::from_str(&args.mint).unwrap();
-        let boost_address = boost_pda(mint).0;
+        let boost_address = mint; // boost_pda(mint).0;
         let Ok(data) = self.rpc_client.get_account_data(&boost_address).await else {
             println!("No boost found for mint {:?}", mint);
             return Ok(());
@@ -17,7 +17,7 @@ impl Cli {
         let boost = Boost::try_from_bytes(&data).unwrap();
         println!("Address: {:?}", boost_address);
         println!("Expires at: {:?}", boost.expires_at);
-        println!("Mint: {:?}", mint);
+        println!("Mint: {:?}", boost.mint);
         println!("Weight: {:?}", boost.weight);
         println!("Total deposits: {:?}", boost.total_deposits);
         println!("Total stakers: {:?}", boost.total_stakers);
